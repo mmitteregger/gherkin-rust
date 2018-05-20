@@ -1,0 +1,371 @@
+use ast::*;
+use ast_node::AstNode;
+use error::{Result, ErrorKind};
+use parser::{self, Builder, RuleType, TokenType};
+use std::any::Any;
+use std::cell::RefCell;
+use std::mem;
+use std::rc::Rc;
+use token::Token;
+
+pub struct AstBuilder {
+    stack: Vec<AstNode>,
+    comments: Vec<Comment>,
+}
+
+impl AstBuilder {
+    pub fn new() -> AstBuilder {
+        let mut ast_builder = AstBuilder {
+            stack: Vec::new(),
+            comments: Vec::new(),
+        };
+        ast_builder.reset();
+        ast_builder
+    }
+}
+
+impl parser::Builder for AstBuilder {
+    type BuilderResult = GherkinDocument;
+
+    fn build(&mut self, token: Rc<RefCell<Token>>) -> Result<()> {
+        let (rule_type, is_comment) = {
+            let token = token.borrow();
+            let token_type = token.matched_type.unwrap();
+            let rule_type = RuleType::from(token_type);
+            let is_comment = token_type == TokenType::Comment;
+            (rule_type, is_comment)
+        };
+
+        if is_comment {
+            let token = token.borrow();
+            let location = self.get_location(&token, 0);
+            let text = token.matched_text.as_ref().unwrap().clone();
+            let comment = Comment::new(location, text);
+            self.comments.push(comment);
+        } else {
+            let current_node = self.current_node().unwrap();
+            current_node.add(rule_type, Box::new(token));
+        }
+
+        Ok(())
+    }
+
+    fn start_rule(&mut self, rule_type: RuleType) -> Result<()> {
+        self.stack.push(AstNode::new(rule_type));
+        Ok(())
+    }
+
+    fn end_rule(&mut self, rule_type: RuleType) -> Result<()> {
+        let node = self.stack.pop().unwrap();
+        let rule_type = node.rule_type;
+        let transformed_node = self.get_transformed_node(node);
+        let current_node = self.current_node().unwrap();
+        current_node.add(rule_type, transformed_node);
+        Ok(())
+    }
+
+    fn get_result(&mut self) -> GherkinDocument {
+        let mut current_node = self.stack.pop().unwrap();
+        current_node.remove(RuleType::GherkinDocument)
+    }
+
+    fn reset(&mut self) {
+        self.stack.clear();
+        self.stack.push(AstNode::new(RuleType::None));
+
+        self.comments.clear();
+    }
+}
+
+impl AstBuilder {
+    fn current_node(&mut self) -> Option<&mut AstNode> {
+        self.stack.last_mut()
+    }
+
+    fn get_location(&self, token: &Token, column: usize) -> Location {
+        let token_location = token.location.as_ref().expect("token location");
+        if column == 0 {
+            token_location.clone()
+        } else {
+            Location::new(token_location.get_line(), column)
+        }
+    }
+
+    fn get_transformed_node(&mut self, mut node: AstNode) -> Box<Any> {
+        match node.rule_type {
+            RuleType::Step => {
+                let step_line: Rc<RefCell<Token>> = node.remove_token(TokenType::StepLine);
+                let step_line = step_line.borrow();
+
+                // TODO: implement step_arg, panic for now...
+                node.remove_or::<String>(RuleType::DataTable, String::new());
+                node.remove_or::<String>(RuleType::DocString, String::new());
+//                let step_arg: Node = node.remove_or(RuleType::DataTable, None);
+//                Node stepArg = node.getSingle(RuleType.DataTable, null);
+//                if (stepArg == null) {
+//                    stepArg = node.getSingle(RuleType.DocString, null);
+//                }
+
+                let location = self.get_location(&step_line, 0);
+                let keyword = step_line.matched_keyword.as_ref().unwrap().to_owned();
+                let text = step_line.matched_text.as_ref().unwrap().to_owned();
+                let step_arg = None;
+
+                Box::new(Step::new(location, keyword, text, step_arg))
+            },
+            RuleType::DocString => {
+                unimplemented!();
+//                Token separatorToken = node.getTokens(TokenType.DocStringSeparator).get(0);
+//                String contentType = separatorToken.matchedText.length() > 0 ? separatorToken.matchedText : null;
+//                List<Token> lineTokens = node.getTokens(TokenType.Other);
+//                StringBuilder content = new StringBuilder();
+//                boolean newLine = false;
+//                for (Token lineToken : lineTokens) {
+//                    if (newLine) content.append("\n");
+//                    newLine = true;
+//                    content.append(lineToken.matchedText);
+//                }
+//                return new DocString(getLocation(separatorToken, 0), contentType, content.toString());
+            },
+            RuleType::DataTable => {
+                unimplemented!();
+//                List<TableRow> rows = getTableRows(node);
+//                return new DataTable(rows);
+            },
+            RuleType::Background => {
+                let background_line: Rc<RefCell<Token>> = node.remove_token(TokenType::BackgroundLine);
+                let background_line = background_line.borrow();
+
+                let description = self.get_description(&mut node);
+                let steps = self.get_steps(&mut node);
+                let location = self.get_location(&background_line, 0);
+                let keyword = background_line.matched_keyword.as_ref().unwrap().to_owned();
+                let name = background_line.matched_text.as_ref().unwrap().to_owned();
+
+                Box::new(Background::new(location, keyword, name, description, steps))
+            },
+            RuleType::ScenarioDefinition => {
+                let tags = self.get_tags(&mut node);
+                let scenario_node = node.remove_opt::<AstNode>(RuleType::Scenario);
+
+                let scenario_definition: Box<ScenarioDefinition> = match scenario_node {
+                    Some(mut scenario_node) => {
+                        let scenario_line = scenario_node.remove_token(TokenType::ScenarioLine);
+                        let scenario_line = scenario_line.borrow();
+
+                        let location = self.get_location(&scenario_line, 0);
+                        let keyword = scenario_line.matched_keyword.as_ref().unwrap().to_owned();
+                        let name = scenario_line.matched_text.as_ref().unwrap().to_owned();
+                        let description = self.get_description(&mut scenario_node);
+                        let steps = self.get_steps(&mut scenario_node);
+
+                        Box::new(Scenario::new(location, keyword, name, description, steps, tags))
+                    },
+                    None => {
+                        let mut outline_node = node.remove::<AstNode>(RuleType::ScenarioOutline);
+                        let outline_line = outline_node.remove_token(TokenType::ScenarioOutlineLine);
+                        let outline_line = outline_line.borrow();
+
+                        let location = self.get_location(&outline_line, 0);
+                        let keyword = outline_line.matched_keyword.as_ref().unwrap().to_owned();
+                        let name = outline_line.matched_text.as_ref().unwrap().to_owned();
+                        let description = self.get_description(&mut outline_node);
+                        let steps = self.get_steps(&mut outline_node);
+                        let examples = outline_node.remove_items(RuleType::ExamplesDefinition);
+
+                        Box::new(ScenarioOutline::new(location, keyword, name, description, steps, tags, examples))
+                    },
+                };
+
+                Box::new(scenario_definition)
+            },
+            RuleType::ExamplesDefinition => {
+                let tags = self.get_tags(&mut node);
+                let mut examples_node: AstNode = node.remove(RuleType::Examples);
+                let examples_line = examples_node.remove_token(TokenType::ExamplesLine);
+                let examples_line = examples_line.borrow();
+                let description = self.get_description(&mut examples_node);
+                let mut rows: Option<Vec<TableRow>> = examples_node.remove_opt(RuleType::ExamplesTable);
+                let (table_header, table_body) = match rows {
+                    Some(mut rows) => {
+                        if rows.is_empty() {
+                            (None, Vec::new())
+                        } else {
+                            let table_header = Some(rows.remove(0));
+                            (table_header, rows)
+                        }
+                    },
+                    None => (None, Vec::new()),
+                };
+                let location = self.get_location(&examples_line, 0);
+                let keyword = examples_line.matched_keyword.as_ref().unwrap().to_owned();
+                let name = examples_line.matched_text.as_ref().unwrap().to_owned();
+                Box::new(Examples::new(location, tags, keyword, name, description, table_header, table_body))
+            },
+            RuleType::ExamplesTable => {
+                Box::new(self.get_table_rows(node))
+            },
+            RuleType::Description => {
+                let mut line_tokens = node.remove_tokens(TokenType::Other);
+
+                let mut end = line_tokens.len();
+                while end > 0 && line_tokens[end - 1].borrow().matched_text.as_ref().unwrap()
+                        .chars()
+                        .all(|c| c.is_whitespace()) {
+                    end -= 1;
+                }
+
+                let line_tokens = &line_tokens[0..end];
+
+                let description = line_tokens.iter()
+                    .map(|token| {
+                        token.borrow().matched_text.as_ref().unwrap().to_owned()
+                    })
+                    .collect::<Vec<String>>()
+                    .join("\n");
+
+                Box::new(description)
+//                List<Token> lineTokens = node.getTokens(TokenType.Other);
+//                // Trim trailing empty lines
+//                int end = lineTokens.size();
+//                while (end > 0 && lineTokens.get(end - 1).matchedText.matches("\\s*")) {
+//                    end--;
+//                }
+//                lineTokens = lineTokens.subList(0, end);
+//
+//                return join(new StringUtils.ToString<Token>() {
+//                    @Override
+//                    public String toString(Token t) {
+//                        return t.matchedText;
+//                    }
+//                }, "\n", lineTokens);
+            },
+            RuleType::Feature => {
+                let mut feature_header = node.remove(RuleType::FeatureHeader);
+                let tags = self.get_tags(&mut feature_header);
+                let feature_line = feature_header.remove_token(TokenType::FeatureLine);
+                let feature_line = feature_line.borrow();
+
+                let mut scenario_definitions: Vec<Box<ScenarioDefinition>> = Vec::new();
+
+                if let Some(background) = node.remove_opt::<Background>(RuleType::Background) {
+                    scenario_definitions.push(Box::new(background));
+                }
+
+                scenario_definitions.extend(node.remove_items::<Box<ScenarioDefinition>>(RuleType::ScenarioDefinition));
+
+                let location = self.get_location(&feature_line, 0);
+                let language = feature_line.matched_gherkin_dialect.as_ref().unwrap().get_language().to_owned();
+                let keyword = feature_line.matched_keyword.as_ref().unwrap().to_owned();
+                let name = feature_line.matched_text.as_ref().unwrap().to_owned();
+                let description = self.get_description(&mut feature_header);
+
+                Box::new(Feature::new(location, tags, language, keyword, name, description, scenario_definitions))
+            },
+            RuleType::GherkinDocument => {
+                let feature: Option<Feature> = node.remove_opt(RuleType::Feature);
+                let comments = mem::replace(&mut self.comments, Vec::new());
+
+                Box::new(GherkinDocument::new(feature, comments))
+            },
+            _ => {
+                Box::new(node)
+            },
+        }
+    }
+
+    fn get_table_rows(&self, mut node: AstNode) -> Vec<TableRow> {
+        let rows: Vec<TableRow> = node.remove_tokens(TokenType::TableRow)
+            .into_iter()
+            .map(|token| {
+                let token = token.borrow();
+
+                let location = self.get_location(&token, 0);
+                let cells = self.get_cells(&token);
+                TableRow::new(location, cells)
+            })
+            .collect();
+
+        self.ensure_cell_count(&rows);
+
+        rows
+    }
+
+    fn ensure_cell_count(&self, rows: &Vec<TableRow>) -> Result<()> {
+        if rows.is_empty() {
+            return Ok(());
+        }
+
+        let cell_count = rows[0].get_cells().len();
+
+        for row in rows {
+            if row.get_cells().len() != cell_count {
+                return Err(ErrorKind::AstBuilder {
+                    location: Some(row.get_location()),
+                    message: "inconsistent cell count within the table".to_owned(),
+                }.into());
+            }
+        }
+
+        Ok(())
+    }
+
+    fn get_cells(&self, token: &Token) -> Vec<TableCell> {
+        token.matched_items.iter()
+            .map(|cell_item| {
+                let location = self.get_location(&token, cell_item.get_column());
+                let text = cell_item.get_text().to_owned();
+                TableCell::new(location, text)
+            })
+            .collect()
+    }
+
+    fn get_steps(&self, node: &mut AstNode) -> Vec<Step> {
+        node.remove_items(RuleType::Step)
+    }
+
+    fn get_description(&self, node: &mut AstNode) -> Option<String> {
+        node.remove_opt(RuleType::Description)
+    }
+
+    fn get_tags(&self, node: &mut AstNode) -> Vec<Tag> {
+        let default_tags_node = AstNode::new(RuleType::None);
+        let mut tags_node = node.remove_or(RuleType::Tags, default_tags_node);
+
+        let tokens = tags_node.remove_tokens(TokenType::TagLine);
+
+        let mut tags = Vec::new();
+        for token in tokens.into_iter() {
+            let mut token = token.borrow_mut();
+            let tag_items = mem::replace(&mut token.matched_items, Vec::new());
+            for tag_item in tag_items {
+                let location = self.get_location(&token, tag_item.get_column());
+                tags.push(Tag::new(location, tag_item.take_text()))
+            }
+        }
+
+        tags
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use {Parser, TokenMatcher};
+    use super::*;
+
+    #[test]
+    fn is_reusable() {
+        let mut matcher = TokenMatcher::default();
+        let mut parser = Parser::new(AstBuilder::new());
+
+        let document_1 =
+            parser.parse_str_with_token_matcher("Feature: 1", &mut matcher)
+                .unwrap();
+        let document_2 =
+            parser.parse_str_with_token_matcher("Feature: 2", &mut matcher)
+                .unwrap();
+
+        assert_eq!(document_1.get_feature().get_name(), "1");
+        assert_eq!(document_2.get_feature().get_name(), "2");
+    }
+}

@@ -1,0 +1,40 @@
+[package]
+name = "gherkin"
+version = "0.1.0"
+authors = ["Michael Mitteregger <michael.mitteregger@gmx.at>"]
+description = """
+Gherkin parser/compiler for Rust.
+Please see [Gherkin](https://github.com/cucumber/gherkin) for details.
+"""
+homepage = "https://github.com/cucumber/cucumber/tree/master/gherkin"
+repository = "https://github.com/cucumber/cucumber/tree/master/gherkin/rust"
+readme = "README.md"
+keywords = ["cucumger", "bdd", "testing"]
+categories = ["development-tools", "command-line-utilities", "text-processing"]
+license = "MIT"
+
+[lib]
+name = "gherkin"
+path = "src/lib.rs"
+
+[[bin]]
+name = "gherkin_generate_tokens"
+path = "src/generate_tokens.rs"
+
+[[bin]]
+name = "gherkin"
+path = "src/main.rs"
+
+[dependencies]
+failure = "0.1.1"
+failure_derive = "0.1.1"
+regex = "1.0.0"
+lazy_static = "1.0.0"
+serde = "1.0.58"
+serde_derive = "1.0.58"
+serde_json = "1.0.17"
+erased-serde = "0.3.3"
+
+[profile.release]
+lto = true
+codegen-units = 1
