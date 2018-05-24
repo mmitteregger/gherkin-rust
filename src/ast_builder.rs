@@ -58,7 +58,7 @@ impl parser::Builder for AstBuilder {
     fn end_rule(&mut self, rule_type: RuleType) -> Result<()> {
         let node = self.stack.pop().unwrap();
         let rule_type = node.rule_type;
-        let transformed_node = self.get_transformed_node(node);
+        let transformed_node = self.get_transformed_node(node)?;
         let current_node = self.current_node().unwrap();
         current_node.add(rule_type, transformed_node);
         Ok(())
@@ -91,7 +91,7 @@ impl AstBuilder {
         }
     }
 
-    fn get_transformed_node(&mut self, mut node: AstNode) -> Box<Any> {
+    fn get_transformed_node(&mut self, mut node: AstNode) -> Result<Box<Any>> {
         match node.rule_type {
             RuleType::Step => {
                 let step_line: Rc<RefCell<Token>> = node.remove_token(TokenType::StepLine);
@@ -111,7 +111,8 @@ impl AstBuilder {
                 let text = step_line.matched_text.as_ref().unwrap().to_owned();
                 let step_arg = None;
 
-                Box::new(Step::new(location, keyword, text, step_arg))
+                let step = Step::new(location, keyword, text, step_arg);
+                Ok(Box::new(step))
             },
             RuleType::DocString => {
                 unimplemented!();
@@ -142,7 +143,8 @@ impl AstBuilder {
                 let keyword = background_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = background_line.matched_text.as_ref().unwrap().to_owned();
 
-                Box::new(Background::new(location, keyword, name, description, steps))
+                let background = Background::new(location, keyword, name, description, steps);
+                Ok(Box::new(background))
             },
             RuleType::ScenarioDefinition => {
                 let tags = self.get_tags(&mut node);
@@ -177,7 +179,7 @@ impl AstBuilder {
                     },
                 };
 
-                Box::new(scenario_definition)
+                Ok(Box::new(scenario_definition))
             },
             RuleType::ExamplesDefinition => {
                 let tags = self.get_tags(&mut node);
@@ -200,10 +202,13 @@ impl AstBuilder {
                 let location = self.get_location(&examples_line, 0);
                 let keyword = examples_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = examples_line.matched_text.as_ref().unwrap().to_owned();
-                Box::new(Examples::new(location, tags, keyword, name, description, table_header, table_body))
+
+                let examples = Examples::new(location, tags, keyword, name, description, table_header, table_body);
+                Ok(Box::new(examples))
             },
             RuleType::ExamplesTable => {
-                Box::new(self.get_table_rows(node))
+                let rows = self.get_table_rows(node)?;
+                Ok(Box::new(rows))
             },
             RuleType::Description => {
                 let mut line_tokens = node.remove_tokens(TokenType::Other);
@@ -224,7 +229,7 @@ impl AstBuilder {
                     .collect::<Vec<String>>()
                     .join("\n");
 
-                Box::new(description)
+                Ok(Box::new(description))
 //                List<Token> lineTokens = node.getTokens(TokenType.Other);
 //                // Trim trailing empty lines
 //                int end = lineTokens.size();
@@ -260,21 +265,23 @@ impl AstBuilder {
                 let name = feature_line.matched_text.as_ref().unwrap().to_owned();
                 let description = self.get_description(&mut feature_header);
 
-                Box::new(Feature::new(location, tags, language, keyword, name, description, scenario_definitions))
+                let feature = Feature::new(location, tags, language, keyword, name, description, scenario_definitions);
+                Ok(Box::new(feature))
             },
             RuleType::GherkinDocument => {
                 let feature: Option<Feature> = node.remove_opt(RuleType::Feature);
                 let comments = mem::replace(&mut self.comments, Vec::new());
 
-                Box::new(GherkinDocument::new(feature, comments))
+                let gherkin_document = GherkinDocument::new(feature, comments);
+                Ok(Box::new(gherkin_document))
             },
             _ => {
-                Box::new(node)
+                Ok(Box::new(node))
             },
         }
     }
 
-    fn get_table_rows(&self, mut node: AstNode) -> Vec<TableRow> {
+    fn get_table_rows(&self, mut node: AstNode) -> Result<Vec<TableRow>> {
         let rows: Vec<TableRow> = node.remove_tokens(TokenType::TableRow)
             .into_iter()
             .map(|token| {
@@ -286,9 +293,9 @@ impl AstBuilder {
             })
             .collect();
 
-        self.ensure_cell_count(&rows);
+        self.ensure_cell_count(&rows)?;
 
-        rows
+        Ok(rows)
     }
 
     fn ensure_cell_count(&self, rows: &Vec<TableRow>) -> Result<()> {
