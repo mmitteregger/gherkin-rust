@@ -120,18 +120,25 @@ impl AstBuilder {
                 Ok(Box::new(step))
             },
             RuleType::DocString => {
-                unimplemented!();
-//                Token separatorToken = node.getTokens(TokenType.DocStringSeparator).get(0);
-//                String contentType = separatorToken.matchedText.length() > 0 ? separatorToken.matchedText : null;
-//                List<Token> lineTokens = node.getTokens(TokenType.Other);
-//                StringBuilder content = new StringBuilder();
-//                boolean newLine = false;
-//                for (Token lineToken : lineTokens) {
-//                    if (newLine) content.append("\n");
-//                    newLine = true;
-//                    content.append(lineToken.matchedText);
-//                }
-//                return new DocString(getLocation(separatorToken, 0), contentType, content.toString());
+                let separator_tokens = node.remove_tokens(TokenType::DocStringSeparator);
+                let separator_token = separator_tokens[0].borrow();
+                let separator_token_text = separator_token.matched_text.as_ref().unwrap();
+                let content_type = if separator_token_text.chars().count() > 0 {
+                    Some(separator_token_text.to_owned())
+                } else {
+                    None
+                };
+                let content = node.remove_tokens(TokenType::Other)
+                    .into_iter()
+                    .map(|line_token| {
+                        line_token.borrow().matched_text.as_ref().unwrap().to_owned()
+                    })
+                    .collect::<Vec<String>>()
+                    .join("\n");
+                let location = self.get_location(&separator_token, 0);
+
+                let doc_string = DocString::new(location, content_type, content);
+                Ok(Box::new(doc_string))
             },
             RuleType::DataTable => {
                 let rows = self.get_table_rows(node)?;
