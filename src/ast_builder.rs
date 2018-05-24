@@ -203,13 +203,13 @@ impl AstBuilder {
                 let (table_header, table_body) = match rows {
                     Some(mut rows) => {
                         if rows.is_empty() {
-                            (None, Vec::new())
+                            (None, None)
                         } else {
                             let table_header = Some(rows.remove(0));
-                            (table_header, rows)
+                            (table_header, Some(rows))
                         }
                     },
-                    None => (None, Vec::new()),
+                    None => (None, None),
                 };
                 let location = self.get_location(&examples_line, 0);
                 let keyword = examples_line.matched_keyword.as_ref().unwrap().to_owned();

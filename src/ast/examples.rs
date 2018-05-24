@@ -11,13 +11,15 @@ pub struct Examples {
     name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     table_header: Option<TableRow>,
-    table_body: Vec<TableRow>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    table_body: Option<Vec<TableRow>>,
 }
 
 impl Examples {
     pub fn new(location: Location, tags: Vec<Tag>, keyword: String, name: String,
-        description: Option<String>, table_header: Option<TableRow>, table_body: Vec<TableRow>) -> Examples {
+        description: Option<String>, table_header: Option<TableRow>, table_body: Option<Vec<TableRow>>) -> Examples {
         Examples {
             node_type: "Examples",
             location,
@@ -50,7 +52,7 @@ impl Examples {
         &self.table_header
     }
 
-    fn get_table_body(&self) -> &Vec<TableRow> {
+    fn get_table_body(&self) -> &Option<Vec<TableRow>> {
         &self.table_body
     }
 }
