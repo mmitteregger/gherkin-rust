@@ -97,19 +97,24 @@ impl AstBuilder {
                 let step_line: Rc<RefCell<Token>> = node.remove_token(TokenType::StepLine);
                 let step_line = step_line.borrow();
 
-                // TODO: implement step_arg, panic for now...
-                node.remove_or::<String>(RuleType::DataTable, String::new());
-                node.remove_or::<String>(RuleType::DocString, String::new());
-//                let step_arg: Node = node.remove_or(RuleType::DataTable, None);
-//                Node stepArg = node.getSingle(RuleType.DataTable, null);
-//                if (stepArg == null) {
-//                    stepArg = node.getSingle(RuleType.DocString, null);
-//                }
+                // TODO: improve code, prevent nesting
+                let step_arg: Option<Box<Node>> = {
+                    let data_table: Option<DataTable> = node.remove_opt(RuleType::DataTable);
+                    match data_table {
+                        Some(data_table) => Some(Box::new(data_table)),
+                        None => {
+                            let doc_string: Option<DocString> = node.remove_opt(RuleType::DocString);
+                            match doc_string {
+                                Some(doc_string) => Some(Box::new(doc_string)),
+                                None => None,
+                            }
+                        }
+                    }
+                };
 
                 let location = self.get_location(&step_line, 0);
                 let keyword = step_line.matched_keyword.as_ref().unwrap().to_owned();
                 let text = step_line.matched_text.as_ref().unwrap().to_owned();
-                let step_arg = None;
 
                 let step = Step::new(location, keyword, text, step_arg);
                 Ok(Box::new(step))
@@ -129,9 +134,9 @@ impl AstBuilder {
 //                return new DocString(getLocation(separatorToken, 0), contentType, content.toString());
             },
             RuleType::DataTable => {
-                unimplemented!();
-//                List<TableRow> rows = getTableRows(node);
-//                return new DataTable(rows);
+                let rows = self.get_table_rows(node)?;
+
+                Ok(Box::new(DataTable::new(rows)))
             },
             RuleType::Background => {
                 let background_line: Rc<RefCell<Token>> = node.remove_token(TokenType::BackgroundLine);
