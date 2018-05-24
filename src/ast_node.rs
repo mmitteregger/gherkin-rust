@@ -20,7 +20,7 @@ impl AstNode {
 
     pub fn add(&mut self, rule_type: RuleType, node: Box<Any>) {
         self.sub_items.entry(rule_type)
-            .or_insert(Vec::new())
+            .or_insert_with(Vec::new)
             .push(node);
     }
 

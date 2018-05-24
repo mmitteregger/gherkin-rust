@@ -18,9 +18,7 @@ impl GherkinLine {
     }
 
     pub fn indent(&self) -> usize {
-        let line_text_char_count = self.line_text.chars().count();
-        let trimmed_line_text_char_count = self.trimmed_line_text.chars().count();
-        return line_text_char_count - trimmed_line_text_char_count;
+        self.line_text.chars().count() - self.trimmed_line_text.chars().count()
     }
 
     pub fn detach(&self) {
@@ -81,7 +79,7 @@ impl GherkinLine {
         }
 
         let mut column = self.indent() + 1;
-        for (preceding_whitespace_count, text) in spans.into_iter() {
+        for (preceding_whitespace_count, text) in spans {
             column += preceding_whitespace_count;
             let text_chars_count = text.chars().count();
             let span = GherkinLineSpan::new(column, text);
@@ -102,9 +100,9 @@ impl GherkinLine {
         let separator_chars_count = constant::TITLE_KEYWORD_SEPARATOR.chars().count();
         let separator: String = chars.take(separator_chars_count).collect();
 
-        return self.trimmed_line_text.chars().count() > text_chars_count &&
+        self.trimmed_line_text.chars().count() > text_chars_count &&
             self.trimmed_line_text.starts_with(text) &&
-            &separator == constant::TITLE_KEYWORD_SEPARATOR;
+            separator == constant::TITLE_KEYWORD_SEPARATOR
     }
 
     pub fn get_table_cells(&self) -> Vec<GherkinLineSpan> {

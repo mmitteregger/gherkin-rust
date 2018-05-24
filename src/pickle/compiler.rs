@@ -38,8 +38,8 @@ impl Compiler {
         pickles
     }
 
-    fn compile_scenario(&mut self, pickles: &mut Vec<Pickle>, background_steps: &Vec<PickleStep>,
-        scenario: &Scenario, feature_tags: &Vec<Tag>, language: &String) {
+    fn compile_scenario(&mut self, pickles: &mut Vec<Pickle>, background_steps: &[PickleStep],
+        scenario: &Scenario, feature_tags: &[Tag], language: &str) {
 
         let name = scenario.get_name().to_owned();
         let language = language.to_owned();
@@ -51,7 +51,7 @@ impl Compiler {
         pickles.push(pickle);
     }
 
-    fn compile_scenario_steps(&mut self, background_steps: &Vec<PickleStep>,
+    fn compile_scenario_steps(&mut self, background_steps: &[PickleStep],
             scenario: &Scenario) -> Vec<PickleStep> {
 
         let scenario_steps = scenario.get_steps();
@@ -66,7 +66,7 @@ impl Compiler {
         steps
     }
 
-    fn compile_scenario_tags(&mut self, feature_tags: &Vec<Tag>, scenario: &Scenario) -> Vec<PickleTag> {
+    fn compile_scenario_tags(&mut self, feature_tags: &[Tag], scenario: &Scenario) -> Vec<PickleTag> {
         let scenario_tags = scenario.get_tags();
         let mut tags = Vec::with_capacity(feature_tags.len() + scenario_tags.len());
 
@@ -76,8 +76,8 @@ impl Compiler {
         self.pickle_tags(tags)
     }
 
-    fn compile_scenario_outline(&mut self, pickles: &mut Vec<Pickle>, background_steps: &Vec<PickleStep>,
-        scenario_outline: &ScenarioOutline, feature_tags: &Vec<Tag>, language: &String) {
+    fn compile_scenario_outline(&mut self, pickles: &mut Vec<Pickle>, background_steps: &[PickleStep],
+        scenario_outline: &ScenarioOutline, feature_tags: &[Tag], language: &str) {
 
         for examples in scenario_outline.get_examples() {
             let table_header: &TableRow = match examples.get_table_header() {
@@ -105,9 +105,9 @@ impl Compiler {
         }
     }
 
-    fn compile_scenario_outline_steps(&mut self, background_steps: &Vec<PickleStep>,
-            scenario_outline: &ScenarioOutline, variable_cells: &Vec<TableCell>,
-            value_cells: &Vec<TableCell>, values: &TableRow) -> Vec<PickleStep> {
+    fn compile_scenario_outline_steps(&mut self, background_steps: &[PickleStep],
+            scenario_outline: &ScenarioOutline, variable_cells: &[TableCell],
+            value_cells: &[TableCell], values: &TableRow) -> Vec<PickleStep> {
 
         let scenario_outline_steps = scenario_outline.get_steps();
         let steps_capacity = background_steps.len() + scenario_outline_steps.len();
@@ -132,7 +132,7 @@ impl Compiler {
         steps
     }
 
-    fn compile_scenario_outline_tags(&mut self, feature_tags: &Vec<Tag>,
+    fn compile_scenario_outline_tags(&mut self, feature_tags: &[Tag],
             scenario_outline: &ScenarioOutline, examples: &Examples) -> Vec<PickleTag> {
 
         let scenario_outline_tags = scenario_outline.get_tags();
@@ -150,9 +150,9 @@ impl Compiler {
     }
 
     fn create_pickle_arguments(&mut self, argument: &Option<Box<Node>>,
-        variable_cells: &Vec<TableCell>, value_cells: &Vec<TableCell>) -> Vec<Box<Argument>> {
+        variable_cells: &[TableCell], value_cells: &[TableCell]) -> Vec<Box<Argument>> {
 
-        let argument: &Box<Node> = match argument {
+        let argument = match argument {
             Some(argument) => argument,
             None => return Vec::new(),
         };
@@ -204,8 +204,8 @@ impl Compiler {
         PickleStep::new(text, arguments, locations)
     }
 
-    fn interpolate(&mut self, text: &String, variable_cells: &Vec<TableCell>,
-        value_cells: &Vec<TableCell>) -> String {
+    fn interpolate(&mut self, text: &str, variable_cells: &[TableCell],
+        value_cells: &[TableCell]) -> String {
 
         let mut interpolated_text = text.to_owned();
 

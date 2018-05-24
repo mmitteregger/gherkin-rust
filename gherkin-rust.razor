@@ -49,7 +49,7 @@
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -60,7 +60,7 @@
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -101,7 +101,7 @@ use std::sync::Arc;
 use std::cell::RefCell;
 
 use error::{Error, ErrorKind, Result, new_error};
-use ast::{Location, GherkinDocument};
+use ast::Location;
 use token::Token;
 use gherkin_dialect::GherkinDialect;
 use ast_builder::AstBuilder;
@@ -161,7 +161,7 @@ pub struct @Model.ParserClassName<B: Builder> {
 
 impl Default for @Model.ParserClassName<AstBuilder> {
     fn default() -> @Model.ParserClassName<AstBuilder> {
-        @Model.ParserClassName::new(AstBuilder::new())
+        @Model.ParserClassName::with_builder(AstBuilder::default())
     }
 }
 
@@ -195,14 +195,14 @@ impl<B: Builder> @Model.ParserClassName<B> {
         self.parse_tokens_with_token_matcher(&mut TokenScanner::from(source), token_matcher)
     }
 
-    pub fn parse_tokens_with_token_matcher<TS, TM>(&mut self, token_scanner: &mut TS, mut token_matcher: &mut TM)
+    pub fn parse_tokens_with_token_matcher<TS, TM>(&mut self, token_scanner: &mut TS, token_matcher: &mut TM)
             -> Result<B::BuilderResult> where TS: TokenScan, TM: TokenMatch {
         self.builder.reset();
         token_matcher.reset();
 
         let mut context = ParserContext {
-                token_scanner: token_scanner,
-                token_matcher: token_matcher,
+                token_scanner,
+                token_matcher,
                 token_queue: VecDeque::new(),
                 errors: Vec::new(),
         };
@@ -247,6 +247,7 @@ impl<B: Builder> @Model.ParserClassName<B> {
         self.handle_external_result(context, result, ())
     }
 
+    #[allow(unused)] // until the function is implemented
     fn handle_external_result<V>(&mut self, _context: &mut ParserContext, result: Result<V>, _default_value: V)
             -> Result<V> {
 
@@ -255,7 +256,7 @@ impl<B: Builder> @Model.ParserClassName<B> {
         }
 
         match result {
-            Ok(value) => return Ok(value),
+            Ok(value) => Ok(value),
             Err(_error) => {
                 unimplemented!();
 //                match error.kind() {
@@ -301,7 +302,7 @@ impl<B: Builder> @Model.ParserClassName<B> {
         @:if token.is_eof() {return Ok(false)};
         }
         let result = context.token_matcher.match_@(FormatMethodName(rule.Name))(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }</text>
 }
 
@@ -319,25 +320,27 @@ impl<B: Builder> @Model.ParserClassName<B> {
 <text>
     // @Raw(state.Comment)
     fn match_token_at_@(state.Id)(&mut self, token: Rc<RefCell<Token>>, context: &mut ParserContext) -> Result<u32> {
-        @foreach(var transition in state.Transitions)
+</text>foreach(var transition in state.Transitions)
         {
+        if (transition.LookAheadHint == null) {
         @:if self.@MatchToken(transition.TokenType)? {
-            if (transition.LookAheadHint != null)
-            {
-            @:if self.lookahead_@(transition.LookAheadHint.Id)(context, &token.borrow()) {
-            }
+        } else {
+        <text>let match_@(FormatMethodName(transition.TokenType.Name))_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_@(FormatMethodName(transition.TokenType.Name))(context, &mut token_borrow)?
+                && self.lookahead_@(transition.LookAheadHint.Id)(context, &token_borrow)
+        };
+        if match_@(FormatMethodName(transition.TokenType.Name))_with_lookahead {</text>
+        }
             foreach(var production in transition.Productions) {
                 @CallProduction(production)
             }
-            @:return Ok(@transition.TargetState);
-            if (transition.LookAheadHint != null)
-            {
-            @:}
-            }
+        @:    return Ok(@transition.TargetState);
         @:}
         }
         @HandleParserError(state.Transitions.Select(t => "#" + t.TokenType.ToString()).Distinct(), state)
-    }</text>
+    @:}
 }
 @foreach(var lookAheadHint in Model.RuleSet.LookAheadHints)
 {
@@ -402,7 +405,7 @@ pub trait TokenMatch {
 pub trait GherkinDialectProvide {
     fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>>;
 
-    fn get_dialect(&self, language: &str, location: &Option<Location>) -> Result<Arc<GherkinDialect>>;
+    fn get_dialect(&self, language: &str, location: Option<Location>) -> Result<Arc<GherkinDialect>>;
 
     fn get_languages(&self) -> Vec<&String>;
 }

@@ -82,7 +82,7 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         }
     }
 
-    fn match_title_line(&self, token: &mut Token, token_type: TokenType, keywords: &Vec<String>) -> bool {
+    fn match_title_line(&self, token: &mut Token, token_type: TokenType, keywords: &[String]) -> bool {
         for keyword in keywords {
             if token.unwrap_line().starts_with_title_keyword(keyword) {
                 let keyword_chars_count = keyword.chars().count();
@@ -239,7 +239,7 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
         };
 
         if let Some(language) = language {
-            self.current_dialect = self.dialect_provider.get_dialect(&language, &token.location)?;
+            self.current_dialect = self.dialect_provider.get_dialect(&language, token.location)?;
             self.set_token_matched(token, TokenType::Language, Some(language), None, None, Vec::new());
             return Ok(true);
         }

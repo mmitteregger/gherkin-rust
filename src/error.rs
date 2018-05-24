@@ -110,10 +110,10 @@ impl fmt::Display for ErrorKind {
             ErrorKind::Io(ref err) => err.fmt(f),
             ErrorKind::SerdeJson(ref err) => err.fmt(f),
             ErrorKind::AstBuilder { ref location, ref message } => {
-                match location {
-                    &Some(ref location) => write!(f, "({}:{}): {}",
+                match *location {
+                    Some(ref location) => write!(f, "({}:{}): {}",
                         location.get_line(), location.get_column(), message),
-                    &None => write!(f, "{}", message),
+                    None => write!(f, "{}", message),
                 }
             }
             ErrorKind::NoSuchLanguage { ref location, ref language } => {

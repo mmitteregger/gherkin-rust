@@ -2,6 +2,8 @@ use std::mem;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::string::ToString;
+use std::default::Default;
+
 use error::Result;
 use ast::Location;
 use token::Token;
@@ -12,8 +14,8 @@ pub struct TokenFormatterBuilder {
     tokens_text_builder: String,
 }
 
-impl TokenFormatterBuilder {
-    pub fn new() -> TokenFormatterBuilder {
+impl Default for TokenFormatterBuilder {
+    fn default() -> TokenFormatterBuilder {
         TokenFormatterBuilder {
             tokens_text_builder: String::new(),
         }
@@ -52,7 +54,7 @@ fn format_token(token: &Token) -> String {
     }
 
     format!("{}{}:{}/{}/{}",
-        format_location(&token.location),
+        format_location(token.location),
         format_option_string(&token.matched_type),
         format_option_string(&token.matched_keyword),
         format_option_string(&token.matched_text),
@@ -60,21 +62,21 @@ fn format_token(token: &Token) -> String {
     )
 }
 
-fn format_location(o: &Option<Location>) -> String {
-    match o {
-        &Some(ref location) => format!("({}:{})", location.get_line(), location.get_column()),
-        &None => String::new(),
+fn format_location(location: Option<Location>) -> String {
+    match location {
+        Some(location) => format!("({}:{})", location.get_line(), location.get_column()),
+        None => String::new(),
     }
 }
 
-fn format_option_string<S: ToString>(o: &Option<S>) -> String {
-    match o {
-        &Some(ref s) => s.to_string(),
-        &None => String::new(),
+fn format_option_string<S: ToString>(string: &Option<S>) -> String {
+    match *string {
+        Some(ref s) => s.to_string(),
+        None => String::new(),
     }
 }
 
-fn format_gherkin_line_spans(spans: &Vec<GherkinLineSpan>) -> String {
+fn format_gherkin_line_spans(spans: &[GherkinLineSpan]) -> String {
     if spans.is_empty() {
         String::new()
     } else {

@@ -38,7 +38,7 @@ impl ::std::fmt::Debug for GherkinDialect {
 }
 
 fn get_keywords(keywords: &mut HashMap<String, Vec<String>>, key: &str) -> Vec<String> {
-    keywords.remove(key).unwrap_or(Vec::new())
+    keywords.remove(key).unwrap_or_default()
 }
 
 impl GherkinDialect {

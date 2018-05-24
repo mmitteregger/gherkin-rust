@@ -2,11 +2,9 @@ use std::fmt::Debug;
 
 use erased_serde::Serialize;
 
-use AstBuilder;
 use Parser;
 use TokenMatcher;
 use GherkinDialectProvide;
-use pickle::Pickle;
 
 pub use self::attachment_event::*;
 pub use self::gherkin_document_event::*;
@@ -28,9 +26,10 @@ pub fn generate_with_defaults(data: String, uri: String) -> Vec<Box<CucumberEven
 
 pub fn generate_with_language(data: String, uri: String, language: String) -> Vec<Box<CucumberEvent>> {
     let token_matcher = TokenMatcher::with_default_dialect_name(language);
-    return generate_with_token_matcher(data, uri, token_matcher);
+    generate_with_token_matcher(data, uri, token_matcher)
 }
 
+#[allow(unused)] // until the function is implemented
 fn generate_with_token_matcher<DP: GherkinDialectProvide>(data: String, uri: String,
         token_matcher: TokenMatcher<DP>) -> Vec<Box<CucumberEvent>> {
 

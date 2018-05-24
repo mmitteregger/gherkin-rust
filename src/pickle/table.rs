@@ -20,6 +20,6 @@ impl PickleTable {
 
 impl Argument for PickleTable {
     fn get_location(&self) -> &PickleLocation {
-        &self.rows.get(0).unwrap().get_cells().get(0).unwrap().get_location()
+        &self.rows[0].get_cells()[0].get_location()
     }
 }

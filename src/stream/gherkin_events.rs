@@ -1,4 +1,3 @@
-use ast::GherkinDocument;
 use ast_builder::AstBuilder;
 use error::Result;
 use event::*;

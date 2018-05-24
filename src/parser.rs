@@ -12,7 +12,7 @@ use std::sync::Arc;
 use std::cell::RefCell;
 
 use error::{Error, ErrorKind, Result, new_error};
-use ast::{Location, GherkinDocument};
+use ast::Location;
 use token::Token;
 use gherkin_dialect::GherkinDialect;
 use ast_builder::AstBuilder;
@@ -122,7 +122,7 @@ pub struct Parser<B: Builder> {
 
 impl Default for Parser<AstBuilder> {
     fn default() -> Parser<AstBuilder> {
-        Parser::with_builder(AstBuilder::new())
+        Parser::with_builder(AstBuilder::default())
     }
 }
 
@@ -156,14 +156,14 @@ impl<B: Builder> Parser<B> {
         self.parse_tokens_with_token_matcher(&mut TokenScanner::from(source), token_matcher)
     }
 
-    pub fn parse_tokens_with_token_matcher<TS, TM>(&mut self, token_scanner: &mut TS, mut token_matcher: &mut TM)
+    pub fn parse_tokens_with_token_matcher<TS, TM>(&mut self, token_scanner: &mut TS, token_matcher: &mut TM)
             -> Result<B::BuilderResult> where TS: TokenScan, TM: TokenMatch {
         self.builder.reset();
         token_matcher.reset();
 
         let mut context = ParserContext {
-                token_scanner: token_scanner,
-                token_matcher: token_matcher,
+                token_scanner,
+                token_matcher,
                 token_queue: VecDeque::new(),
                 errors: Vec::new(),
         };
@@ -208,6 +208,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, ())
     }
 
+    #[allow(unused)] // until the function is implemented
     fn handle_external_result<V>(&mut self, _context: &mut ParserContext, result: Result<V>, _default_value: V)
             -> Result<V> {
 
@@ -216,7 +217,7 @@ impl<B: Builder> Parser<B> {
         }
 
         match result {
-            Ok(value) => return Ok(value),
+            Ok(value) => Ok(value),
             Err(_error) => {
                 unimplemented!();
 //                match error.kind() {
@@ -257,85 +258,85 @@ impl<B: Builder> Parser<B> {
 
     fn match_eof(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         let result = context.token_matcher.match_eof(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_empty(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_empty(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_comment(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_comment(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_tag_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_tag_line(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_feature_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_feature_line(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_background_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_background_line(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_scenario_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_scenario_line(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_scenario_outline_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_scenario_outline_line(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_examples_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_examples_line(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_step_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_step_line(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_doc_string_separator(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_doc_string_separator(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_table_row(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_table_row(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_language(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_language(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_other(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
         let result = context.token_matcher.match_other(token);
-        return self.handle_external_result(context, result, false);
+        self.handle_external_result(context, result, false)
     }
 
     fn match_token(&mut self, state: u32, token: Rc<RefCell<Token>>, context: &mut ParserContext) -> Result<u32> {
@@ -424,7 +425,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -435,7 +436,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -463,7 +464,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(0)
-
     }
 
     // GherkinDocument:0>Feature:0>Feature_Header:0>#Language:0
@@ -497,7 +497,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -508,7 +508,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -536,7 +536,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(1)
-
     }
 
     // GherkinDocument:0>Feature:0>Feature_Header:1>Tags:0>#TagLine:0
@@ -570,7 +569,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -581,7 +580,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -609,7 +608,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(2)
-
     }
 
     // GherkinDocument:0>Feature:0>Feature_Header:2>#FeatureLine:0
@@ -676,7 +674,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -687,7 +685,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -715,7 +713,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(3)
-
     }
 
     // GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:1>Description:0>#Other:0
@@ -782,7 +779,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -793,7 +790,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -821,7 +818,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(4)
-
     }
 
     // GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:2>#Comment:0
@@ -882,7 +878,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -893,7 +889,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -921,7 +917,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(5)
-
     }
 
     // GherkinDocument:0>Feature:1>Background:0>#BackgroundLine:0
@@ -987,7 +982,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -998,7 +993,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1026,7 +1021,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(6)
-
     }
 
     // GherkinDocument:0>Feature:1>Background:1>Description_Helper:1>Description:0>#Other:0
@@ -1092,7 +1086,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1103,7 +1097,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1131,7 +1125,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(7)
-
     }
 
     // GherkinDocument:0>Feature:1>Background:1>Description_Helper:2>#Comment:0
@@ -1191,7 +1184,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1202,7 +1195,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1230,7 +1223,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(8)
-
     }
 
     // GherkinDocument:0>Feature:1>Background:2>Step:0>#StepLine:0
@@ -1307,7 +1299,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1318,7 +1310,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1346,7 +1338,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(9)
-
     }
 
     // GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0
@@ -1421,7 +1412,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1432,7 +1423,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1460,7 +1451,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(10)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:0>Tags:0>#TagLine:0
@@ -1502,7 +1492,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1513,7 +1503,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1541,7 +1531,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(11)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:0>#ScenarioLine:0
@@ -1611,7 +1600,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1622,7 +1611,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1650,7 +1639,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(12)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:1>Description:0>#Other:0
@@ -1720,7 +1708,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1731,7 +1719,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1759,7 +1747,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(13)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:2>#Comment:0
@@ -1823,7 +1810,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1834,7 +1821,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1862,7 +1849,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(14)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:0>#StepLine:0
@@ -1943,7 +1929,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -1954,7 +1940,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -1982,7 +1968,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(15)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0
@@ -2061,7 +2046,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2072,7 +2057,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2100,7 +2085,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(16)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:0>#ScenarioOutlineLine:0
@@ -2125,13 +2109,17 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2185,7 +2173,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2196,7 +2184,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2224,7 +2212,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(17)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:1>Description:0>#Other:0
@@ -2248,14 +2235,18 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Description)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::Description)?;
@@ -2311,7 +2302,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2322,7 +2313,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2350,7 +2341,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(18)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:2>#Comment:0
@@ -2371,13 +2361,17 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2429,7 +2423,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2440,7 +2434,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2468,7 +2462,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(19)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:0>#StepLine:0
@@ -2497,14 +2490,18 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::Step)?;
@@ -2566,7 +2563,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2577,7 +2574,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2605,7 +2602,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(20)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0
@@ -2630,15 +2626,19 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::DataTable)?;
@@ -2703,7 +2703,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2714,7 +2714,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2742,7 +2742,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(21)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:0>Tags:0>#TagLine:0
@@ -2777,7 +2776,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2788,7 +2787,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2816,7 +2815,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(22)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:0>#ExamplesLine:0
@@ -2843,15 +2841,19 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::Examples)?;
@@ -2913,7 +2915,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -2924,7 +2926,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -2952,7 +2954,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(23)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:1>Description:0>#Other:0
@@ -2978,8 +2979,13 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -2987,7 +2993,6 @@ impl<B: Builder> Parser<B> {
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::Description)?;
@@ -3051,7 +3056,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3062,7 +3067,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3090,7 +3095,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(24)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:2>#Comment:0
@@ -3113,15 +3117,19 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::Examples)?;
@@ -3181,7 +3189,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3192,7 +3200,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3220,7 +3228,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(25)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:2>Examples_Table:0>#TableRow:0
@@ -3239,8 +3246,13 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::ExamplesTable)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3248,7 +3260,6 @@ impl<B: Builder> Parser<B> {
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::ExamplesTable)?;
@@ -3316,7 +3327,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3327,7 +3338,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3355,7 +3366,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(26)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0
@@ -3378,7 +3388,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3389,7 +3399,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3417,7 +3427,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(28)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0
@@ -3438,15 +3447,19 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
-            if self.lookahead_0(context, &token.borrow()) {
+        let match_tag_line_with_lookahead = {
+            // Workaround for borrow checking
+            let mut token_borrow = token.borrow_mut();
+            self.match_tag_line(context, &mut token_borrow)?
+                && self.lookahead_0(context, &token_borrow)
+        };
+        if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(22);
-            }
         }
         if self.match_tag_line(context, &mut *token.borrow_mut())? {
             self.end_rule(context, RuleType::DocString)?;
@@ -3510,7 +3523,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3521,7 +3534,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3549,7 +3562,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(29)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0
@@ -3572,7 +3584,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3583,7 +3595,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3611,7 +3623,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(30)
-
     }
 
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0
@@ -3685,7 +3696,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3696,7 +3707,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3724,7 +3735,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(31)
-
     }
 
     // GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0
@@ -3747,7 +3757,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3758,7 +3768,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3786,7 +3796,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(32)
-
     }
 
     // GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0
@@ -3856,7 +3865,7 @@ impl<B: Builder> Parser<B> {
 
         let token = token.borrow();
         let error = if token.is_eof() {
-            let location = token.location.clone();
+            let location = token.location;
             let expected = expected_tokens.join(", ");
             let message = format!("unexpected end of file, expected: {}", expected);
 
@@ -3867,7 +3876,7 @@ impl<B: Builder> Parser<B> {
 //                expected_tokens,
             }
         } else {
-            let token_location = token.location.clone().expect("token location");
+            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 Some(token_location)
             } else {
@@ -3895,7 +3904,6 @@ impl<B: Builder> Parser<B> {
 
         self.add_error(context, new_error(error));
         Ok(33)
-
     }
 
     fn lookahead_0(&mut self, context: &mut ParserContext, current_token: &Token) -> bool {
@@ -3965,7 +3973,7 @@ pub trait TokenMatch {
 pub trait GherkinDialectProvide {
     fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>>;
 
-    fn get_dialect(&self, language: &str, location: &Option<Location>) -> Result<Arc<GherkinDialect>>;
+    fn get_dialect(&self, language: &str, location: Option<Location>) -> Result<Arc<GherkinDialect>>;
 
     fn get_languages(&self) -> Vec<&String>;
 }

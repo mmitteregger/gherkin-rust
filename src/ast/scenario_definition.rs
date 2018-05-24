@@ -1,5 +1,3 @@
-use downcast::Downcast;
-
 use ast::*;
 
 pub trait ScenarioDefinition: Node {

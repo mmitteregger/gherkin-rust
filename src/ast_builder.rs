@@ -1,11 +1,13 @@
-use ast::*;
-use ast_node::AstNode;
-use error::{Result, ErrorKind};
-use parser::{self, Builder, RuleType, TokenType};
 use std::any::Any;
 use std::cell::RefCell;
 use std::mem;
 use std::rc::Rc;
+use std::default::Default;
+
+use ast::*;
+use ast_node::AstNode;
+use error::{Result, ErrorKind};
+use parser::{self, Builder, RuleType, TokenType};
 use token::Token;
 
 pub struct AstBuilder {
@@ -13,8 +15,8 @@ pub struct AstBuilder {
     comments: Vec<Comment>,
 }
 
-impl AstBuilder {
-    pub fn new() -> AstBuilder {
+impl Default for AstBuilder {
+    fn default() -> AstBuilder {
         let mut ast_builder = AstBuilder {
             stack: Vec::new(),
             comments: Vec::new(),
@@ -43,8 +45,7 @@ impl parser::Builder for AstBuilder {
             let comment = Comment::new(location, text);
             self.comments.push(comment);
         } else {
-            let current_node = self.current_node().unwrap();
-            current_node.add(rule_type, Box::new(token));
+            self.current_node().add(rule_type, Box::new(token));
         }
 
         Ok(())
@@ -57,16 +58,16 @@ impl parser::Builder for AstBuilder {
 
     fn end_rule(&mut self, rule_type: RuleType) -> Result<()> {
         let node = self.stack.pop().unwrap();
-        let rule_type = node.rule_type;
+        debug_assert_eq!(rule_type, node.rule_type);
+
         let transformed_node = self.get_transformed_node(node)?;
-        let current_node = self.current_node().unwrap();
-        current_node.add(rule_type, transformed_node);
+        self.current_node().add(rule_type, transformed_node);
+
         Ok(())
     }
 
     fn get_result(&mut self) -> GherkinDocument {
-        let mut current_node = self.stack.pop().unwrap();
-        current_node.remove(RuleType::GherkinDocument)
+        self.current_node().remove(RuleType::GherkinDocument)
     }
 
     fn reset(&mut self) {
@@ -78,14 +79,15 @@ impl parser::Builder for AstBuilder {
 }
 
 impl AstBuilder {
-    fn current_node(&mut self) -> Option<&mut AstNode> {
-        self.stack.last_mut()
+    fn current_node(&mut self) -> &mut AstNode {
+        self.stack.last_mut().expect("current node on AstBuilder stack")
     }
 
     fn get_location(&self, token: &Token, column: usize) -> Location {
-        let token_location = token.location.as_ref().expect("token location");
+        let token_location = token.location.expect("token location");
+
         if column == 0 {
-            token_location.clone()
+            token_location
         } else {
             Location::new(token_location.get_line(), column)
         }
@@ -310,7 +312,7 @@ impl AstBuilder {
         Ok(rows)
     }
 
-    fn ensure_cell_count(&self, rows: &Vec<TableRow>) -> Result<()> {
+    fn ensure_cell_count(&self, rows: &[TableRow]) -> Result<()> {
         if rows.is_empty() {
             return Ok(());
         }
@@ -354,7 +356,7 @@ impl AstBuilder {
         let tokens = tags_node.remove_tokens(TokenType::TagLine);
 
         let mut tags = Vec::new();
-        for token in tokens.into_iter() {
+        for token in tokens {
             let mut token = token.borrow_mut();
             let tag_items = mem::replace(&mut token.matched_items, Vec::new());
             for tag_item in tag_items {

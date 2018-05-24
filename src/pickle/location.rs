@@ -1,5 +1,3 @@
-use pickle::*;
-
 #[derive(Serialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PickleLocation {

@@ -1,3 +1,5 @@
+use std::default::Default;
+
 use event::*;
 
 #[derive(Serialize, Debug)]
@@ -16,7 +18,7 @@ impl AttachmentEvent {
             event_type: "attachment",
             source,
             data,
-            media: Media::new(),
+            media: Media::default(),
         }
     }
 }
@@ -62,8 +64,8 @@ pub struct Media {
     media_type: &'static str,
 }
 
-impl Media {
-    pub fn new() -> Media {
+impl Default for Media {
+    fn default() -> Media {
         Media {
             encoding: "utf-8",
             media_type: "text/x.cucumber.stacktrace+plain",

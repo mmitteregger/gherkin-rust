@@ -18,7 +18,7 @@ fn parse_built_int_gherkin_dialects() -> HashMap<String, Arc<GherkinDialect>> {
         serde_json::from_slice(GHERKIN_LANGUAGES).unwrap();
     let mut arc_dialects = HashMap::with_capacity(dialects.len());
 
-    for (language, mut dialect) in dialects.into_iter() {
+    for (language, mut dialect) in dialects {
         dialect.language = language.clone();
         dialect.init_step_keywords();
         arc_dialects.insert(language, Arc::new(dialect));
@@ -49,10 +49,10 @@ impl BuiltInGherkinDialectProvider {
 
 impl GherkinDialectProvide for BuiltInGherkinDialectProvider {
     fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>> {
-        self.get_dialect(&self.default_dialect_name, &None)
+        self.get_dialect(&self.default_dialect_name, None)
     }
 
-    fn get_dialect(&self, language: &str, location: &Option<Location>)
+    fn get_dialect(&self, language: &str, location: Option<Location>)
             -> Result<Arc<GherkinDialect>> {
         let dialect = DIALECTS.get(language);
         let language = language.to_owned();
@@ -60,11 +60,10 @@ impl GherkinDialectProvide for BuiltInGherkinDialectProvider {
         match dialect {
             Some(dialect) => Ok(dialect.clone()),
             None => {
-                let error = ErrorKind::NoSuchLanguage {
-                    location: location.clone(),
+                Err(ErrorKind::NoSuchLanguage {
+                    location,
                     language,
-                }.into();
-                return Err(error)
+                }.into())
             },
         }
     }
