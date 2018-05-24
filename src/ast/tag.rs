@@ -1,6 +1,6 @@
 use ast::*;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Tag {
     #[serde(rename = "type")]

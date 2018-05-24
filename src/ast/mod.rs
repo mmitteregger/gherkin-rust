@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use erased_serde::Serialize;
+use downcast::Downcast;
 
 pub use self::location::*;
 pub use self::tag::*;
@@ -34,10 +35,11 @@ mod scenario_outline;
 mod data_table;
 mod doc_string;
 
-pub trait Node: Serialize + Debug {
+pub trait Node: Serialize + Downcast + Debug {
     fn get_location(&self) -> Location;
 }
 
 serialize_trait_object!(Node);
+impl_downcast!(Node);
 
 // TODO: Try to get rid of all the node_type struct fields inside this module

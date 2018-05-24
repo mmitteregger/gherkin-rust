@@ -30,8 +30,12 @@ impl ScenarioOutline {
         }
     }
 
-    fn get_tags(&self) -> &Vec<Tag> {
+    pub fn get_tags(&self) -> &Vec<Tag> {
         &self.tags
+    }
+
+    pub fn get_examples(&self) -> &Vec<Examples> {
+        &self.examples
     }
 }
 

@@ -1,6 +1,6 @@
 use pickle::*;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PickleTable {
     rows: Vec<PickleRow>,

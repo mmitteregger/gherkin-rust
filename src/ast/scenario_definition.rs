@@ -1,3 +1,5 @@
+use downcast::Downcast;
+
 use ast::*;
 
 pub trait ScenarioDefinition: Node {
@@ -11,3 +13,4 @@ pub trait ScenarioDefinition: Node {
 }
 
 serialize_trait_object!(ScenarioDefinition);
+impl_downcast!(ScenarioDefinition);

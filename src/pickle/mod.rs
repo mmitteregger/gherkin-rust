@@ -22,8 +22,25 @@ mod pickle_string;
 mod pickle_table;
 mod pickle_tag;
 
-pub trait Argument: Serialize + Debug {
+pub trait Argument: Serialize + Debug + CloneArgument {
     fn get_location(&self) -> &PickleLocation;
 }
 
 serialize_trait_object!(Argument);
+
+pub trait CloneArgument {
+    fn clone_argument(&self) -> Box<Argument>;
+}
+
+impl<T> CloneArgument for T where T: 'static + Argument + Clone,
+{
+    fn clone_argument(&self) -> Box<Argument> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<Argument> {
+    fn clone(&self) -> Box<Argument> {
+        self.clone_argument()
+    }
+}

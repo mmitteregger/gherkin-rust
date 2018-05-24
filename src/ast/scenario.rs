@@ -28,7 +28,7 @@ impl Scenario {
         }
     }
 
-    fn get_tags(&self) -> &Vec<Tag> {
+    pub fn get_tags(&self) -> &Vec<Tag> {
         &self.tags
     }
 }

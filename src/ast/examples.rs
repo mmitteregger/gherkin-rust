@@ -32,27 +32,27 @@ impl Examples {
         }
     }
 
-    fn get_tags(&self) -> &Vec<Tag> {
+    pub fn get_tags(&self) -> &Vec<Tag> {
         &self.tags
     }
 
-    fn get_keyword(&self) -> &String {
+    pub fn get_keyword(&self) -> &String {
         &self.keyword
     }
 
-    fn get_name(&self) -> &String {
+    pub fn get_name(&self) -> &String {
         &self.name
     }
 
-    fn get_description(&self) -> &Option<String> {
+    pub fn get_description(&self) -> &Option<String> {
         &self.description
     }
 
-    fn get_table_header(&self) -> &Option<TableRow> {
+    pub fn get_table_header(&self) -> &Option<TableRow> {
         &self.table_header
     }
 
-    fn get_table_body(&self) -> &Option<Vec<TableRow>> {
+    pub fn get_table_body(&self) -> &Option<Vec<TableRow>> {
         &self.table_body
     }
 }

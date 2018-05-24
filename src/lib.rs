@@ -10,6 +10,8 @@ extern crate serde;
 extern crate serde_json;
 #[macro_use]
 extern crate erased_serde;
+#[macro_use]
+extern crate downcast_rs as downcast;
 
 pub use ast_builder::AstBuilder;
 pub use error::{Error, ErrorKind, Result};
