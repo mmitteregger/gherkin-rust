@@ -41,7 +41,7 @@ pub enum ErrorKind {
         language: String,
     },
     UnexpectedToken {
-        location: Option<Location>,
+        location: Location,
         message: String,
         state_comment: String,
 //        received_token: Token,
@@ -115,7 +115,7 @@ impl fmt::Display for ErrorKind {
                         location.get_line(), location.get_column(), message),
                     None => write!(f, "{}", message),
                 }
-            }
+            },
             ErrorKind::NoSuchLanguage { ref location, ref language } => {
                 write!(f, "language not supported: {}", language)
             },
@@ -144,6 +144,21 @@ impl fmt::Display for ErrorKind {
 
                 Ok(())
             },
+            ErrorKind::__Nonexhaustive => unreachable!(),
+        }
+    }
+}
+
+impl ErrorKind {
+    pub fn get_location(&self) -> Option<Location> {
+        match *self {
+            ErrorKind::Io(ref _err) => None,
+            ErrorKind::SerdeJson(ref _err) => None,
+            ErrorKind::AstBuilder { location, .. } => location,
+            ErrorKind::NoSuchLanguage { location, .. } => location,
+            ErrorKind::UnexpectedToken { location, .. } => Some(location),
+            ErrorKind::UnexpectedEof { location, .. } => location,
+            ErrorKind::Composite(ref _errors) => None,
             ErrorKind::__Nonexhaustive => unreachable!(),
         }
     }

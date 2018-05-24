@@ -438,16 +438,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -510,16 +511,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -582,16 +584,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -687,16 +690,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -792,16 +796,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -891,16 +896,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -995,16 +1001,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1099,16 +1106,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1197,16 +1205,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1312,16 +1321,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1425,16 +1435,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1505,16 +1516,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1613,16 +1625,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1721,16 +1734,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1823,16 +1837,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -1942,16 +1957,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2059,16 +2075,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2186,16 +2203,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2315,16 +2333,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2436,16 +2455,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2576,16 +2596,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2716,16 +2737,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2789,16 +2811,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -2928,16 +2951,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3069,16 +3093,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3202,16 +3227,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3340,16 +3366,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3401,16 +3428,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3536,16 +3564,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3597,16 +3626,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3709,16 +3739,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3770,16 +3801,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,
@@ -3878,16 +3910,17 @@ impl<B: Builder> Parser<B> {
         } else {
             let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
-                Some(token_location)
+                token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
                 let line = token_location.get_line();
                 let column = token_line.indent() + 1;
-                Some(Location::new(line, column))
+                Location::new(line, column)
             };
             let received = token.get_token_value().trim();
             let expected = expected_tokens.join(", ");
-            let message = format!("expected: {}, got '{}'", expected, received);
+            let message = format!("({}:{}): expected: {}, got '{}'",
+                    location.get_line(), location.get_column(), expected, received);
 
             ErrorKind::UnexpectedToken {
                 location,

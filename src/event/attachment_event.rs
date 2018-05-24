@@ -61,6 +61,7 @@ impl Location {
 #[serde(rename_all = "camelCase")]
 pub struct Media {
     encoding: &'static str,
+    #[serde(rename = "type")]
     media_type: &'static str,
 }
 

@@ -1,5 +1,6 @@
+use ast::Location;
 use ast_builder::AstBuilder;
-use error::Result;
+use error::{Error, ErrorKind};
 use event::*;
 use gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 use parser::Parser;
@@ -8,7 +9,7 @@ use token_matcher::TokenMatcher;
 
 pub struct GherkinEvents {
     parser: Parser<AstBuilder>,
-    matcher: TokenMatcher<BuiltInGherkinDialectProvider>,
+    token_matcher: TokenMatcher<BuiltInGherkinDialectProvider>,
     compiler: Compiler,
 
     print_source: bool,
@@ -20,7 +21,7 @@ impl GherkinEvents {
     pub fn new(print_source: bool, print_ast: bool, print_pickles: bool) -> GherkinEvents {
         GherkinEvents {
             parser: Parser::default(),
-            matcher: TokenMatcher::default(),
+            token_matcher: TokenMatcher::default(),
             compiler: Compiler::default(),
             print_source,
             print_ast,
@@ -28,14 +29,21 @@ impl GherkinEvents {
         }
     }
 
-    pub fn iter_source_event(&mut self, source_event: SourceEvent) -> Result<GherkinEventsIter> {
+    pub fn iter_source_event(&mut self, source_event: SourceEvent) -> GherkinEventsIter {
         let mut cucumber_events: Vec<Box<CucumberEvent>> = Vec::new();
 
-//        try {
-        let gherkin_document =
-            self.parser.parse_str_with_token_matcher(source_event.get_data(), &mut self.matcher)?;
+        let uri = source_event.get_uri().to_owned();
+        let gherkin_document = match self.parser.parse_str_with_token_matcher(
+            source_event.get_data(), &mut self.token_matcher) {
 
-        let source_event_uri = source_event.get_uri().to_owned();
+            Ok(gherkin_document) => gherkin_document,
+            Err(error) => {
+                self.add_error_attachment(&mut cucumber_events, &error, &uri);
+                return GherkinEventsIter {
+                    cucumber_events_iter: cucumber_events.into_iter(),
+                };
+            },
+        };
 
         if self.print_source {
             cucumber_events.push(Box::new(source_event));
@@ -48,42 +56,48 @@ impl GherkinEvents {
         };
 
         if self.print_ast {
-            let uri = source_event_uri.clone();
+            let uri = uri.clone();
             cucumber_events.push(Box::new(GherkinDocumentEvent::new(uri, gherkin_document)));
         }
 
         for pickle in pickles {
-            let uri = source_event_uri.clone();
+            let uri = uri.clone();
             cucumber_events.push(Box::new(PickleEvent::new(uri, pickle)));
         }
 
-//        } catch (ParserException.CompositeParserException e) {
-//            for (ParserException error : e.errors) {
-//                addErrorAttachment(cucumberEvents, error, sourceEvent.uri);
-//            }
-//        } catch (ParserException e) {
-//            addErrorAttachment(cucumberEvents, e, sourceEvent.uri);
-//        }
-
-        let gherkin_events_iter = GherkinEventsIter {
+        GherkinEventsIter {
             cucumber_events_iter: cucumber_events.into_iter(),
-        };
-        Ok(gherkin_events_iter)
+        }
     }
 
-//    private void addErrorAttachment(List<CucumberEvent> cucumberEvents, ParserException e, String uri) {
-//        cucumberEvents.add(new AttachmentEvent(
-//                new AttachmentEvent.SourceRef(
-//                        uri,
-//                        new AttachmentEvent.Location(
-//                                e.location.getLine(),
-//                                e.location.getColumn()
-//                        )
-//                ),
-//                e.getMessage()
-//        ));
-//
-//    }
+    fn add_error_attachment(&self, cucumber_events: &mut Vec<Box<CucumberEvent>>, error: &Error,
+            uri: &str) {
+
+        match error.kind() {
+            ErrorKind::Composite(composite_errors) => {
+                for wrapped_error in composite_errors {
+                    self.add_error_attachment(cucumber_events, &wrapped_error, uri);
+                }
+            },
+            error_kind => {
+                let error_location = error_kind.get_location()
+                    .unwrap_or_else(|| Location::new(0, 0));
+                let event_location = attachment_event::Location::new(
+                    error_location.get_line(),
+                    error_location.get_column(),
+                );
+                let source_ref = attachment_event::SourceRef::new(
+                    uri.to_owned(),
+                    event_location,
+                );
+                let attachment_event = AttachmentEvent::new(
+                    source_ref,
+                    error.to_string(),
+                );
+                cucumber_events.push(Box::new(attachment_event));
+            }
+        }
+    }
 }
 
 pub struct GherkinEventsIter {

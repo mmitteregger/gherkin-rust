@@ -6,15 +6,15 @@ use Parser;
 use TokenMatcher;
 use GherkinDialectProvide;
 
-pub use self::attachment_event::*;
-pub use self::gherkin_document_event::*;
-pub use self::pickle_event::*;
-pub use self::source_event::*;
+pub use self::attachment_event::AttachmentEvent;
+pub use self::gherkin_document_event::GherkinDocumentEvent;
+pub use self::pickle_event::PickleEvent;
+pub use self::source_event::SourceEvent;
 
-mod attachment_event;
-mod gherkin_document_event;
-mod pickle_event;
-mod source_event;
+pub mod attachment_event;
+pub mod gherkin_document_event;
+pub mod pickle_event;
+pub mod source_event;
 
 pub trait CucumberEvent: Serialize + Debug {}
 
