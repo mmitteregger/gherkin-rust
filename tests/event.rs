@@ -1,6 +1,6 @@
 extern crate gherkin;
 
-use gherkin::event::{self, SourceEvent, GherkinDocumentEvent, PickleEvent};
+use gherkin::event::{self, GherkinDocumentEvent, PickleEvent, SourceEvent};
 
 #[test]
 fn generates_events_for_english_by_default() {
@@ -17,7 +17,7 @@ fn generates_events_for_english_by_default() {
 #[test]
 fn generates_events_for_specific_language() {
     let data = "Fonctionnalité: Bonjour\n  Scénario: Monde\n    Soit une étape";
-    let  uri = "features/hello.feature";
+    let uri = "features/hello.feature";
 
     let events = event::generate_with_language(data, uri, "fr").unwrap();
 

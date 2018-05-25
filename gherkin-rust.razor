@@ -40,8 +40,12 @@
 }
 @helper HandleParserError(IEnumerable<string> expectedTokens, State state)
 {<text>
+        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: @state.Id - @Raw(state.Comment)");
+
         token.borrow().detach();
+
+        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             @foreach(var expectedToken in expectedTokens) {<text>            String::from("@expectedToken"),
 </text>}
@@ -84,19 +88,19 @@
 @helper MatchToken(TokenType tokenType)
 {<text>match_@(FormatMethodName(tokenType.Name))(context, &mut *token.borrow_mut())</text>}
 
-use std::io::prelude::*;
+use std::cell::RefCell;
 use std::collections::VecDeque;
-use std::fmt;
 use std::default::Default;
+use std::fmt;
+use std::io::prelude::*;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::cell::RefCell;
 
-use error::{Result, Error};
 use ast::Location;
-use token::Token;
-use gherkin_dialect::GherkinDialect;
 use ast_builder::AstBuilder;
+use error::{Error, Result};
+use gherkin_dialect::GherkinDialect;
+use token::Token;
 use token_matcher::TokenMatcher;
 use token_scanner::TokenScanner;
 
@@ -115,6 +119,7 @@ impl fmt::Display for TokenType {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
 pub enum RuleType {
     None,
     @foreach(var rule in Model.RuleSet.Where(r => !r.TempRule)) {
@@ -169,26 +174,52 @@ impl<B: Builder> @Model.ParserClassName<B> {
         self.parse_reader(source.as_ref().as_bytes())
     }
 
-    pub fn parse_str_with_matcher<S: AsRef<str>, TM>(&mut self, source: S, token_match: &mut TM)
-            -> Result<B::BuilderResult> where TM: TokenMatch {
+    pub fn parse_str_with_matcher<S: AsRef<str>, TM>(
+        &mut self,
+        source: S,
+        token_match: &mut TM,
+    ) -> Result<B::BuilderResult>
+    where
+        TM: TokenMatch,
+    {
         self.parse_reader_with_matcher(source.as_ref().as_bytes(), token_match)
     }
 
-    pub fn parse_reader<R>(&mut self, source: R) -> Result<B::BuilderResult> where R: Read {
+    pub fn parse_reader<R>(&mut self, source: R) -> Result<B::BuilderResult>
+    where
+        R: Read,
+    {
         self.parse_scanner(&mut TokenScanner::from(source))
     }
 
-    pub fn parse_reader_with_matcher<R, TM>(&mut self, source: R, token_match: &mut TM)
-            -> Result<B::BuilderResult> where R: Read, TM: TokenMatch {
+    pub fn parse_reader_with_matcher<R, TM>(
+        &mut self,
+        source: R,
+        token_match: &mut TM,
+    ) -> Result<B::BuilderResult>
+    where
+        R: Read,
+        TM: TokenMatch,
+    {
         self.parse_scanner_with_matcher(&mut TokenScanner::from(source), token_match)
     }
 
-    pub fn parse_scanner<TS>(&mut self, token_scan: &mut TS) -> Result<B::BuilderResult> where TS: TokenScan {
+    pub fn parse_scanner<TS>(&mut self, token_scan: &mut TS) -> Result<B::BuilderResult>
+    where
+        TS: TokenScan,
+    {
         self.parse_scanner_with_matcher(token_scan, &mut TokenMatcher::default())
     }
 
-    pub fn parse_scanner_with_matcher<TS, TM>(&mut self, token_scan: &mut TS, token_match: &mut TM)
-            -> Result<B::BuilderResult> where TS: TokenScan, TM: TokenMatch {
+    pub fn parse_scanner_with_matcher<TS, TM>(
+        &mut self,
+        token_scan: &mut TS,
+        token_match: &mut TM,
+    ) -> Result<B::BuilderResult>
+    where
+        TS: TokenScan,
+        TM: TokenMatch,
+    {
         self.builder.reset();
         token_match.reset();
 
@@ -211,7 +242,7 @@ impl<B: Builder> @Model.ParserClassName<B> {
                         break;
                     }
                     continue;
-                },
+                }
             };
             state = self.match_token(state, token.clone(), &mut context)?;
 
@@ -231,32 +262,33 @@ impl<B: Builder> @Model.ParserClassName<B> {
 
     fn add_error(&mut self, context: &mut ParserContext, error: Error) {
         context.errors.push(error);
-//        if (context.errors.size() > 10)
-//            throw new ParserException.CompositeParserException(context.errors);
+        // if (context.errors.size() > 10)
+        //     throw new ParserException.CompositeParserException(context.errors);
     }
 
     fn handle_ast_result(&mut self, context: &mut ParserContext, result: Result<()>) -> Result<()> {
         self.handle_external_result(context, result, ())
     }
 
-    fn handle_external_result<V>(&mut self, context: &mut ParserContext, result: Result<V>, default_value: V)
-            -> Result<V> {
-
+    fn handle_external_result<V>(
+        &mut self,
+        context: &mut ParserContext,
+        result: Result<V>,
+        default_value: V,
+    ) -> Result<V> {
         if self.stop_at_first_error {
             return result;
         }
 
         match result {
             Ok(value) => return Ok(value),
-            Err(error) => {
-                match error {
-                    Error::Composite(errors) => {
-                        for parse_error in errors {
-                            self.add_error(context, parse_error);
-                        }
-                    },
-                    _ => self.add_error(context, error),
+            Err(error) => match error {
+                Error::Composite(errors) => {
+                    for parse_error in errors {
+                        self.add_error(context, parse_error);
+                    }
                 }
+                _ => self.add_error(context, error),
             },
         }
 
@@ -286,17 +318,29 @@ impl<B: Builder> @Model.ParserClassName<B> {
     }
 @foreach(var rule in Model.RuleSet.TokenRules)
 {<text>
-    fn match_@(FormatMethodName(rule.Name))(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
+    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    fn match_@(FormatMethodName(rule.Name))(
+        &mut self,
+        context: &mut ParserContext,
+        token: &mut Token,
+    ) -> Result<bool> {
         @if (rule.Name != "#EOF")
         {
-        @:if token.is_eof() {return Ok(false)};
+        <text>if token.is_eof() {
+            return Ok(false);
+        };</text>
         }
         let result = context.token_match.match_@(FormatMethodName(rule.Name))(token);
         self.handle_external_result(context, result, false)
     }</text>
 }
 
-    fn match_token(&mut self, state: u32, token: Rc<RefCell<Token>>, context: &mut ParserContext) -> Result<u32> {
+    fn match_token(
+        &mut self,
+        state: u32,
+        token: Rc<RefCell<Token>>,
+        context: &mut ParserContext,
+    ) -> Result<u32> {
         match state {
         @foreach(var state in Model.States.Values.Where(s => !s.IsEndState))
         {
@@ -309,7 +353,11 @@ impl<B: Builder> @Model.ParserClassName<B> {
 {
 <text>
     // @Raw(state.Comment)
-    fn match_token_at_@(state.Id)(&mut self, token: Rc<RefCell<Token>>, context: &mut ParserContext) -> Result<u32> {
+    fn match_token_at_@(state.Id)(
+        &mut self,
+        token: Rc<RefCell<Token>>,
+        context: &mut ParserContext,
+    ) -> Result<u32> {
 </text>foreach(var transition in state.Transitions)
         {
         if (transition.LookAheadHint == null) {

@@ -4,11 +4,11 @@ extern crate serde_json;
 use std::env;
 use std::io::{self, Write};
 
-use gherkin::Result;
 use gherkin::stream::*;
+use gherkin::Result;
 
 fn main() -> Result<()> {
-    // TODO: Should we use clap or structopt?
+    // TODO: Use clap or structopt?
     let mut print_source = true;
     let mut print_ast = true;
     let mut print_pickles = true;

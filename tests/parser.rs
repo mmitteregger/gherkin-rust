@@ -1,8 +1,8 @@
 extern crate gherkin;
 extern crate serde_json;
 
-use gherkin::{Parser, TokenMatcher};
 use gherkin::pickle::Compiler;
+use gherkin::{Parser, TokenMatcher};
 
 #[test]
 fn parse_feature_after_parse_error() {
@@ -29,12 +29,13 @@ Feature: Foo
         panic!("Error expected");
     }
 
-    let gherkin_document = parser.parse_str_with_matcher(source2, &mut matcher)
-            .unwrap();
-    let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document)
+    let gherkin_document = parser
+        .parse_str_with_matcher(source2, &mut matcher)
         .unwrap();
+    let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document).unwrap();
 
-    assert_eq!(r###"{
+    assert_eq!(
+        r###"{
   "type": "GherkinDocument",
   "feature": {
     "type": "Feature",
@@ -80,7 +81,8 @@ Feature: Foo
   },
   "comments": []
 }"###,
-        &gherkin_document_json);
+        &gherkin_document_json
+    );
 }
 
 #[test]
@@ -89,12 +91,11 @@ fn change_default_language() {
     let mut matcher = TokenMatcher::with_default_dialect_name("no");
     let mut parser = Parser::default();
 
-    let gherkin_document = parser.parse_str_with_matcher(source, &mut matcher)
-        .unwrap();
-    let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document)
-        .unwrap();
+    let gherkin_document = parser.parse_str_with_matcher(source, &mut matcher).unwrap();
+    let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document).unwrap();
 
-    assert_eq!(r###"{
+    assert_eq!(
+        r###"{
   "type": "GherkinDocument",
   "feature": {
     "type": "Feature",
@@ -110,7 +111,8 @@ fn change_default_language() {
   },
   "comments": []
 }"###,
-        &gherkin_document_json);
+        &gherkin_document_json
+    );
 }
 
 #[test]
@@ -126,12 +128,11 @@ Feature: Foo
     let mut matcher = TokenMatcher::default();
     let mut parser = Parser::default();
 
-    let gherkin_document = parser.parse_str_with_matcher(source, &mut matcher)
-        .unwrap();
-    let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document)
-        .unwrap();
+    let gherkin_document = parser.parse_str_with_matcher(source, &mut matcher).unwrap();
+    let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document).unwrap();
 
-    assert_eq!(r###"{
+    assert_eq!(
+        r###"{
   "type": "GherkinDocument",
   "feature": {
     "type": "Feature",
@@ -178,13 +179,15 @@ Feature: Foo
   },
   "comments": []
 }"###,
-        &gherkin_document_json);
+        &gherkin_document_json
+    );
 
     let mut compiler = Compiler::default();
     let pickles = compiler.compile(&gherkin_document);
     let pickles_json = serde_json::to_string_pretty(&pickles).unwrap();
 
-    assert_eq!(r###"[
+    assert_eq!(
+        r###"[
   {
     "name": "Bar",
     "language": "en",
@@ -218,5 +221,6 @@ Feature: Foo
     ]
   }
 ]"###,
-        &pickles_json);
+        &pickles_json
+    );
 }

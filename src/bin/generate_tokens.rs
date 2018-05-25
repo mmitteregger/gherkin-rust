@@ -3,10 +3,11 @@ extern crate gherkin;
 use std::env;
 use std::fs::File;
 use std::io::{self, Write};
-use gherkin::{Result, TokenFormatterBuilder, Parser};
+
+use gherkin::{Parser, Result, TokenFormatterBuilder};
 
 fn main() -> Result<()> {
-    // TODO: Should we use clap or structopt?
+    // TODO: Use clap or structopt?
     let stdout = io::stdout();
     let mut stdout_handle = stdout.lock();
 

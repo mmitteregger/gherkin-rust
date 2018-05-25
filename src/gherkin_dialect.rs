@@ -33,7 +33,11 @@ pub struct GherkinDialect {
 
 impl ::std::fmt::Debug for GherkinDialect {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
-        write!(f, "GherkinDialect {{ language: \"{}\", ... }}", self.language)
+        write!(
+            f,
+            "GherkinDialect {{ language: \"{}\", ... }}",
+            self.language
+        )
     }
 }
 
@@ -42,8 +46,12 @@ fn get_keywords(keywords: &mut HashMap<String, Vec<String>>, key: &str) -> Vec<S
 }
 
 impl GherkinDialect {
-    pub fn new(language: String, name: String, native_name: String,
-            mut keywords: HashMap<String, Vec<String>>) -> GherkinDialect {
+    pub fn new(
+        language: String,
+        name: String,
+        native_name: String,
+        mut keywords: HashMap<String, Vec<String>>,
+    ) -> GherkinDialect {
         let feature_keywords = get_keywords(&mut keywords, "feature");
         let scenario_keywords = get_keywords(&mut keywords, "scenario");
         let background_keywords = get_keywords(&mut keywords, "background");
@@ -78,7 +86,10 @@ impl GherkinDialect {
 
     pub(crate) fn init_step_keywords(&mut self) {
         let step_keywords = &mut self.step_keywords;
-        debug_assert!(step_keywords.is_empty(), "step keywords must only be initialized once");
+        debug_assert!(
+            step_keywords.is_empty(),
+            "step keywords must only be initialized once"
+        );
         step_keywords.extend_from_slice(&self.given_keywords);
         step_keywords.extend_from_slice(&self.when_keywords);
         step_keywords.extend_from_slice(&self.then_keywords);

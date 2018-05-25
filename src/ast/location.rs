@@ -9,10 +9,7 @@ pub struct Location {
 
 impl Location {
     pub fn new(line: usize, column: usize) -> Location {
-        Location {
-            line,
-            column,
-        }
+        Location { line, column }
     }
 
     pub fn get_line(&self) -> usize {

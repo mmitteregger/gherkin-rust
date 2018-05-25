@@ -1,5 +1,5 @@
-use event::*;
 use ast::GherkinDocument;
+use event::*;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]

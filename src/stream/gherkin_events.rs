@@ -33,15 +33,17 @@ impl GherkinEvents {
         let mut cucumber_events: Vec<Box<CucumberEvent>> = Vec::new();
 
         let uri = source_event.get_uri().to_owned();
-        let gherkin_document = match self.parser.parse_str_with_matcher(
-            source_event.get_data(), &mut self.token_matcher) {
+        let gherkin_document = match self
+            .parser
+            .parse_str_with_matcher(source_event.get_data(), &mut self.token_matcher)
+        {
             Ok(gherkin_document) => gherkin_document,
             Err(error) => {
                 self.add_error_attachment(&mut cucumber_events, &error, &uri);
                 return GherkinEventsIter {
                     cucumber_events_iter: cucumber_events.into_iter(),
                 };
-            },
+            }
         };
 
         if self.print_source {
@@ -69,30 +71,28 @@ impl GherkinEvents {
         }
     }
 
-    fn add_error_attachment(&self, cucumber_events: &mut Vec<Box<CucumberEvent>>, error: &Error,
-            uri: &str) {
-
+    fn add_error_attachment(
+        &self,
+        cucumber_events: &mut Vec<Box<CucumberEvent>>,
+        error: &Error,
+        uri: &str,
+    ) {
         match error {
             Error::Composite(composite_errors) => {
                 for wrapped_error in composite_errors {
                     self.add_error_attachment(cucumber_events, &wrapped_error, uri);
                 }
-            },
+            }
             error_kind => {
-                let error_location = error_kind.get_location()
+                let error_location = error_kind
+                    .get_location()
                     .unwrap_or_else(|| Location::new(0, 0));
                 let event_location = attachment_event::Location::new(
                     error_location.get_line(),
                     error_location.get_column(),
                 );
-                let source_ref = attachment_event::SourceRef::new(
-                    uri.to_owned(),
-                    event_location,
-                );
-                let attachment_event = AttachmentEvent::new(
-                    source_ref,
-                    error.to_string(),
-                );
+                let source_ref = attachment_event::SourceRef::new(uri.to_owned(), event_location);
+                let attachment_event = AttachmentEvent::new(source_ref, error.to_string());
                 cucumber_events.push(Box::new(attachment_event));
             }
         }

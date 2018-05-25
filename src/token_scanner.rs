@@ -1,10 +1,11 @@
 use std::io::prelude::*;
 use std::io::BufReader;
-use error::{Result};
+
 use ast::Location;
-use token::Token;
+use error::Result;
 use gherkin_line::GherkinLine;
 use parser::TokenScan;
+use token::Token;
 
 /// The scanner reads a gherkin doc (typically read from a .feature file)
 /// and creates a token for each line.

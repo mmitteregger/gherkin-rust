@@ -2,8 +2,8 @@ use std::fmt::Debug;
 
 use erased_serde::Serialize;
 
-pub use self::compiler::*;
 pub use self::cell::*;
+pub use self::compiler::*;
 pub use self::location::*;
 pub use self::row::*;
 pub use self::step::*;
@@ -11,8 +11,8 @@ pub use self::string::*;
 pub use self::table::*;
 pub use self::tag::*;
 
-mod compiler;
 mod cell;
+mod compiler;
 mod location;
 mod row;
 mod step;
@@ -30,7 +30,9 @@ pub trait CloneArgument {
     fn clone_argument(&self) -> Box<Argument>;
 }
 
-impl<T> CloneArgument for T where T: 'static + Argument + Clone,
+impl<T> CloneArgument for T
+where
+    T: 'static + Argument + Clone,
 {
     fn clone_argument(&self) -> Box<Argument> {
         Box::new(self.clone())
@@ -54,8 +56,13 @@ pub struct Pickle {
 }
 
 impl Pickle {
-    pub fn new(name: String, language: String, steps: Vec<PickleStep>, tags: Vec<PickleTag>,
-               locations: Vec<PickleLocation>) -> Pickle {
+    pub fn new(
+        name: String,
+        language: String,
+        steps: Vec<PickleStep>,
+        tags: Vec<PickleTag>,
+        locations: Vec<PickleLocation>,
+    ) -> Pickle {
         Pickle {
             name,
             language,

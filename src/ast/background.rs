@@ -14,8 +14,13 @@ pub struct Background {
 }
 
 impl Background {
-    pub fn new(location: Location, keyword: String, name: String, description: Option<String>,
-            steps: Vec<Step>) -> Background {
+    pub fn new(
+        location: Location,
+        keyword: String,
+        name: String,
+        description: Option<String>,
+        steps: Vec<Step>,
+    ) -> Background {
         Background {
             node_type: "Background",
             location,

@@ -21,8 +21,7 @@ impl GherkinLine {
         self.line_text.chars().count() - self.trimmed_line_text.chars().count()
     }
 
-    pub fn detach(&self) {
-    }
+    pub fn detach(&self) {}
 
     pub fn get_line_text(&self, indent_to_remove: isize) -> &str {
         if indent_to_remove < 0 || indent_to_remove > self.indent() as isize {
@@ -53,7 +52,6 @@ impl GherkinLine {
     }
 
     pub fn get_tags(&self) -> Vec<GherkinLineSpan> {
-        // TODO: This works for now, but is too complicated and probably inefficient
         let mut line_spans: Vec<GherkinLineSpan> = Vec::new();
 
         let mut spans: Vec<(usize, String)> = Vec::new();
@@ -100,9 +98,9 @@ impl GherkinLine {
         let separator_chars_count = constant::TITLE_KEYWORD_SEPARATOR.chars().count();
         let separator: String = chars.take(separator_chars_count).collect();
 
-        self.trimmed_line_text.chars().count() > text_chars_count &&
-            self.trimmed_line_text.starts_with(text) &&
-            separator == constant::TITLE_KEYWORD_SEPARATOR
+        self.trimmed_line_text.chars().count() > text_chars_count
+            && self.trimmed_line_text.starts_with(text)
+            && separator == constant::TITLE_KEYWORD_SEPARATOR
     }
 
     pub fn get_table_cells(&self) -> Vec<GherkinLineSpan> {
@@ -129,7 +127,8 @@ impl GherkinLine {
                     // Skip the first empty span
                     before_first = false;
                 } else {
-                    let mut content_start = cell.chars()
+                    let mut content_start = cell
+                        .chars()
                         .enumerate()
                         .skip_while(|(_index, cell_char)| cell_char.is_whitespace())
                         .map(|(index, _cell_char)| index)
@@ -164,10 +163,13 @@ mod tests {
         let gherkin_line = GherkinLine::new("    @this @is  @atag  ".to_owned());
         let gherkin_line_spans = gherkin_line.get_tags();
 
-        assert_eq!(gherkin_line_spans, vec![
-            GherkinLineSpan::new(5, "@this".to_owned()),
-            GherkinLineSpan::new(11, "@is".to_owned()),
-            GherkinLineSpan::new(16, "@atag".to_owned()),
-        ]);
+        assert_eq!(
+            gherkin_line_spans,
+            vec![
+                GherkinLineSpan::new(5, "@this".to_owned()),
+                GherkinLineSpan::new(11, "@is".to_owned()),
+                GherkinLineSpan::new(16, "@atag".to_owned()),
+            ]
+        );
     }
 }

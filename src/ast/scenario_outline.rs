@@ -16,8 +16,15 @@ pub struct ScenarioOutline {
 }
 
 impl ScenarioOutline {
-    pub fn new(location: Location, keyword: String, name: String, description: Option<String>,
-            steps: Vec<Step>, tags: Vec<Tag>, examples: Vec<Examples>) -> ScenarioOutline {
+    pub fn new(
+        location: Location,
+        keyword: String,
+        name: String,
+        description: Option<String>,
+        steps: Vec<Step>,
+        tags: Vec<Tag>,
+        examples: Vec<Examples>,
+    ) -> ScenarioOutline {
         ScenarioOutline {
             node_type: "ScenarioOutline",
             location,

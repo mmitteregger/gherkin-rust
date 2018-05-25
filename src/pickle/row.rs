@@ -8,12 +8,10 @@ pub struct PickleRow {
 
 impl PickleRow {
     pub fn new(cells: Vec<PickleCell>) -> PickleRow {
-        PickleRow {
-            cells,
-        }
+        PickleRow { cells }
     }
 
-    pub fn get_cells(&self)-> &Vec<PickleCell> {
+    pub fn get_cells(&self) -> &Vec<PickleCell> {
         &self.cells
     }
 }

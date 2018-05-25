@@ -15,8 +15,14 @@ pub struct Scenario {
 }
 
 impl Scenario {
-    pub fn new(location: Location, keyword: String, name: String, description: Option<String>,
-            steps: Vec<Step>, tags: Vec<Tag>) -> Scenario {
+    pub fn new(
+        location: Location,
+        keyword: String,
+        name: String,
+        description: Option<String>,
+        steps: Vec<Step>,
+        tags: Vec<Tag>,
+    ) -> Scenario {
         Scenario {
             node_type: "Scenario",
             location,

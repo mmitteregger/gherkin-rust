@@ -1,8 +1,9 @@
 use std::sync::Arc;
+
 use ast::Location;
+use gherkin_dialect::GherkinDialect;
 use gherkin_line::GherkinLine;
 use gherkin_line_span::GherkinLineSpan;
-use gherkin_dialect::GherkinDialect;
 use parser::TokenType;
 
 #[derive(Debug, Clone)]

@@ -1,7 +1,7 @@
 use std::fs;
 
-use event::SourceEvent;
 use error::Result;
+use event::SourceEvent;
 
 pub struct SourceEvents {
     paths: Vec<String>,
@@ -9,9 +9,7 @@ pub struct SourceEvents {
 
 impl SourceEvents {
     pub fn new(paths: Vec<String>) -> SourceEvents {
-        SourceEvents {
-            paths,
-        }
+        SourceEvents { paths }
     }
 }
 
@@ -25,7 +23,7 @@ impl IntoIterator for SourceEvents {
 
     fn into_iter(self) -> SourceEventsIter {
         SourceEventsIter {
-            paths_iter: self.paths.into_iter()
+            paths_iter: self.paths.into_iter(),
         }
     }
 }
@@ -40,7 +38,7 @@ impl Iterator for SourceEventsIter {
                     Ok(data) => data,
                     Err(error) => {
                         return Some(Err(error.into()));
-                    },
+                    }
                 };
                 Some(Ok(SourceEvent::new(path.to_owned(), data)))
             }

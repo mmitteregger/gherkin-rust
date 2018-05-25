@@ -7,10 +7,7 @@ pub struct PickleLocation {
 
 impl PickleLocation {
     pub fn new(line: usize, column: usize) -> PickleLocation {
-        PickleLocation {
-            line,
-            column,
-        }
+        PickleLocation { line, column }
     }
 
     pub fn get_line(&self) -> usize {

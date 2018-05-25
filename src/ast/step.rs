@@ -13,7 +13,12 @@ pub struct Step {
 }
 
 impl Step {
-    pub fn new(location: Location, keyword: String, text: String, argument: Option<Box<Node>>) -> Step {
+    pub fn new(
+        location: Location,
+        keyword: String,
+        text: String,
+        argument: Option<Box<Node>>,
+    ) -> Step {
         Step {
             node_type: "Step",
             location,

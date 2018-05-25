@@ -62,23 +62,40 @@ impl fmt::Display for Error {
         match *self {
             Error::Io(ref err) => err.fmt(f),
             Error::SerdeJson(ref err) => err.fmt(f),
-            Error::AstBuilder { ref location, ref message } => {
-                    write!(f, "{}: {}", location, message)
-            },
-            Error::NoSuchLanguage { ref location, ref language } => {
-                write!(f, "{}: Language not supported: {}", location, language)
-            },
+            Error::AstBuilder {
+                ref location,
+                ref message,
+            } => write!(f, "{}: {}", location, message),
+            Error::NoSuchLanguage {
+                ref location,
+                ref language,
+            } => write!(f, "{}: Language not supported: {}", location, language),
             Error::UnexpectedToken {
-                ref location, ref received_token, ref expected_tokens, ..
+                ref location,
+                ref received_token,
+                ref expected_tokens,
+                ..
             } => {
                 let received = received_token.get_token_value().trim();
                 let expected = expected_tokens.join(", ");
-                write!(f, "{}: expected: {}, got '{}'", location, expected, received)
-            },
-            Error::UnexpectedEof { ref location, ref expected_tokens, .. } => {
+                write!(
+                    f,
+                    "{}: expected: {}, got '{}'",
+                    location, expected, received
+                )
+            }
+            Error::UnexpectedEof {
+                ref location,
+                ref expected_tokens,
+                ..
+            } => {
                 let expected = expected_tokens.join(", ");
-                write!(f, "{}: unexpected end of file, expected: {}", location, expected)
-            },
+                write!(
+                    f,
+                    "{}: unexpected end of file, expected: {}",
+                    location, expected
+                )
+            }
             Error::Composite(ref errors) => {
                 write!(f, "multiple parse errors:")?;
 
@@ -88,7 +105,7 @@ impl fmt::Display for Error {
                 }
 
                 Ok(())
-            },
+            }
             Error::__Nonexhaustive => unreachable!(),
         }
     }

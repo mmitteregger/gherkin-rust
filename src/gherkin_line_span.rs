@@ -6,10 +6,7 @@ pub struct GherkinLineSpan {
 
 impl GherkinLineSpan {
     pub fn new(column: usize, text: String) -> GherkinLineSpan {
-        GherkinLineSpan {
-            column,
-            text,
-        }
+        GherkinLineSpan { column, text }
     }
 
     /// One-based line position.

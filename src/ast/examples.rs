@@ -18,8 +18,15 @@ pub struct Examples {
 }
 
 impl Examples {
-    pub fn new(location: Location, tags: Vec<Tag>, keyword: String, name: String,
-        description: Option<String>, table_header: Option<TableRow>, table_body: Option<Vec<TableRow>>) -> Examples {
+    pub fn new(
+        location: Location,
+        tags: Vec<Tag>,
+        keyword: String,
+        name: String,
+        description: Option<String>,
+        table_header: Option<TableRow>,
+        table_body: Option<Vec<TableRow>>,
+    ) -> Examples {
         Examples {
             node_type: "Examples",
             location,

@@ -1,11 +1,13 @@
-use ast::Location;
-use error::{Result, Error};
-use gherkin_dialect::GherkinDialect;
-use parser::GherkinDialectProvide;
-use serde_json;
 use std::collections::HashMap;
 use std::default::Default;
 use std::sync::Arc;
+
+use serde_json;
+
+use ast::Location;
+use error::{Error, Result};
+use gherkin_dialect::GherkinDialect;
+use parser::GherkinDialectProvide;
 
 static GHERKIN_LANGUAGES: &[u8] = include_bytes!("../gherkin-languages.json");
 
@@ -38,7 +40,9 @@ impl Default for BuiltInGherkinDialectProvider {
 }
 
 impl BuiltInGherkinDialectProvider {
-    pub fn with_default_dialect_name<S: Into<String>>(default_dialect_name: S) -> BuiltInGherkinDialectProvider {
+    pub fn with_default_dialect_name<S: Into<String>>(
+        default_dialect_name: S,
+    ) -> BuiltInGherkinDialectProvider {
         BuiltInGherkinDialectProvider {
             default_dialect_name: default_dialect_name.into(),
         }
@@ -51,19 +55,13 @@ impl GherkinDialectProvide for BuiltInGherkinDialectProvider {
         self.get_dialect(&self.default_dialect_name, location)
     }
 
-    fn get_dialect(&self, language: &str, location: Location)
-            -> Result<Arc<GherkinDialect>> {
+    fn get_dialect(&self, language: &str, location: Location) -> Result<Arc<GherkinDialect>> {
         let dialect = DIALECTS.get(language);
         let language = language.to_owned();
 
         match dialect {
             Some(dialect) => Ok(dialect.clone()),
-            None => {
-                Err(Error::NoSuchLanguage {
-                    location,
-                    language,
-                })
-            },
+            None => Err(Error::NoSuchLanguage { location, language }),
         }
     }
 
@@ -83,8 +81,12 @@ mod tests {
         let em_dialect = get_dialect("em");
         let scenario_keywords = em_dialect.get_scenario_keywords();
         let first_emoji_keyword = scenario_keywords.get(0).unwrap();
-        assert_eq!(first_emoji_keyword.chars().count(), 1,
-            "expected exactly 1 char for first emoji scenario keyword: {}", first_emoji_keyword);
+        assert_eq!(
+            first_emoji_keyword.chars().count(),
+            1,
+            "expected exactly 1 char for first emoji scenario keyword: {}",
+            first_emoji_keyword
+        );
     }
 
     fn get_dialect(language: &str) -> Arc<GherkinDialect> {

@@ -16,9 +16,15 @@ pub struct Feature {
 }
 
 impl Feature {
-    pub fn new(location: Location, tags: Vec<Tag>, language: String, keyword: String,
-            name: String, description: Option<String>, children: Vec<Box<ScenarioDefinition>>)
-            -> Feature {
+    pub fn new(
+        location: Location,
+        tags: Vec<Tag>,
+        language: String,
+        keyword: String,
+        name: String,
+        description: Option<String>,
+        children: Vec<Box<ScenarioDefinition>>,
+    ) -> Feature {
         Feature {
             node_type: "Feature",
             location,
@@ -39,15 +45,15 @@ impl Feature {
         &self.language
     }
 
-    pub fn get_keyword(&self) -> &String{
+    pub fn get_keyword(&self) -> &String {
         &self.keyword
     }
 
-    pub fn get_name(&self) -> &String{
+    pub fn get_name(&self) -> &String {
         &self.name
     }
 
-    pub fn get_description(&self) -> Option<&String>{
+    pub fn get_description(&self) -> Option<&String> {
         self.description.as_ref()
     }
 

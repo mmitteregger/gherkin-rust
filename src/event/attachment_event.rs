@@ -34,10 +34,7 @@ pub struct SourceRef {
 
 impl SourceRef {
     pub fn new(uri: String, start: Location) -> SourceRef {
-        SourceRef {
-            uri,
-            start,
-        }
+        SourceRef { uri, start }
     }
 }
 
@@ -50,10 +47,7 @@ pub struct Location {
 
 impl Location {
     pub fn new(line: usize, column: usize) -> Location {
-        Location {
-            line,
-            column,
-        }
+        Location { line, column }
     }
 }
 

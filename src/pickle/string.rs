@@ -10,7 +10,11 @@ pub struct PickleString {
 }
 
 impl PickleString {
-    pub fn new(location: PickleLocation, content: String, content_type: Option<String>) -> PickleString {
+    pub fn new(
+        location: PickleLocation,
+        content: String,
+        content_type: Option<String>,
+    ) -> PickleString {
         PickleString {
             location,
             content,

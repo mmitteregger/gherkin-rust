@@ -9,7 +9,11 @@ pub struct PickleStep {
 }
 
 impl PickleStep {
-    pub fn new(text: String, arguments: Vec<Box<Argument>>, locations: Vec<PickleLocation>) -> PickleStep {
+    pub fn new(
+        text: String,
+        arguments: Vec<Box<Argument>>,
+        locations: Vec<PickleLocation>,
+    ) -> PickleStep {
         PickleStep {
             text,
             arguments,

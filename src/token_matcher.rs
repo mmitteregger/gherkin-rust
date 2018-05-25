@@ -4,17 +4,18 @@ use std::sync::Arc;
 use regex::Regex;
 
 use ast::*;
-use gherkin_dialect_provider::BuiltInGherkinDialectProvider as DialectProvider;
 use constant;
 use error::Result;
 use gherkin_dialect::GherkinDialect;
-use parser::GherkinDialectProvide;
+use gherkin_dialect_provider::BuiltInGherkinDialectProvider as DialectProvider;
 use gherkin_line_span::GherkinLineSpan;
-use token::Token;
+use parser::GherkinDialectProvide;
 use parser::{TokenMatch, TokenType};
+use token::Token;
 
 lazy_static! {
-    static ref LANGUAGE_PATTERN: Regex = Regex::new(r"^\s*#\s*language\s*:\s*([a-zA-Z\-_]+)\s*$").unwrap();
+    static ref LANGUAGE_PATTERN: Regex =
+        Regex::new(r"^\s*#\s*language\s*:\s*([a-zA-Z\-_]+)\s*$").unwrap();
 }
 
 pub struct TokenMatcher<DP: GherkinDialectProvide> {
@@ -39,7 +40,8 @@ impl TokenMatcher<DialectProvider> {
 
 impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
     pub fn with_dialect_provider(dialect_provider: DP) -> TokenMatcher<DP> {
-        let default_dialect = dialect_provider.get_default_dialect()
+        let default_dialect = dialect_provider
+            .get_default_dialect()
             .expect("get default dialect");
 
         TokenMatcher {
@@ -50,9 +52,15 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         }
     }
 
-    fn set_token_matched(&self, token: &mut Token, matched_type: TokenType, text: Option<String>,
-            keyword: Option<String>, indent: Option<usize>, items: Vec<GherkinLineSpan>) {
-
+    fn set_token_matched(
+        &self,
+        token: &mut Token,
+        matched_type: TokenType,
+        text: Option<String>,
+        keyword: Option<String>,
+        indent: Option<usize>,
+        items: Vec<GherkinLineSpan>,
+    ) {
         token.matched_type = Some(matched_type);
         token.matched_keyword = keyword;
         token.matched_text = text;
@@ -78,16 +86,29 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         }
     }
 
-    fn match_title_line(&self, token: &mut Token, token_type: TokenType, keywords: &[String]) -> bool {
+    fn match_title_line(
+        &self,
+        token: &mut Token,
+        token_type: TokenType,
+        keywords: &[String],
+    ) -> bool {
         for keyword in keywords {
             if token.unwrap_line().starts_with_title_keyword(keyword) {
                 let keyword_chars_count = keyword.chars().count();
                 let separator_chars_count = constant::TITLE_KEYWORD_SEPARATOR.chars().count();
                 let title = {
                     let line = token.unwrap_line();
-                    line.get_rest_trimmed(keyword_chars_count + separator_chars_count).to_owned()
+                    line.get_rest_trimmed(keyword_chars_count + separator_chars_count)
+                        .to_owned()
                 };
-                self.set_token_matched(token, token_type, Some(title), Some(keyword.to_owned()), None, Vec::new());
+                self.set_token_matched(
+                    token,
+                    token_type,
+                    Some(title),
+                    Some(keyword.to_owned()),
+                    None,
+                    Vec::new(),
+                );
                 return true;
             }
         }
@@ -95,7 +116,12 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         false
     }
 
-    fn match_doc_string_separator(&mut self, token: &mut Token, separator: &str, is_open: bool) -> bool {
+    fn match_doc_string_separator(
+        &mut self,
+        token: &mut Token,
+        separator: &str,
+        is_open: bool,
+    ) -> bool {
         if token.unwrap_line().starts_with(&separator) {
             let content_type = if is_open {
                 let line = token.unwrap_line();
@@ -109,7 +135,14 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
                 None
             };
 
-            self.set_token_matched(token, TokenType::DocStringSeparator, content_type, None, None, Vec::new());
+            self.set_token_matched(
+                token,
+                TokenType::DocStringSeparator,
+                content_type,
+                None,
+                None,
+                Vec::new(),
+            );
             return true;
         }
 
@@ -138,7 +171,14 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
         if token.unwrap_line().starts_with(constant::COMMENT_PREFIX) {
             // take the entire line
             let text = token.unwrap_line().get_line_text(0).to_owned();
-            self.set_token_matched(token, TokenType::Comment, Some(text), None, Some(0), Vec::new());
+            self.set_token_matched(
+                token,
+                TokenType::Comment,
+                Some(text),
+                None,
+                Some(0),
+                Vec::new(),
+            );
             return Ok(true);
         }
         Ok(false)
@@ -189,8 +229,18 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
         for keyword in keywords {
             if token.unwrap_line().starts_with(keyword) {
                 let keyword_chars_count = keyword.chars().count();
-                let step_text = token.unwrap_line().get_rest_trimmed(keyword_chars_count).to_owned();
-                self.set_token_matched(token, TokenType::StepLine, Some(step_text), Some(keyword.to_owned()), None, Vec::new());
+                let step_text = token
+                    .unwrap_line()
+                    .get_rest_trimmed(keyword_chars_count)
+                    .to_owned();
+                self.set_token_matched(
+                    token,
+                    TokenType::StepLine,
+                    Some(step_text),
+                    Some(keyword.to_owned()),
+                    None,
+                    Vec::new(),
+                );
                 return Ok(true);
             }
         }
@@ -199,23 +249,29 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
     }
 
     fn match_doc_string_separator(&mut self, token: &mut Token) -> Result<bool> {
-        // TODO: Remove clone of active doc string separator
         let is_match = match self.active_doc_string_separator.to_owned() {
             Some(ref separator) => {
                 // close
                 self.match_doc_string_separator(token, separator, false)
-            },
+            }
             None => {
                 // open
                 self.match_doc_string_separator(token, constant::DOCSTRING_SEPARATOR, true)
-                    || self.match_doc_string_separator(token, constant::DOCSTRING_ALTERNATIVE_SEPARATOR, true)
-            },
+                    || self.match_doc_string_separator(
+                        token,
+                        constant::DOCSTRING_ALTERNATIVE_SEPARATOR,
+                        true,
+                    )
+            }
         };
         Ok(is_match)
     }
 
     fn match_table_row(&mut self, token: &mut Token) -> Result<bool> {
-        if token.unwrap_line().starts_with(constant::TABLE_CELL_SEPARATOR) {
+        if token
+            .unwrap_line()
+            .starts_with(constant::TABLE_CELL_SEPARATOR)
+        {
             let table_cells = token.unwrap_line().get_table_cells();
             self.set_token_matched(token, TokenType::TableRow, None, None, None, table_cells);
             return Ok(true);
@@ -235,11 +291,20 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
         };
 
         if let Some(language) = language {
-            self.set_token_matched(token, TokenType::Language, Some(language), None, None, Vec::new());
+            self.set_token_matched(
+                token,
+                TokenType::Language,
+                Some(language),
+                None,
+                None,
+                Vec::new(),
+            );
 
             let location = token.location.expect("token location");
             let dialect_language = token.matched_text.as_ref().unwrap();
-            self.current_dialect = self.dialect_provider.get_dialect(dialect_language, location)?;
+            self.current_dialect = self
+                .dialect_provider
+                .get_dialect(dialect_language, location)?;
             return Ok(true);
         }
 
@@ -253,14 +318,23 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
             let line_text = line.get_line_text(self.indent_to_remove as isize);
             self.unescape_doc_string(line_text)
         };
-        self.set_token_matched(token, TokenType::Other, Some(text), None, Some(0), Vec::new());
+        self.set_token_matched(
+            token,
+            TokenType::Other,
+            Some(text),
+            None,
+            Some(0),
+            Vec::new(),
+        );
         Ok(true)
     }
 
     fn reset(&mut self) {
         self.active_doc_string_separator = None;
         self.indent_to_remove = 0;
-        self.current_dialect = self.dialect_provider.get_default_dialect()
+        self.current_dialect = self
+            .dialect_provider
+            .get_default_dialect()
             .expect("get default dialect");
     }
 }

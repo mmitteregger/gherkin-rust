@@ -1,14 +1,14 @@
+use std::cell::RefCell;
+use std::default::Default;
 use std::mem;
 use std::rc::Rc;
-use std::cell::RefCell;
 use std::string::ToString;
-use std::default::Default;
 
-use error::Result;
 use ast::Location;
-use token::Token;
+use error::Result;
 use gherkin_line_span::GherkinLineSpan;
 use parser::{self, RuleType};
+use token::Token;
 
 pub struct TokenFormatterBuilder {
     tokens_text_builder: String,
@@ -44,8 +44,7 @@ impl parser::Builder for TokenFormatterBuilder {
         mem::replace(&mut self.tokens_text_builder, String::new())
     }
 
-    fn reset(&mut self) {
-    }
+    fn reset(&mut self) {}
 }
 
 fn format_token(token: &Token) -> String {
@@ -53,7 +52,8 @@ fn format_token(token: &Token) -> String {
         return String::from("EOF");
     }
 
-    format!("{}{}:{}/{}/{}",
+    format!(
+        "{}{}:{}/{}/{}",
         format_location(token.location),
         format_option_string(&token.matched_type),
         format_option_string(&token.matched_keyword),
@@ -80,7 +80,8 @@ fn format_gherkin_line_spans(spans: &[GherkinLineSpan]) -> String {
     if spans.is_empty() {
         String::new()
     } else {
-        spans.iter()
+        spans
+            .iter()
             .map(|ref span| format!("{}:{}", span.get_column(), span.get_text()))
             .collect::<Vec<String>>()
             .join(",")

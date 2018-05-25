@@ -9,10 +9,7 @@ pub struct PickleCell {
 
 impl PickleCell {
     pub fn new(location: PickleLocation, value: String) -> PickleCell {
-        PickleCell {
-            location,
-            value,
-        }
+        PickleCell { location, value }
     }
 
     pub fn get_location(&self) -> &PickleLocation {
