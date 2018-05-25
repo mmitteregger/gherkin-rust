@@ -31,8 +31,8 @@ impl Step {
         &self.text
     }
 
-    pub fn get_argument(&self) -> &Option<Box<Node>> {
-        &self.argument
+    pub fn get_argument(&self) -> Option<&Box<Node>> {
+        self.argument.as_ref()
     }
 }
 

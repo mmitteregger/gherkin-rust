@@ -32,6 +32,7 @@ default: .compared
 
 .built: src/parser.rs gherkin-languages.json $(RUST_FILES) LICENSE Cargo.toml
 	cargo build
+	cargo test
 	touch $@
 
 acceptance/testdata/%.feature.tokens: testdata/%.feature testdata/%.feature.tokens .built

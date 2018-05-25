@@ -84,7 +84,7 @@ impl Compiler {
                 Some(table_header) => table_header,
                 None => return,
             };
-            let table_body = examples.get_table_body().as_ref().unwrap();
+            let table_body = examples.get_table_body().unwrap();
 
             let variable_cells = table_header.get_cells();
             for values in table_body {
@@ -149,7 +149,7 @@ impl Compiler {
         self.pickle_tags(tags)
     }
 
-    fn create_pickle_arguments(&mut self, argument: &Option<Box<Node>>,
+    fn create_pickle_arguments(&mut self, argument: Option<&Box<Node>>,
         variable_cells: &[TableCell], value_cells: &[TableCell]) -> Vec<Box<Argument>> {
 
         let argument = match argument {

@@ -31,7 +31,7 @@ impl Default for TokenMatcher<DialectProvider> {
 }
 
 impl TokenMatcher<DialectProvider> {
-    pub fn with_default_dialect_name(default: String) -> TokenMatcher<DialectProvider> {
+    pub fn with_default_dialect_name<S: Into<String>>(default: S) -> TokenMatcher<DialectProvider> {
         let dialect_provider = DialectProvider::with_default_dialect_name(default);
         TokenMatcher::with_dialect_provider(dialect_provider)
     }

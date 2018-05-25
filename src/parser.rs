@@ -109,8 +109,8 @@ impl From<TokenType> for RuleType {
 }
 
 struct ParserContext<'a> {
-    token_scanner: &'a mut TokenScan,
-    token_matcher: &'a mut TokenMatch,
+    token_scan: &'a mut TokenScan,
+    token_match: &'a mut TokenMatch,
     token_queue: VecDeque<Rc<RefCell<Token>>>,
     errors: Vec<Error>,
 }
@@ -134,36 +134,36 @@ impl<B: Builder> Parser<B> {
         }
     }
 
-    pub fn parse_str(&mut self, source: &str) -> Result<B::BuilderResult> {
-        self.parse_reader(source.as_bytes())
+    pub fn parse_str<S: AsRef<str>>(&mut self, source: S) -> Result<B::BuilderResult> {
+        self.parse_reader(source.as_ref().as_bytes())
+    }
+
+    pub fn parse_str_with_matcher<S: AsRef<str>, TM>(&mut self, source: S, token_match: &mut TM)
+            -> Result<B::BuilderResult> where TM: TokenMatch {
+        self.parse_reader_with_matcher(source.as_ref().as_bytes(), token_match)
     }
 
     pub fn parse_reader<R>(&mut self, source: R) -> Result<B::BuilderResult> where R: Read {
-        self.parse_tokens(&mut TokenScanner::from(source))
+        self.parse_scanner(&mut TokenScanner::from(source))
     }
 
-    pub fn parse_tokens<TS>(&mut self, token_scanner: &mut TS) -> Result<B::BuilderResult> where TS: TokenScan {
-        self.parse_tokens_with_token_matcher(token_scanner, &mut TokenMatcher::default())
-    }
-
-    pub fn parse_str_with_token_matcher<TM>(&mut self, source: &str, token_matcher: &mut TM)
-            -> Result<B::BuilderResult> where TM: TokenMatch {
-        self.parse_reader_with_token_matcher(source.as_bytes(), token_matcher)
-    }
-
-    pub fn parse_reader_with_token_matcher<R, TM>(&mut self, source: R, token_matcher: &mut TM)
+    pub fn parse_reader_with_matcher<R, TM>(&mut self, source: R, token_match: &mut TM)
             -> Result<B::BuilderResult> where R: Read, TM: TokenMatch {
-        self.parse_tokens_with_token_matcher(&mut TokenScanner::from(source), token_matcher)
+        self.parse_scanner_with_matcher(&mut TokenScanner::from(source), token_match)
     }
 
-    pub fn parse_tokens_with_token_matcher<TS, TM>(&mut self, token_scanner: &mut TS, token_matcher: &mut TM)
+    pub fn parse_scanner<TS>(&mut self, token_scan: &mut TS) -> Result<B::BuilderResult> where TS: TokenScan {
+        self.parse_scanner_with_matcher(token_scan, &mut TokenMatcher::default())
+    }
+
+    pub fn parse_scanner_with_matcher<TS, TM>(&mut self, token_scan: &mut TS, token_match: &mut TM)
             -> Result<B::BuilderResult> where TS: TokenScan, TM: TokenMatch {
         self.builder.reset();
-        token_matcher.reset();
+        token_match.reset();
 
         let mut context = ParserContext {
-                token_scanner,
-                token_matcher,
+                token_scan,
+                token_match,
                 token_queue: VecDeque::new(),
                 errors: Vec::new(),
         };
@@ -251,90 +251,90 @@ impl<B: Builder> Parser<B> {
     fn read_token(&mut self, context: &mut ParserContext) -> Result<Rc<RefCell<Token>>> {
         match context.token_queue.pop_front() {
             Some(token) => Ok(token),
-            None => context.token_scanner.scan_next_token().map(|token| Rc::new(RefCell::new(token))),
+            None => context.token_scan.next().map(|token| Rc::new(RefCell::new(token))),
         }
     }
 
     fn match_eof(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
-        let result = context.token_matcher.match_eof(token);
+        let result = context.token_match.match_eof(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_empty(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_empty(token);
+        let result = context.token_match.match_empty(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_comment(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_comment(token);
+        let result = context.token_match.match_comment(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_tag_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_tag_line(token);
+        let result = context.token_match.match_tag_line(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_feature_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_feature_line(token);
+        let result = context.token_match.match_feature_line(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_background_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_background_line(token);
+        let result = context.token_match.match_background_line(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_scenario_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_scenario_line(token);
+        let result = context.token_match.match_scenario_line(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_scenario_outline_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_scenario_outline_line(token);
+        let result = context.token_match.match_scenario_outline_line(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_examples_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_examples_line(token);
+        let result = context.token_match.match_examples_line(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_step_line(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_step_line(token);
+        let result = context.token_match.match_step_line(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_doc_string_separator(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_doc_string_separator(token);
+        let result = context.token_match.match_doc_string_separator(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_table_row(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_table_row(token);
+        let result = context.token_match.match_table_row(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_language(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_language(token);
+        let result = context.token_match.match_language(token);
         self.handle_external_result(context, result, false)
     }
 
     fn match_other(&mut self, context: &mut ParserContext, token: &mut Token) -> Result<bool> {
         if token.is_eof() {return Ok(false)};
-        let result = context.token_matcher.match_other(token);
+        let result = context.token_match.match_other(token);
         self.handle_external_result(context, result, false)
     }
 
@@ -3684,7 +3684,7 @@ pub trait Builder {
 }
 
 pub trait TokenScan {
-    fn scan_next_token(&mut self) -> Result<Token>;
+    fn next(&mut self) -> Result<Token>;
 }
 
 pub trait TokenMatch {

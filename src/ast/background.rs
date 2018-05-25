@@ -42,8 +42,8 @@ impl ScenarioDefinition for Background {
         &self.name
     }
 
-    fn get_description(&self) -> &Option<String> {
-        &self.description
+    fn get_description(&self) -> Option<&String> {
+        self.description.as_ref()
     }
 
     fn get_steps(&self) -> &Vec<Step> {

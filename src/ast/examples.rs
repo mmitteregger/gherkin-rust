@@ -44,16 +44,16 @@ impl Examples {
         &self.name
     }
 
-    pub fn get_description(&self) -> &Option<String> {
-        &self.description
+    pub fn get_description(&self) -> Option<&String> {
+        self.description.as_ref()
     }
 
-    pub fn get_table_header(&self) -> &Option<TableRow> {
-        &self.table_header
+    pub fn get_table_header(&self) -> Option<&TableRow> {
+        self.table_header.as_ref()
     }
 
-    pub fn get_table_body(&self) -> &Option<Vec<TableRow>> {
-        &self.table_body
+    pub fn get_table_body(&self) -> Option<&Vec<TableRow>> {
+        self.table_body.as_ref()
     }
 }
 

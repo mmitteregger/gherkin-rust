@@ -21,8 +21,8 @@ impl DocString {
         }
     }
 
-    pub fn get_content_type(&self) -> &Option<String> {
-        &self.content_type
+    pub fn get_content_type(&self) -> Option<&String> {
+        self.content_type.as_ref()
     }
 
     pub fn get_content(&self) -> &String {

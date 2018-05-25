@@ -28,7 +28,7 @@ impl<R: Read> From<R> for TokenScanner<R> {
 }
 
 impl<R: Read> TokenScan for TokenScanner<R> {
-    fn scan_next_token(&mut self) -> Result<Token> {
+    fn next(&mut self) -> Result<Token> {
         let mut line = String::new();
         self.reader.read_line(&mut line)?;
 

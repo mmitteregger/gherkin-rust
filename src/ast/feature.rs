@@ -47,8 +47,8 @@ impl Feature {
         &self.name
     }
 
-    pub fn get_description(&self) -> &Option<String>{
-        &self.description
+    pub fn get_description(&self) -> Option<&String>{
+        self.description.as_ref()
     }
 
     pub fn get_children(&self) -> &Vec<Box<ScenarioDefinition>> {

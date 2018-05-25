@@ -33,16 +33,14 @@ pub struct BuiltInGherkinDialectProvider {
 
 impl Default for BuiltInGherkinDialectProvider {
     fn default() -> BuiltInGherkinDialectProvider {
-        BuiltInGherkinDialectProvider {
-            default_dialect_name: String::from("en"),
-        }
+        BuiltInGherkinDialectProvider::with_default_dialect_name("en")
     }
 }
 
 impl BuiltInGherkinDialectProvider {
-    pub fn with_default_dialect_name(default_dialect_name: String) -> BuiltInGherkinDialectProvider {
+    pub fn with_default_dialect_name<S: Into<String>>(default_dialect_name: S) -> BuiltInGherkinDialectProvider {
         BuiltInGherkinDialectProvider {
-            default_dialect_name,
+            default_dialect_name: default_dialect_name.into(),
         }
     }
 }

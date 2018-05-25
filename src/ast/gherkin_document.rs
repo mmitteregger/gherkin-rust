@@ -19,8 +19,8 @@ impl GherkinDocument {
         }
     }
 
-    pub fn get_feature(&self) -> &Option<Feature> {
-        &self.feature
+    pub fn get_feature(&self) -> Option<&Feature> {
+        self.feature.as_ref()
     }
 
     pub fn get_comments(&self) -> &Vec<Comment> {

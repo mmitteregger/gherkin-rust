@@ -357,22 +357,18 @@ impl AstBuilder {
 
 #[cfg(test)]
 mod tests {
-    use {Parser, TokenMatcher};
     use super::*;
+    use {Parser, TokenMatcher};
 
     #[test]
     fn is_reusable() {
         let mut matcher = TokenMatcher::default();
-        let mut parser = Parser::new(AstBuilder::new());
+        let mut parser = Parser::with_builder(AstBuilder::default());
 
-        let document_1 =
-            parser.parse_str_with_token_matcher("Feature: 1", &mut matcher)
-                .unwrap();
-        let document_2 =
-            parser.parse_str_with_token_matcher("Feature: 2", &mut matcher)
-                .unwrap();
+        let document_1 = parser.parse_str_with_matcher("Feature: 1", &mut matcher).unwrap();
+        let document_2 = parser.parse_str_with_matcher("Feature: 2", &mut matcher).unwrap();
 
-        assert_eq!(document_1.get_feature().get_name(), "1");
-        assert_eq!(document_2.get_feature().get_name(), "2");
+        assert_eq!(document_1.get_feature().unwrap().get_name(), "1");
+        assert_eq!(document_2.get_feature().unwrap().get_name(), "2");
     }
 }

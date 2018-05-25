@@ -33,9 +33,8 @@ impl GherkinEvents {
         let mut cucumber_events: Vec<Box<CucumberEvent>> = Vec::new();
 
         let uri = source_event.get_uri().to_owned();
-        let gherkin_document = match self.parser.parse_str_with_token_matcher(
+        let gherkin_document = match self.parser.parse_str_with_matcher(
             source_event.get_data(), &mut self.token_matcher) {
-
             Ok(gherkin_document) => gherkin_document,
             Err(error) => {
                 self.add_error_attachment(&mut cucumber_events, &error, &uri);
