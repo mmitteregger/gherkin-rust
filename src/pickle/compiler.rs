@@ -149,6 +149,7 @@ impl Compiler {
         self.pickle_tags(tags)
     }
 
+    #[allow(unknown_lints, borrowed_box)] // required for downcasting to a concrete type
     fn create_pickle_arguments(&mut self, argument: Option<&Box<Node>>,
         variable_cells: &[TableCell], value_cells: &[TableCell]) -> Vec<Box<Argument>> {
 

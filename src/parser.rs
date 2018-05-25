@@ -208,7 +208,6 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, ())
     }
 
-    #[allow(unused)] // until the function is implemented
     fn handle_external_result<V>(&mut self, context: &mut ParserContext, result: Result<V>, default_value: V)
             -> Result<V> {
 
@@ -3641,6 +3640,7 @@ impl<B: Builder> Parser<B> {
         Ok(33)
     }
 
+    #[allow(unknown_lints, nonminimal_bool)] // simplifies the parser template
     fn lookahead_0(&mut self, context: &mut ParserContext, current_token: &Token) -> bool {
         current_token.detach();
         let mut token: Rc<RefCell<Token>>;

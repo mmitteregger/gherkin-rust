@@ -31,6 +31,7 @@ impl Step {
         &self.text
     }
 
+    #[allow(unknown_lints, borrowed_box)] // required for downcasting to a concrete type
     pub fn get_argument(&self) -> Option<&Box<Node>> {
         self.argument.as_ref()
     }
