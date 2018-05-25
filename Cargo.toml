@@ -19,11 +19,11 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "gherkin_generate_tokens"
-path = "src/generate_tokens.rs"
+path = "src/bin/generate_tokens.rs"
 
 [[bin]]
 name = "gherkin"
-path = "src/main.rs"
+path = "src/bin/gherkin.rs"
 
 [dependencies]
 failure = "0.1.1"
