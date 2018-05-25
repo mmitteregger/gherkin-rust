@@ -91,7 +91,7 @@ src/parser.rs: gherkin.berp gherkin-rust.razor berp/berp.exe
 	mv $@.nobom $@
 
 clean:
-	cargo clean
+	cargo clean --package gherkin
 	rm -rf .compared .built acceptance
 .PHONY: clean
 
