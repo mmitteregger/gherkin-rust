@@ -11,7 +11,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::cell::RefCell;
 
-use error::{Error, ErrorKind, Result, new_error};
+use error::{Result, Error};
 use ast::Location;
 use token::Token;
 use gherkin_dialect::GherkinDialect;
@@ -192,7 +192,7 @@ impl<B: Builder> Parser<B> {
         self.end_rule(&mut context, RuleType::GherkinDocument)?;
 
         if !context.errors.is_empty() {
-            Err(ErrorKind::Composite(context.errors))?;
+            Err(Error::Composite(context.errors))?;
         }
 
         Ok(self.builder.get_result())
@@ -209,7 +209,7 @@ impl<B: Builder> Parser<B> {
     }
 
     #[allow(unused)] // until the function is implemented
-    fn handle_external_result<V>(&mut self, _context: &mut ParserContext, result: Result<V>, _default_value: V)
+    fn handle_external_result<V>(&mut self, context: &mut ParserContext, result: Result<V>, default_value: V)
             -> Result<V> {
 
         if self.stop_at_first_error {
@@ -217,21 +217,20 @@ impl<B: Builder> Parser<B> {
         }
 
         match result {
-            Ok(value) => Ok(value),
-            Err(_error) => {
-                unimplemented!();
-//                match error.kind() {
-//                    &ErrorKind::Composite(errors) => {
-//                        for parse_error in errors.into_iter() {
-//                            self.add_error(context, parse_error);
-//                        }
-//                    },
-//                    _ => self.add_error(context, error),
-//                }
+            Ok(value) => return Ok(value),
+            Err(error) => {
+                match error {
+                    Error::Composite(errors) => {
+                        for parse_error in errors {
+                            self.add_error(context, parse_error);
+                        }
+                    },
+                    _ => self.add_error(context, error),
+                }
             },
         }
 
-//        Ok(default_value)
+        Ok(default_value)
     }
 
     fn build(&mut self, context: &mut ParserContext, token: Rc<RefCell<Token>>) -> Result<()> {
@@ -424,19 +423,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -445,25 +440,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(0)
     }
 
@@ -497,19 +487,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -518,25 +504,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(1)
     }
 
@@ -570,19 +551,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -591,25 +568,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(2)
     }
 
@@ -676,19 +648,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -697,25 +665,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(3)
     }
 
@@ -782,19 +745,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -803,25 +762,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(4)
     }
 
@@ -882,19 +836,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -903,25 +853,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(5)
     }
 
@@ -987,19 +932,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1008,25 +949,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(6)
     }
 
@@ -1092,19 +1028,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1113,25 +1045,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(7)
     }
 
@@ -1191,19 +1118,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1212,25 +1135,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(8)
     }
 
@@ -1307,19 +1225,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1328,25 +1242,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(9)
     }
 
@@ -1421,19 +1330,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1442,25 +1347,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(10)
     }
 
@@ -1502,19 +1402,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1523,25 +1419,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(11)
     }
 
@@ -1611,19 +1502,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1632,25 +1519,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(12)
     }
 
@@ -1720,19 +1602,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1741,25 +1619,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(13)
     }
 
@@ -1823,19 +1696,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1844,25 +1713,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(14)
     }
 
@@ -1943,19 +1807,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -1964,25 +1824,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(15)
     }
 
@@ -2061,19 +1916,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2082,25 +1933,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(16)
     }
 
@@ -2189,19 +2035,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2210,25 +2052,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(17)
     }
 
@@ -2319,19 +2156,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2340,25 +2173,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(18)
     }
 
@@ -2441,19 +2269,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2462,25 +2286,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(19)
     }
 
@@ -2582,19 +2401,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2603,25 +2418,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(20)
     }
 
@@ -2723,19 +2533,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2744,25 +2550,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(21)
     }
 
@@ -2797,19 +2598,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2818,25 +2615,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(22)
     }
 
@@ -2937,19 +2729,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -2958,25 +2746,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(23)
     }
 
@@ -3079,19 +2862,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3100,25 +2879,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(24)
     }
 
@@ -3213,19 +2987,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3234,25 +3004,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(25)
     }
 
@@ -3352,19 +3117,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3373,25 +3134,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(26)
     }
 
@@ -3414,19 +3170,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3435,25 +3187,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(28)
     }
 
@@ -3550,19 +3297,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3571,25 +3314,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(29)
     }
 
@@ -3612,19 +3350,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3633,25 +3367,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(30)
     }
 
@@ -3725,19 +3454,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3746,25 +3471,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(31)
     }
 
@@ -3787,19 +3507,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3808,25 +3524,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(32)
     }
 
@@ -3896,19 +3607,15 @@ impl<B: Builder> Parser<B> {
         ];
 
         let token = token.borrow();
-        let error = if token.is_eof() {
-            let location = token.location;
-            let expected = expected_tokens.join(", ");
-            let message = format!("unexpected end of file, expected: {}", expected);
+        let token_location = token.location.expect("token location");
 
-            ErrorKind::UnexpectedEof {
-                location,
-                message,
+        let error = if token.is_eof() {
+            Error::UnexpectedEof {
+                location: token_location,
                 state_comment,
-//                expected_tokens,
+                expected_tokens,
             }
         } else {
-            let token_location = token.location.expect("token location");
             let location = if token_location.get_column() > 1 {
                 token_location
             } else {
@@ -3917,25 +3624,20 @@ impl<B: Builder> Parser<B> {
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };
-            let received = token.get_token_value().trim();
-            let expected = expected_tokens.join(", ");
-            let message = format!("({}:{}): expected: {}, got '{}'",
-                    location.get_line(), location.get_column(), expected, received);
 
-            ErrorKind::UnexpectedToken {
+            Error::UnexpectedToken {
                 location,
-                message,
                 state_comment,
-//                received_token: *token,
-//                expected_tokens,
+                received_token: Box::new(token.clone()),
+                expected_tokens,
             }
         };
 
         if self.stop_at_first_error {
-            return Err(error.into());
+            return Err(error);
         }
 
-        self.add_error(context, new_error(error));
+        self.add_error(context, error);
         Ok(33)
     }
 
@@ -4006,7 +3708,7 @@ pub trait TokenMatch {
 pub trait GherkinDialectProvide {
     fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>>;
 
-    fn get_dialect(&self, language: &str, location: Option<Location>) -> Result<Arc<GherkinDialect>>;
+    fn get_dialect(&self, language: &str, location: Location) -> Result<Arc<GherkinDialect>>;
 
     fn get_languages(&self) -> Vec<&String>;
 }

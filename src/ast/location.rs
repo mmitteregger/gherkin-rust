@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Serialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Location {
@@ -19,5 +21,11 @@ impl Location {
 
     pub fn get_column(&self) -> usize {
         self.column
+    }
+}
+
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "({}:{})", self.line, self.column)
     }
 }

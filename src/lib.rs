@@ -14,7 +14,7 @@ extern crate erased_serde;
 extern crate downcast_rs as downcast;
 
 pub use ast_builder::AstBuilder;
-pub use error::{Error, ErrorKind, Result};
+pub use error::{Error, Result};
 pub use gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 pub use token_formatter_builder::TokenFormatterBuilder;
 pub use token_matcher::TokenMatcher;

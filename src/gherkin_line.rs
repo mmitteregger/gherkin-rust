@@ -1,7 +1,7 @@
 use constant;
 use gherkin_line_span::GherkinLineSpan;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GherkinLine {
     line_text: String,
     trimmed_line_text: String,

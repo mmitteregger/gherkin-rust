@@ -1,6 +1,6 @@
 use ast::Location;
 use ast_builder::AstBuilder;
-use error::{Error, ErrorKind};
+use error::Error;
 use event::*;
 use gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 use parser::Parser;
@@ -73,8 +73,8 @@ impl GherkinEvents {
     fn add_error_attachment(&self, cucumber_events: &mut Vec<Box<CucumberEvent>>, error: &Error,
             uri: &str) {
 
-        match error.kind() {
-            ErrorKind::Composite(composite_errors) => {
+        match error {
+            Error::Composite(composite_errors) => {
                 for wrapped_error in composite_errors {
                     self.add_error_attachment(cucumber_events, &wrapped_error, uri);
                 }

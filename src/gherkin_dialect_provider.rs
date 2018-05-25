@@ -1,5 +1,5 @@
 use ast::Location;
-use error::{ErrorKind, Result};
+use error::{Result, Error};
 use gherkin_dialect::GherkinDialect;
 use parser::GherkinDialectProvide;
 use serde_json;
@@ -49,10 +49,11 @@ impl BuiltInGherkinDialectProvider {
 
 impl GherkinDialectProvide for BuiltInGherkinDialectProvider {
     fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>> {
-        self.get_dialect(&self.default_dialect_name, None)
+        let location = Location::new(0, 0);
+        self.get_dialect(&self.default_dialect_name, location)
     }
 
-    fn get_dialect(&self, language: &str, location: Option<Location>)
+    fn get_dialect(&self, language: &str, location: Location)
             -> Result<Arc<GherkinDialect>> {
         let dialect = DIALECTS.get(language);
         let language = language.to_owned();
@@ -60,10 +61,10 @@ impl GherkinDialectProvide for BuiltInGherkinDialectProvider {
         match dialect {
             Some(dialect) => Ok(dialect.clone()),
             None => {
-                Err(ErrorKind::NoSuchLanguage {
+                Err(Error::NoSuchLanguage {
                     location,
                     language,
-                }.into())
+                })
             },
         }
     }
@@ -90,7 +91,8 @@ mod tests {
 
     fn get_dialect(language: &str) -> Arc<GherkinDialect> {
         let dialect_provider = BuiltInGherkinDialectProvider::default();
-        let dialect = dialect_provider.get_dialect(language, &None).unwrap();
+        let location = Location::new(0, 0);
+        let dialect = dialect_provider.get_dialect(language, location).unwrap();
         dialect
     }
 }

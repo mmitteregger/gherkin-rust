@@ -5,7 +5,7 @@ use gherkin_line_span::GherkinLineSpan;
 use gherkin_dialect::GherkinDialect;
 use parser::TokenType;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub line: Option<GherkinLine>,
     pub matched_type: Option<TokenType>,

@@ -50,10 +50,6 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         }
     }
 
-    pub fn get_current_dialect(&self) -> &Arc<GherkinDialect> {
-        &self.current_dialect
-    }
-
     fn set_token_matched(&self, token: &mut Token, matched_type: TokenType, text: Option<String>,
             keyword: Option<String>, indent: Option<usize>, items: Vec<GherkinLineSpan>) {
 
@@ -61,7 +57,7 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         token.matched_keyword = keyword;
         token.matched_text = text;
         token.matched_items = items;
-        token.matched_gherkin_dialect = Some(self.get_current_dialect().clone());
+        token.matched_gherkin_dialect = Some(self.current_dialect.clone());
         token.matched_indent = indent.or_else(|| match token.line {
             Some(ref line) => Some(line.indent()),
             None => Some(0),
@@ -239,8 +235,11 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
         };
 
         if let Some(language) = language {
-            self.current_dialect = self.dialect_provider.get_dialect(&language, token.location)?;
             self.set_token_matched(token, TokenType::Language, Some(language), None, None, Vec::new());
+
+            let location = token.location.expect("token location");
+            let dialect_language = token.matched_text.as_ref().unwrap();
+            self.current_dialect = self.dialect_provider.get_dialect(dialect_language, location)?;
             return Ok(true);
         }
 

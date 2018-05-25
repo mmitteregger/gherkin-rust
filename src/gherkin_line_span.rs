@@ -1,4 +1,4 @@
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub struct GherkinLineSpan {
     column: usize,
     text: String,

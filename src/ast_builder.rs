@@ -6,7 +6,7 @@ use std::default::Default;
 
 use ast::*;
 use ast_node::AstNode;
-use error::{Result, ErrorKind};
+use error::{Result, Error};
 use parser::{self, Builder, RuleType, TokenType};
 use token::Token;
 
@@ -56,9 +56,9 @@ impl parser::Builder for AstBuilder {
         Ok(())
     }
 
-    fn end_rule(&mut self, rule_type: RuleType) -> Result<()> {
+    fn end_rule(&mut self, _rule_type: RuleType) -> Result<()> {
         let node = self.stack.pop().unwrap();
-        debug_assert_eq!(rule_type, node.rule_type);
+        let rule_type = node.rule_type;
 
         let transformed_node = self.get_transformed_node(node)?;
         self.current_node().add(rule_type, transformed_node);
@@ -244,20 +244,6 @@ impl AstBuilder {
                     .join("\n");
 
                 Ok(Box::new(description))
-//                List<Token> lineTokens = node.getTokens(TokenType.Other);
-//                // Trim trailing empty lines
-//                int end = lineTokens.size();
-//                while (end > 0 && lineTokens.get(end - 1).matchedText.matches("\\s*")) {
-//                    end--;
-//                }
-//                lineTokens = lineTokens.subList(0, end);
-//
-//                return join(new StringUtils.ToString<Token>() {
-//                    @Override
-//                    public String toString(Token t) {
-//                        return t.matchedText;
-//                    }
-//                }, "\n", lineTokens);
             },
             RuleType::Feature => {
                 let mut feature_header = node.remove(RuleType::FeatureHeader);
@@ -321,10 +307,10 @@ impl AstBuilder {
 
         for row in rows {
             if row.get_cells().len() != cell_count {
-                return Err(ErrorKind::AstBuilder {
-                    location: Some(row.get_location()),
+                return Err(Error::AstBuilder {
+                    location: row.get_location(),
                     message: "inconsistent cell count within the table".to_owned(),
-                }.into());
+                });
             }
         }
 

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct GherkinDialect {
     #[serde(skip)]
     pub(crate) language: String,
