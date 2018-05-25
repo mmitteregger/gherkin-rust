@@ -34,9 +34,12 @@ impl<R: Read> TokenScan for TokenScanner<R> {
 
         let is_eof = line.is_empty();
 
-        // rusts BufReader::read_line function includes the newline delimiter,
-        // so it has to be removed
+        // rusts BufReader::read_line function includes the line delimiters,
+        // so they have to be removed
         if line.ends_with('\n') {
+            line.pop();
+        }
+        if line.ends_with('\r') {
             line.pop();
         }
 
