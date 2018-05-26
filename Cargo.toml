@@ -9,8 +9,8 @@ Please see [Gherkin](https://github.com/cucumber/gherkin) for details.
 homepage = "https://github.com/cucumber/cucumber/tree/master/gherkin"
 repository = "https://github.com/cucumber/cucumber/tree/master/gherkin/rust"
 readme = "README.md"
-keywords = ["cucumger", "bdd", "testing"]
-categories = ["development-tools", "command-line-utilities", "text-processing"]
+keywords = ["cucumber", "bdd", "testing"]
+categories = ["parser-implementations", "development-tools::testing"]
 license = "MIT"
 
 [lib]
