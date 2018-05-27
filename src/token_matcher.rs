@@ -7,7 +7,7 @@ use ast::*;
 use constant;
 use error::Result;
 use gherkin_dialect::GherkinDialect;
-use gherkin_dialect_provider::BuiltInGherkinDialectProvider as DialectProvider;
+use gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 use gherkin_line_span::GherkinLineSpan;
 use parser::GherkinDialectProvide;
 use parser::{TokenMatch, TokenType};
@@ -25,15 +25,18 @@ pub struct TokenMatcher<DP: GherkinDialectProvide> {
     indent_to_remove: usize,
 }
 
-impl Default for TokenMatcher<DialectProvider> {
-    fn default() -> TokenMatcher<DialectProvider> {
-        TokenMatcher::with_dialect_provider(DialectProvider::default())
+impl Default for TokenMatcher<BuiltInGherkinDialectProvider> {
+    fn default() -> TokenMatcher<BuiltInGherkinDialectProvider> {
+        TokenMatcher::with_dialect_provider(BuiltInGherkinDialectProvider::default())
     }
 }
 
-impl TokenMatcher<DialectProvider> {
-    pub fn with_default_dialect_name<S: Into<String>>(default: S) -> TokenMatcher<DialectProvider> {
-        let dialect_provider = DialectProvider::with_default_dialect_name(default);
+impl TokenMatcher<BuiltInGherkinDialectProvider> {
+    pub fn with_default_dialect_name<S>(default: S) -> TokenMatcher<BuiltInGherkinDialectProvider>
+    where
+        S: Into<String>,
+    {
+        let dialect_provider = BuiltInGherkinDialectProvider::with_default_dialect_name(default);
         TokenMatcher::with_dialect_provider(dialect_provider)
     }
 }

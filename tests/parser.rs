@@ -2,7 +2,7 @@ extern crate gherkin;
 extern crate serde_json;
 
 use gherkin::pickle::Compiler;
-use gherkin::{Parser, TokenMatcher};
+use gherkin::{Parser, ParserOptions};
 
 #[test]
 fn parse_feature_after_parse_error() {
@@ -22,16 +22,13 @@ Feature: Foo
       closed docstring
       """
 "###;
-    let mut matcher = TokenMatcher::default();
     let mut parser = Parser::default();
 
-    if let Ok(_) = parser.parse_str_with_matcher(source1, &mut matcher) {
+    if let Ok(_) = parser.parse_str(source1) {
         panic!("Error expected");
     }
 
-    let gherkin_document = parser
-        .parse_str_with_matcher(source2, &mut matcher)
-        .unwrap();
+    let gherkin_document = parser.parse_str(source2).unwrap();
     let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document).unwrap();
 
     assert_eq!(
@@ -88,10 +85,9 @@ Feature: Foo
 #[test]
 fn change_default_language() {
     let source = "Egenskap: i18n support\n";
-    let mut matcher = TokenMatcher::with_default_dialect_name("no");
-    let mut parser = Parser::default();
+    let mut parser = ParserOptions::new().language("no").create();
 
-    let gherkin_document = parser.parse_str_with_matcher(source, &mut matcher).unwrap();
+    let gherkin_document = parser.parse_str(source).unwrap();
     let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document).unwrap();
 
     assert_eq!(
@@ -125,10 +121,9 @@ Feature: Foo
       {}
       """
 "###;
-    let mut matcher = TokenMatcher::default();
     let mut parser = Parser::default();
 
-    let gherkin_document = parser.parse_str_with_matcher(source, &mut matcher).unwrap();
+    let gherkin_document = parser.parse_str(source).unwrap();
     let gherkin_document_json = serde_json::to_string_pretty(&gherkin_document).unwrap();
 
     assert_eq!(

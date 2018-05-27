@@ -43,18 +43,6 @@ impl Examples {
         &self.tags
     }
 
-    pub fn get_keyword(&self) -> &String {
-        &self.keyword
-    }
-
-    pub fn get_name(&self) -> &String {
-        &self.name
-    }
-
-    pub fn get_description(&self) -> Option<&String> {
-        self.description.as_ref()
-    }
-
     pub fn get_table_header(&self) -> Option<&TableRow> {
         self.table_header.as_ref()
     }

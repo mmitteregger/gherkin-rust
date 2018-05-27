@@ -28,6 +28,15 @@ impl<R: Read> From<R> for TokenScanner<R> {
     }
 }
 
+impl<'a> From<&'a str> for TokenScanner<&'a [u8]> {
+    fn from(source: &'a str) -> TokenScanner<&'a [u8]> {
+        TokenScanner {
+            reader: BufReader::new(source.as_bytes()),
+            line_number: 0,
+        }
+    }
+}
+
 impl<R: Read> TokenScan for TokenScanner<R> {
     fn next(&mut self) -> Result<Token> {
         let mut line = String::new();

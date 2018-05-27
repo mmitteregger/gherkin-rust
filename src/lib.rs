@@ -15,16 +15,13 @@ extern crate downcast_rs as downcast;
 
 pub use ast_builder::AstBuilder;
 pub use error::{Error, Result};
-pub use gherkin_dialect_provider::BuiltInGherkinDialectProvider;
-pub use parser::{GherkinDialectProvide, Parser, TokenMatch, TokenScan};
+pub use parser::{GherkinDialectProvide, Parser, ParserOptions};
 pub use token_formatter_builder::TokenFormatterBuilder;
-pub use token_matcher::TokenMatcher;
-pub use token_scanner::TokenScanner;
 
-pub mod ast;
+mod ast;
 mod ast_builder;
 mod ast_node;
-pub mod constant;
+mod constant;
 mod error;
 pub mod event;
 mod gherkin_dialect;

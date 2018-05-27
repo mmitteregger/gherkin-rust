@@ -11,8 +11,7 @@ fn main() -> Result<()> {
     let stdout = io::stdout();
     let mut stdout_handle = stdout.lock();
 
-    let token_formatter_builder = TokenFormatterBuilder::default();
-    let mut parser = Parser::with_builder(token_formatter_builder);
+    let mut parser = Parser::with_builder(TokenFormatterBuilder::default());
 
     for file_name in env::args().skip(1) {
         let file = File::open(&file_name)?;

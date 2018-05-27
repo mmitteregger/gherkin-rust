@@ -413,19 +413,14 @@ impl AstBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use {Parser, TokenMatcher};
+    use ParserOptions;
 
     #[test]
     fn is_reusable() {
-        let mut matcher = TokenMatcher::default();
-        let mut parser = Parser::with_builder(AstBuilder::default());
+        let mut parser = ParserOptions::with_builder(AstBuilder::default()).create();
 
-        let document_1 = parser
-            .parse_str_with_matcher("Feature: 1", &mut matcher)
-            .unwrap();
-        let document_2 = parser
-            .parse_str_with_matcher("Feature: 2", &mut matcher)
-            .unwrap();
+        let document_1 = parser.parse_str("Feature: 1").unwrap();
+        let document_2 = parser.parse_str("Feature: 2").unwrap();
 
         assert_eq!(document_1.get_feature().unwrap().get_name(), "1");
         assert_eq!(document_2.get_feature().unwrap().get_name(), "2");

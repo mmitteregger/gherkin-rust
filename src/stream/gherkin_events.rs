@@ -2,14 +2,11 @@ use ast::Location;
 use ast_builder::AstBuilder;
 use error::Error;
 use event::*;
-use gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 use parser::Parser;
 use pickle::Compiler;
-use token_matcher::TokenMatcher;
 
 pub struct GherkinEvents {
     parser: Parser<AstBuilder>,
-    token_matcher: TokenMatcher<BuiltInGherkinDialectProvider>,
     compiler: Compiler,
 
     print_source: bool,
@@ -21,7 +18,6 @@ impl GherkinEvents {
     pub fn new(print_source: bool, print_ast: bool, print_pickles: bool) -> GherkinEvents {
         GherkinEvents {
             parser: Parser::default(),
-            token_matcher: TokenMatcher::default(),
             compiler: Compiler::default(),
             print_source,
             print_ast,
@@ -33,10 +29,7 @@ impl GherkinEvents {
         let mut cucumber_events: Vec<Box<CucumberEvent>> = Vec::new();
 
         let uri = source_event.get_uri().to_owned();
-        let gherkin_document = match self
-            .parser
-            .parse_str_with_matcher(source_event.get_data(), &mut self.token_matcher)
-        {
+        let gherkin_document = match self.parser.parse_str(source_event.get_data()) {
             Ok(gherkin_document) => gherkin_document,
             Err(error) => {
                 self.add_error_attachment(&mut cucumber_events, &error, &uri);
