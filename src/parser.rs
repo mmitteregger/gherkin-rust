@@ -127,13 +127,19 @@ pub struct ParserOptions<B: Builder> {
     stop_at_first_error: Option<bool>,
 }
 
-impl ParserOptions<AstBuilder> {
-    pub fn new() -> ParserOptions<AstBuilder> {
+impl Default for ParserOptions<AstBuilder> {
+    fn default() -> ParserOptions<AstBuilder> {
         ParserOptions {
             builder: AstBuilder::default(),
             token_match: None,
             stop_at_first_error: None,
         }
+    }
+}
+
+impl ParserOptions<AstBuilder> {
+    pub fn new() -> ParserOptions<AstBuilder> {
+        ParserOptions::default()
     }
 }
 

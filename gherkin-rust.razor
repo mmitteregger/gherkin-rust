@@ -162,13 +162,19 @@ pub struct @(Model.ParserClassName)Options<B: Builder> {
     stop_at_first_error: Option<bool>,
 }
 
-impl @(Model.ParserClassName)Options<AstBuilder> {
-    pub fn new() -> ParserOptions<AstBuilder> {
-        ParserOptions {
+impl Default for @(Model.ParserClassName)Options<AstBuilder> {
+    fn default() -> @(Model.ParserClassName)Options<AstBuilder> {
+        @(Model.ParserClassName)Options {
             builder: AstBuilder::default(),
             token_match: None,
             stop_at_first_error: None,
         }
+    }
+}
+
+impl @(Model.ParserClassName)Options<AstBuilder> {
+    pub fn new() -> ParserOptions<AstBuilder> {
+        @(Model.ParserClassName)Options::default()
     }
 }
 
