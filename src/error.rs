@@ -13,7 +13,7 @@ pub type Result<T> = result::Result<T, Error>;
 /// The specific type of an error.
 #[derive(Fail, Debug)]
 pub enum Error {
-    /// An I/O error that occurred while reading CSV data.
+    /// An I/O error that occurred while reading a feature file.
     Io(#[cause] io::Error),
     SerdeJson(#[cause] serde_json::Error),
     AstBuilder {

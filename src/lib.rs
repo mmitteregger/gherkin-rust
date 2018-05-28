@@ -18,7 +18,7 @@ pub use error::{Error, Result};
 pub use parser::{GherkinDialectProvide, Parser, ParserOptions};
 pub use token_formatter_builder::TokenFormatterBuilder;
 
-mod ast;
+pub mod ast;
 mod ast_builder;
 mod ast_node;
 mod constant;
