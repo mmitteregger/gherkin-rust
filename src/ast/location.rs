@@ -3,20 +3,20 @@ use std::fmt;
 #[derive(Serialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Location {
-    line: usize,
-    column: usize,
+    line: u32,
+    column: u32,
 }
 
 impl Location {
-    pub fn new(line: usize, column: usize) -> Location {
+    pub fn new(line: u32, column: u32) -> Location {
         Location { line, column }
     }
 
-    pub fn get_line(&self) -> usize {
+    pub fn get_line(&self) -> u32 {
         self.line
     }
 
-    pub fn get_column(&self) -> usize {
+    pub fn get_column(&self) -> u32 {
         self.column
     }
 }

@@ -17,8 +17,8 @@ impl GherkinLine {
         }
     }
 
-    pub fn indent(&self) -> usize {
-        self.line_text.chars().count() - self.trimmed_line_text.chars().count()
+    pub fn indent(&self) -> u32 {
+        self.line_text.chars().count() as u32 - self.trimmed_line_text.chars().count() as u32
     }
 
     pub fn detach(&self) {}
@@ -54,8 +54,8 @@ impl GherkinLine {
     pub fn get_tags(&self) -> Vec<GherkinLineSpan> {
         let mut line_spans: Vec<GherkinLineSpan> = Vec::new();
 
-        let mut spans: Vec<(usize, String)> = Vec::new();
-        let mut preceding_whitespace_count: usize = 0;
+        let mut spans: Vec<(u32, String)> = Vec::new();
+        let mut preceding_whitespace_count = 0;
         let mut span = String::new();
 
         for c in self.trimmed_line_text.chars() {
@@ -79,7 +79,7 @@ impl GherkinLine {
         let mut column = self.indent() + 1;
         for (preceding_whitespace_count, text) in spans {
             column += preceding_whitespace_count;
-            let text_chars_count = text.chars().count();
+            let text_chars_count = text.chars().count() as u32;
             let span = GherkinLineSpan::new(column, text);
             line_spans.push(span);
             column += text_chars_count;
@@ -107,7 +107,7 @@ impl GherkinLine {
         let mut line_spans: Vec<GherkinLineSpan> = Vec::new();
         let mut cell = String::new();
         let mut before_first = true;
-        let mut start_col: usize = 0;
+        let mut start_col = 0;
         let mut after_backslash = false;
 
         for (col, c) in self.trimmed_line_text.chars().enumerate() {
@@ -127,19 +127,18 @@ impl GherkinLine {
                     // Skip the first empty span
                     before_first = false;
                 } else {
-                    let mut content_start = cell
-                        .chars()
+                    let mut content_start = cell.chars()
                         .enumerate()
                         .skip_while(|(_index, cell_char)| cell_char.is_whitespace())
                         .map(|(index, _cell_char)| index)
                         .next()
-                        .unwrap_or(0);
+                        .unwrap_or(0) as u32;
 
                     let column = self.indent() + start_col + content_start + 2;
                     let text = cell.trim().to_owned();
                     line_spans.push(GherkinLineSpan::new(column, text));
 
-                    start_col = col;
+                    start_col = col as u32;
                 }
                 cell.clear();
             } else if c == '\\' {

@@ -184,8 +184,7 @@ impl<B: Builder> ParserOptions<B> {
     pub fn create(self) -> Parser<B> {
         Parser {
             builder: self.builder,
-            token_match: self
-                .token_match
+            token_match: self.token_match
                 .unwrap_or_else(|| Box::new(TokenMatcher::default())),
             stop_at_first_error: self.stop_at_first_error.unwrap_or(false),
         }

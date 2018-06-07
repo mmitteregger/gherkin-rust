@@ -217,8 +217,7 @@ impl Compiler {
                 .get_rows()
                 .iter()
                 .map(|row: &TableRow| {
-                    let cells = row
-                        .get_cells()
+                    let cells = row.get_cells()
                         .iter()
                         .map(|cell: &TableCell| {
                             let location = self.pickle_location(cell.get_location());
@@ -293,7 +292,7 @@ impl Compiler {
         let keyword_column = if step.get_keyword().is_empty() {
             0
         } else {
-            step.get_keyword().chars().count()
+            step.get_keyword().chars().count() as u32
         };
         let step_location = step.get_location();
         let line = step_location.get_line();

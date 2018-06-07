@@ -13,7 +13,7 @@ pub struct Token {
     pub matched_keyword: Option<String>,
     pub matched_text: Option<String>,
     pub matched_items: Vec<GherkinLineSpan>,
-    pub matched_indent: Option<usize>,
+    pub matched_indent: Option<u32>,
     pub matched_gherkin_dialect: Option<Arc<GherkinDialect>>,
     pub location: Option<Location>,
 }

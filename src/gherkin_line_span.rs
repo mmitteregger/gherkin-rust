@@ -1,16 +1,16 @@
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub struct GherkinLineSpan {
-    column: usize,
+    column: u32,
     text: String,
 }
 
 impl GherkinLineSpan {
-    pub fn new(column: usize, text: String) -> GherkinLineSpan {
+    pub fn new(column: u32, text: String) -> GherkinLineSpan {
         GherkinLineSpan { column, text }
     }
 
     /// One-based line position.
-    pub fn get_column(&self) -> usize {
+    pub fn get_column(&self) -> u32 {
         self.column
     }
 

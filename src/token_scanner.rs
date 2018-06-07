@@ -1,5 +1,5 @@
-use std::io::prelude::*;
 use std::io::BufReader;
+use std::io::prelude::*;
 
 use ast::Location;
 use error::Result;
@@ -16,7 +16,7 @@ use token::Token;
 /// The keywords are defined in gherkin-languages.json.
 pub struct TokenScanner<R> {
     reader: BufReader<R>,
-    line_number: usize,
+    line_number: u32,
 }
 
 impl<R: Read> From<R> for TokenScanner<R> {

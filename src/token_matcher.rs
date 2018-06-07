@@ -22,7 +22,7 @@ pub struct TokenMatcher<DP: GherkinDialectProvide> {
     dialect_provider: DP,
     current_dialect: Arc<GherkinDialect>,
     active_doc_string_separator: Option<String>,
-    indent_to_remove: usize,
+    indent_to_remove: u32,
 }
 
 impl Default for TokenMatcher<BuiltInGherkinDialectProvider> {
@@ -61,7 +61,7 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         matched_type: TokenType,
         text: Option<String>,
         keyword: Option<String>,
-        indent: Option<usize>,
+        indent: Option<u32>,
         items: Vec<GherkinLineSpan>,
     ) {
         token.matched_type = Some(matched_type);
@@ -305,8 +305,7 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
 
             let location = token.location.expect("token location");
             let dialect_language = token.matched_text.as_ref().unwrap();
-            self.current_dialect = self
-                .dialect_provider
+            self.current_dialect = self.dialect_provider
                 .get_dialect(dialect_language, location)?;
             return Ok(true);
         }
@@ -335,8 +334,7 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
     fn reset(&mut self) {
         self.active_doc_string_separator = None;
         self.indent_to_remove = 0;
-        self.current_dialect = self
-            .dialect_provider
+        self.current_dialect = self.dialect_provider
             .get_default_dialect()
             .expect("get default dialect");
     }

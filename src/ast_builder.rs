@@ -85,7 +85,7 @@ impl AstBuilder {
             .expect("current node on AstBuilder stack")
     }
 
-    fn get_location(&self, token: &Token, column: usize) -> Location {
+    fn get_location(&self, token: &Token, column: u32) -> Location {
         let token_location = token.location.expect("token location");
 
         if column == 0 {
@@ -132,8 +132,7 @@ impl AstBuilder {
                 } else {
                     None
                 };
-                let content = node
-                    .remove_tokens(TokenType::Other)
+                let content = node.remove_tokens(TokenType::Other)
                     .into_iter()
                     .map(|line_token| {
                         line_token
@@ -296,9 +295,9 @@ impl AstBuilder {
                     scenario_definitions.push(Box::new(background));
                 }
 
-                scenario_definitions.extend(
-                    node.remove_items::<Box<ScenarioDefinition>>(RuleType::ScenarioDefinition),
-                );
+                scenario_definitions.extend(node.remove_items::<Box<ScenarioDefinition>>(
+                    RuleType::ScenarioDefinition,
+                ));
 
                 let location = self.get_location(&feature_line, 0);
                 let language = feature_line
@@ -334,8 +333,7 @@ impl AstBuilder {
     }
 
     fn get_table_rows(&self, mut node: AstNode) -> Result<Vec<TableRow>> {
-        let rows: Vec<TableRow> = node
-            .remove_tokens(TokenType::TableRow)
+        let rows: Vec<TableRow> = node.remove_tokens(TokenType::TableRow)
             .into_iter()
             .map(|token| {
                 let token = token.borrow();
