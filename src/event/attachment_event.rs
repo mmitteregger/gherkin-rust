@@ -7,8 +7,8 @@ use event::*;
 pub struct AttachmentEvent {
     #[serde(rename = "type")]
     event_type: &'static str,
-    source: SourceRef,
-    data: String,
+    pub source: SourceRef,
+    pub data: String,
     media: Media,
 }
 
@@ -28,8 +28,8 @@ impl CucumberEvent for AttachmentEvent {}
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SourceRef {
-    uri: String,
-    start: Location,
+    pub uri: String,
+    pub start: Location,
 }
 
 impl SourceRef {
@@ -41,8 +41,8 @@ impl SourceRef {
 #[derive(Serialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Location {
-    line: u32,
-    column: u32,
+    pub line: u32,
+    pub column: u32,
 }
 
 impl Location {

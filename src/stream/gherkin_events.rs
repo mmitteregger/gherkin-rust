@@ -28,8 +28,8 @@ impl GherkinEvents {
     pub fn iter_source_event(&mut self, source_event: SourceEvent) -> GherkinEventsIter {
         let mut cucumber_events: Vec<Box<CucumberEvent>> = Vec::new();
 
-        let uri = source_event.get_uri().to_owned();
-        let gherkin_document = match self.parser.parse_str(source_event.get_data()) {
+        let uri = &source_event.uri.to_owned();
+        let gherkin_document = match self.parser.parse_str(&source_event.data) {
             Ok(gherkin_document) => gherkin_document,
             Err(error) => {
                 self.add_error_attachment(&mut cucumber_events, &error, &uri);

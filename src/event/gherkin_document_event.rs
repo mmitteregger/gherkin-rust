@@ -6,8 +6,8 @@ use event::*;
 pub struct GherkinDocumentEvent {
     #[serde(rename = "type")]
     event_type: &'static str,
-    uri: String,
-    document: GherkinDocument,
+    pub uri: String,
+    pub document: GherkinDocument,
 }
 
 impl GherkinDocumentEvent {

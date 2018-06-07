@@ -7,8 +7,8 @@ use event::*;
 pub struct SourceEvent {
     #[serde(rename = "type")]
     event_type: &'static str,
-    uri: String,
-    data: String,
+    pub uri: String,
+    pub data: String,
     media: Media,
 }
 
@@ -20,14 +20,6 @@ impl SourceEvent {
             data,
             media: Media::default(),
         }
-    }
-
-    pub fn get_uri(&self) -> &String {
-        &self.uri
-    }
-
-    pub fn get_data(&self) -> &String {
-        &self.data
     }
 }
 

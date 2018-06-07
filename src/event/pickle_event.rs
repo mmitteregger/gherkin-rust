@@ -6,8 +6,8 @@ use pickle::Pickle;
 pub struct PickleEvent {
     #[serde(rename = "type")]
     event_type: &'static str,
-    uri: String,
-    pickle: Pickle,
+    pub uri: String,
+    pub pickle: Pickle,
 }
 
 impl PickleEvent {
