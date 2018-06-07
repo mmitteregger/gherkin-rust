@@ -33,3 +33,17 @@ impl Node for GherkinDocument {
         Location::new(0, 0)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn assert_sync<T: Sync>() {}
+    fn assert_send<T: Send>() {}
+
+    #[test]
+    fn test_send_sync() {
+        assert_send::<GherkinDocument>();
+        assert_sync::<GherkinDocument>();
+    }
+}

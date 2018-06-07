@@ -35,7 +35,7 @@ mod table_cell;
 mod table_row;
 mod tag;
 
-pub trait Node: Serialize + Downcast + Debug {
+pub trait Node: Serialize + Downcast + Debug + Send + Sync {
     fn get_location(&self) -> Location;
 }
 
