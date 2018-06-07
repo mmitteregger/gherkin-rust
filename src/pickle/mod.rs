@@ -20,7 +20,7 @@ mod string;
 mod table;
 mod tag;
 
-pub trait Argument: Serialize + Debug + CloneArgument {
+pub trait Argument: Serialize + Debug + CloneArgument + Send + Sync {
     fn get_location(&self) -> &PickleLocation;
 }
 
@@ -90,5 +90,19 @@ impl Pickle {
 
     pub fn get_tags(&self) -> &Vec<PickleTag> {
         &self.tags
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn assert_sync<T: Sync>() {}
+    fn assert_send<T: Send>() {}
+
+    #[test]
+    fn test_send_sync() {
+        assert_send::<Pickle>();
+        assert_sync::<Pickle>();
     }
 }
