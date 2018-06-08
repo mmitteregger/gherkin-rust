@@ -5,7 +5,7 @@ env:
     - RUST_BACKTRACE: full
 rust:
   # Minimum Rust supported channel to make sure the project continues to work on the advertised minimum version.
-  - 1.26.0
+  - 1.26.2
   - beta
   - nightly
 matrix:
