@@ -1,7 +1,6 @@
-use std::default::Default;
-
 use ast::*;
 use pickle::*;
+use std::default::Default;
 
 pub struct Compiler;
 
@@ -65,7 +64,7 @@ impl Compiler {
         let steps = self.compile_scenario_steps(background_steps, scenario);
         let tags = self.compile_scenario_tags(feature_tags, scenario);
         let locations = vec![self.pickle_location(scenario.get_location())];
-        let pickle = Pickle::new(name, language, steps, tags, locations);
+        let pickle = Pickle { name, language, steps, tags, locations };
 
         pickles.push(pickle);
     }
@@ -136,7 +135,7 @@ impl Compiler {
                     self.pickle_location(values.get_location()),
                     self.pickle_location(scenario_outline.get_location()),
                 ];
-                let pickle = Pickle::new(name, language, steps, tags, locations);
+                let pickle = Pickle { name, language, steps, tags, locations };
 
                 pickles.push(pickle);
             }
@@ -160,7 +159,7 @@ impl Compiler {
         }
 
         for scenario_outline_step in scenario_outline.get_steps() {
-            let step_text = self.interpolate(
+            let text = self.interpolate(
                 scenario_outline_step.get_text(),
                 variable_cells,
                 value_cells,
@@ -175,7 +174,7 @@ impl Compiler {
                 self.pickle_step_location(scenario_outline_step),
             ];
 
-            let pickle_step = PickleStep::new(step_text, arguments, locations);
+            let pickle_step = PickleStep { text, arguments, locations };
             steps.push(pickle_step);
         }
 
@@ -224,14 +223,14 @@ impl Compiler {
                             let value =
                                 self.interpolate(cell.get_value(), variable_cells, value_cells);
 
-                            PickleCell::new(location, value)
+                            PickleCell { location, value }
                         })
                         .collect::<Vec<PickleCell>>();
 
-                    PickleRow::new(cells)
+                    PickleRow { cells }
                 })
                 .collect::<Vec<PickleRow>>();
-            let pickle_table = PickleTable::new(rows);
+            let pickle_table = PickleTable { rows };
 
             vec![Box::new(pickle_table)]
         } else if let Some(doc_string) = argument.downcast_ref::<DocString>() {
@@ -243,7 +242,7 @@ impl Compiler {
                 }
                 None => None,
             };
-            let pickle_string = PickleString::new(location, content, content_type);
+            let pickle_string = PickleString { location, content, content_type };
 
             vec![Box::new(pickle_string)]
         } else {
@@ -267,7 +266,7 @@ impl Compiler {
         let arguments = self.create_pickle_arguments(step.get_argument(), &Vec::new(), &Vec::new());
         let locations = vec![self.pickle_step_location(step)];
 
-        PickleStep::new(text, arguments, locations)
+        PickleStep { text, arguments, locations }
     }
 
     fn interpolate(
@@ -297,11 +296,14 @@ impl Compiler {
         let step_location = step.get_location();
         let line = step_location.get_line();
         let column = step_location.get_column() + keyword_column;
-        PickleLocation::new(line, column)
+        PickleLocation { line, column }
     }
 
     fn pickle_location(&mut self, location: Location) -> PickleLocation {
-        PickleLocation::new(location.get_line(), location.get_column())
+        PickleLocation {
+            line: location.get_line(),
+            column: location.get_column(),
+        }
     }
 
     fn pickle_tags(&mut self, tags: Vec<Tag>) -> Vec<PickleTag> {
@@ -309,6 +311,9 @@ impl Compiler {
     }
 
     fn pickle_tag(&mut self, tag: Tag) -> PickleTag {
-        PickleTag::new(self.pickle_location(tag.get_location()), tag.take_name())
+        PickleTag {
+            location: self.pickle_location(tag.get_location()),
+            name: tag.take_name(),
+        }
     }
 }
