@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use downcast::Downcast;
 use erased_serde::Serialize;
 
 pub use self::cell::*;
@@ -20,11 +21,12 @@ mod string;
 mod table;
 mod tag;
 
-pub trait Argument: Serialize + Debug + CloneArgument + Send + Sync {
+pub trait Argument: Serialize + Downcast + Debug + CloneArgument + Send + Sync {
     fn get_location(&self) -> &PickleLocation;
 }
 
 serialize_trait_object!(Argument);
+impl_downcast!(Argument);
 
 pub trait CloneArgument {
     fn clone_argument(&self) -> Box<Argument>;
