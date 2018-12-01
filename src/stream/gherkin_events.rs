@@ -26,7 +26,7 @@ impl GherkinEvents {
     }
 
     pub fn iter_source_event(&mut self, source_event: SourceEvent) -> GherkinEventsIter {
-        let mut cucumber_events: Vec<Box<CucumberEvent>> = Vec::new();
+        let mut cucumber_events: Vec<CucumberEvent> = Vec::new();
 
         let uri = &source_event.uri.to_owned();
         let gherkin_document = match self.parser.parse_str(&source_event.data) {
@@ -40,7 +40,7 @@ impl GherkinEvents {
         };
 
         if self.print_source {
-            cucumber_events.push(Box::new(source_event));
+            cucumber_events.push(CucumberEvent::from(source_event));
         }
 
         let pickles = if self.print_pickles {
@@ -51,12 +51,12 @@ impl GherkinEvents {
 
         if self.print_ast {
             let uri = uri.clone();
-            cucumber_events.push(Box::new(GherkinDocumentEvent::new(uri, gherkin_document)));
+            cucumber_events.push(CucumberEvent::from(GherkinDocumentEvent::new(uri, gherkin_document)));
         }
 
         for pickle in pickles {
             let uri = uri.clone();
-            cucumber_events.push(Box::new(PickleEvent::new(uri, pickle)));
+            cucumber_events.push(CucumberEvent::from(PickleEvent::new(uri, pickle)));
         }
 
         GherkinEventsIter {
@@ -66,7 +66,7 @@ impl GherkinEvents {
 
     fn add_error_attachment(
         &self,
-        cucumber_events: &mut Vec<Box<CucumberEvent>>,
+        cucumber_events: &mut Vec<CucumberEvent>,
         error: &Error,
         uri: &str,
     ) {
@@ -86,20 +86,20 @@ impl GherkinEvents {
                 );
                 let source_ref = attachment_event::SourceRef::new(uri.to_owned(), event_location);
                 let attachment_event = AttachmentEvent::new(source_ref, error.to_string());
-                cucumber_events.push(Box::new(attachment_event));
+                cucumber_events.push(CucumberEvent::from(attachment_event));
             }
         }
     }
 }
 
 pub struct GherkinEventsIter {
-    cucumber_events_iter: ::std::vec::IntoIter<Box<CucumberEvent>>,
+    cucumber_events_iter: ::std::vec::IntoIter<CucumberEvent>,
 }
 
 impl Iterator for GherkinEventsIter {
-    type Item = Box<CucumberEvent>;
+    type Item = CucumberEvent;
 
-    fn next(&mut self) -> Option<Box<CucumberEvent>> {
+    fn next(&mut self) -> Option<CucumberEvent> {
         self.cucumber_events_iter.next()
     }
 }

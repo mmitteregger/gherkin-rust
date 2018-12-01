@@ -1,4 +1,3 @@
-use event::*;
 use pickle::Pickle;
 
 #[derive(Serialize, Debug)]
@@ -19,5 +18,3 @@ impl PickleEvent {
         }
     }
 }
-
-impl CucumberEvent for PickleEvent {}

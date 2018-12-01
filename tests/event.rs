@@ -1,6 +1,6 @@
 extern crate gherkin;
 
-use gherkin::event::{self, GherkinDocumentEvent, PickleEvent, SourceEvent};
+use gherkin::event::{self, CucumberEvent};
 
 #[test]
 fn generates_events_for_english_by_default() {
@@ -9,9 +9,9 @@ fn generates_events_for_english_by_default() {
 
     let events = event::generate(data, uri).unwrap();
 
-    assert!(events[0].downcast_ref::<SourceEvent>().is_some());
-    assert!(events[1].downcast_ref::<GherkinDocumentEvent>().is_some());
-    assert!(events[2].downcast_ref::<PickleEvent>().is_some());
+    assert!(match events[0] { CucumberEvent::Source(..) => true, _ => false});
+    assert!(match events[1] { CucumberEvent::GherkinDocument(..) => true, _ => false});
+    assert!(match events[2] { CucumberEvent::Pickle(..) => true, _ => false});
 }
 
 #[test]
@@ -21,7 +21,7 @@ fn generates_events_for_specific_language() {
 
     let events = event::generate_with_language(data, uri, "fr").unwrap();
 
-    assert!(events[0].downcast_ref::<SourceEvent>().is_some());
-    assert!(events[1].downcast_ref::<GherkinDocumentEvent>().is_some());
-    assert!(events[2].downcast_ref::<PickleEvent>().is_some());
+    assert!(match events[0] { CucumberEvent::Source(..) => true, _ => false});
+    assert!(match events[1] { CucumberEvent::GherkinDocument(..) => true, _ => false});
+    assert!(match events[2] { CucumberEvent::Pickle(..) => true, _ => false});
 }

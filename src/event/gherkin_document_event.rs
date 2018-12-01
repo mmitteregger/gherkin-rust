@@ -1,5 +1,4 @@
 use ast::GherkinDocument;
-use event::*;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -19,5 +18,3 @@ impl GherkinDocumentEvent {
         }
     }
 }
-
-impl CucumberEvent for GherkinDocumentEvent {}

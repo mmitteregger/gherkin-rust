@@ -1,7 +1,5 @@
 use std::default::Default;
 
-use event::*;
-
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SourceEvent {
@@ -22,8 +20,6 @@ impl SourceEvent {
         }
     }
 }
-
-impl CucumberEvent for SourceEvent {}
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]

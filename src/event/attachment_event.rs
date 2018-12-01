@@ -1,7 +1,5 @@
 use std::default::Default;
 
-use event::*;
-
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AttachmentEvent {
@@ -22,8 +20,6 @@ impl AttachmentEvent {
         }
     }
 }
-
-impl CucumberEvent for AttachmentEvent {}
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
