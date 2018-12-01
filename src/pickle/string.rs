@@ -9,8 +9,8 @@ pub struct PickleString {
     pub content_type: Option<String>,
 }
 
-impl Argument for PickleString {
-    fn get_location(&self) -> &PickleLocation {
+impl PickleString {
+    pub fn get_location(&self) -> &PickleLocation {
         &self.location
     }
 }

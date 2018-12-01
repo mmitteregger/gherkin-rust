@@ -6,8 +6,8 @@ pub struct PickleTable {
     pub rows: Vec<PickleRow>,
 }
 
-impl Argument for PickleTable {
-    fn get_location(&self) -> &PickleLocation {
+impl PickleTable {
+    pub fn get_location(&self) -> &PickleLocation {
         &self.rows[0].cells[0].location
     }
 }

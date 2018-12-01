@@ -205,7 +205,7 @@ impl Compiler {
         argument: Option<&Box<Node>>,
         variable_cells: &[TableCell],
         value_cells: &[TableCell],
-    ) -> Vec<Box<Argument>> {
+    ) -> Vec<Argument> {
         let argument = match argument {
             Some(argument) => argument,
             None => return Vec::new(),
@@ -232,7 +232,7 @@ impl Compiler {
                 .collect::<Vec<PickleRow>>();
             let pickle_table = PickleTable { rows };
 
-            vec![Box::new(pickle_table)]
+            vec![Argument::Table(pickle_table)]
         } else if let Some(doc_string) = argument.downcast_ref::<DocString>() {
             let location = self.pickle_location(doc_string.get_location());
             let content = self.interpolate(doc_string.get_content(), variable_cells, value_cells);
@@ -244,7 +244,7 @@ impl Compiler {
             };
             let pickle_string = PickleString { location, content, content_type };
 
-            vec![Box::new(pickle_string)]
+            vec![Argument::String(pickle_string)]
         } else {
             panic!("Unexpected argument: {:?}", argument);
         }
