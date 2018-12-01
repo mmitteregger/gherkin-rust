@@ -12,7 +12,8 @@ pub struct Feature {
     name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     description: Option<String>,
-    children: Vec<Box<ScenarioDefinition>>,
+    #[serde(rename = "children")]
+    scenario_definitions: Vec<ScenarioDefinition>,
 }
 
 impl Feature {
@@ -23,7 +24,7 @@ impl Feature {
         keyword: String,
         name: String,
         description: Option<String>,
-        children: Vec<Box<ScenarioDefinition>>,
+        scenario_definitions: Vec<ScenarioDefinition>,
     ) -> Feature {
         Feature {
             node_type: "Feature",
@@ -33,7 +34,7 @@ impl Feature {
             keyword,
             name,
             description,
-            children,
+            scenario_definitions: scenario_definitions,
         }
     }
 
@@ -57,8 +58,8 @@ impl Feature {
         self.description.as_ref()
     }
 
-    pub fn get_children(&self) -> &Vec<Box<ScenarioDefinition>> {
-        &self.children
+    pub fn get_scenario_definitions(&self) -> &Vec<ScenarioDefinition> {
+        &self.scenario_definitions
     }
 
     pub fn get_location(&self) -> Location {

@@ -41,26 +41,20 @@ impl Scenario {
     pub fn get_location(&self) -> Location {
         self.location
     }
-}
 
-impl ScenarioDefinition for Scenario {
-    fn get_location(&self) -> Location {
-        self.location
-    }
-
-    fn get_keyword(&self) -> &String {
+    pub fn get_keyword(&self) -> &String {
         &self.keyword
     }
 
-    fn get_name(&self) -> &String {
+    pub fn get_name(&self) -> &String {
         &self.name
     }
 
-    fn get_description(&self) -> Option<&String> {
+    pub fn get_description(&self) -> Option<&String> {
         self.description.as_ref()
     }
 
-    fn get_steps(&self) -> &Vec<Step> {
+    pub fn get_steps(&self) -> &Vec<Step> {
         &self.steps
     }
 }

@@ -172,7 +172,7 @@ impl AstBuilder {
                 let tags = self.get_tags(&mut node);
                 let scenario_node = node.remove_opt::<AstNode>(RuleType::Scenario);
 
-                let scenario_definition: Box<ScenarioDefinition> = match scenario_node {
+                let scenario_definition: ScenarioDefinition = match scenario_node {
                     Some(mut scenario_node) => {
                         let scenario_line = scenario_node.remove_token(TokenType::ScenarioLine);
                         let scenario_line = scenario_line.borrow();
@@ -183,7 +183,7 @@ impl AstBuilder {
                         let description = self.get_description(&mut scenario_node);
                         let steps = self.get_steps(&mut scenario_node);
 
-                        Box::new(Scenario::new(
+                        ScenarioDefinition::from(Scenario::new(
                             location,
                             keyword,
                             name,
@@ -205,7 +205,7 @@ impl AstBuilder {
                         let steps = self.get_steps(&mut outline_node);
                         let examples = outline_node.remove_items(RuleType::ExamplesDefinition);
 
-                        Box::new(ScenarioOutline::new(
+                        ScenarioDefinition::from(ScenarioOutline::new(
                             location,
                             keyword,
                             name,
@@ -289,13 +289,13 @@ impl AstBuilder {
                 let feature_line = feature_header.remove_token(TokenType::FeatureLine);
                 let feature_line = feature_line.borrow();
 
-                let mut scenario_definitions: Vec<Box<ScenarioDefinition>> = Vec::new();
+                let mut scenario_definitions: Vec<ScenarioDefinition> = Vec::new();
 
                 if let Some(background) = node.remove_opt::<Background>(RuleType::Background) {
-                    scenario_definitions.push(Box::new(background));
+                    scenario_definitions.push(ScenarioDefinition::from(background));
                 }
 
-                scenario_definitions.extend(node.remove_items::<Box<ScenarioDefinition>>(
+                scenario_definitions.extend(node.remove_items::<ScenarioDefinition>(
                     RuleType::ScenarioDefinition,
                 ));
 

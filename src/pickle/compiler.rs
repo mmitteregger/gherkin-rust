@@ -17,34 +17,34 @@ impl Compiler {
             None => return Vec::new(),
         };
 
-        let mut pickles = Vec::with_capacity(feature.get_children().len());
+        let mut pickles = Vec::with_capacity(feature.get_scenario_definitions().len());
         let feature_tags = feature.get_tags();
         let language = feature.get_language();
         let mut background_steps: Vec<PickleStep> = Vec::new();
 
-        for scenario_definition in feature.get_children() {
-            if let Some(background) = scenario_definition.downcast_ref::<Background>() {
-                background_steps = self.pickle_steps(background);
-            } else if let Some(scenario) = scenario_definition.downcast_ref::<Scenario>() {
-                self.compile_scenario(
-                    &mut pickles,
-                    &background_steps,
-                    scenario,
-                    feature_tags,
-                    language,
-                );
-            } else if let Some(scenario_outline) =
-                scenario_definition.downcast_ref::<ScenarioOutline>()
-            {
-                self.compile_scenario_outline(
-                    &mut pickles,
-                    &background_steps,
-                    scenario_outline,
-                    feature_tags,
-                    language,
-                );
-            } else {
-                panic!("Unexpected scenario definition: {:?}", scenario_definition);
+        for scenario_definition in feature.get_scenario_definitions() {
+            match scenario_definition {
+                ScenarioDefinition::Background(background) => {
+                    background_steps = self.background_pickle_steps(background);
+                },
+                ScenarioDefinition::Scenario(scenario) => {
+                    self.compile_scenario(
+                        &mut pickles,
+                        &background_steps,
+                        scenario,
+                        feature_tags,
+                        language,
+                    );
+                },
+                ScenarioDefinition::ScenarioOutline(scenario_outline) => {
+                    self.compile_scenario_outline(
+                        &mut pickles,
+                        &background_steps,
+                        scenario_outline,
+                        feature_tags,
+                        language,
+                    );
+                },
             }
         }
 
@@ -88,7 +88,7 @@ impl Compiler {
             steps.extend_from_slice(background_steps);
         }
 
-        steps.extend(self.pickle_steps(scenario));
+        steps.extend(self.scenario_pickle_steps(scenario));
         steps
     }
 
@@ -270,11 +270,22 @@ impl Compiler {
         }
     }
 
-    fn pickle_steps<SD: ScenarioDefinition>(
+    fn background_pickle_steps(
         &mut self,
-        scenario_definition: &SD,
+        background: &Background,
     ) -> Vec<PickleStep> {
-        scenario_definition
+        background
+            .get_steps()
+            .iter()
+            .map(|step| self.pickle_step(step))
+            .collect()
+    }
+
+    fn scenario_pickle_steps(
+        &mut self,
+        scenario: &Scenario,
+    ) -> Vec<PickleStep> {
+        scenario
             .get_steps()
             .iter()
             .map(|step| self.pickle_step(step))
