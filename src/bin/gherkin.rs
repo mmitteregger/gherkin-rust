@@ -4,8 +4,8 @@ extern crate serde_json;
 use std::env;
 use std::io::{self, Write};
 
-use gherkin::Result;
 use gherkin::stream::*;
+use gherkin::Result;
 
 fn main() -> Result<()> {
     // TODO: Use clap or structopt?

@@ -1,19 +1,19 @@
+pub use self::argument::*;
 pub use self::cell::*;
 pub use self::compiler::*;
 pub use self::location::*;
 pub use self::row::*;
 pub use self::step::*;
-pub use self::argument::*;
 pub use self::string::*;
 pub use self::table::*;
 pub use self::tag::*;
 
+mod argument;
 mod cell;
 mod compiler;
 mod location;
 mod row;
 mod step;
-mod argument;
 mod string;
 mod table;
 mod tag;

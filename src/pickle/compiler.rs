@@ -64,7 +64,13 @@ impl Compiler {
         let steps = self.compile_scenario_steps(background_steps, scenario);
         let tags = self.compile_scenario_tags(feature_tags, scenario);
         let locations = vec![self.pickle_location(scenario.get_location())];
-        let pickle = Pickle { name, language, steps, tags, locations };
+        let pickle = Pickle {
+            name,
+            language,
+            steps,
+            tags,
+            locations,
+        };
 
         pickles.push(pickle);
     }
@@ -135,7 +141,13 @@ impl Compiler {
                     self.pickle_location(values.get_location()),
                     self.pickle_location(scenario_outline.get_location()),
                 ];
-                let pickle = Pickle { name, language, steps, tags, locations };
+                let pickle = Pickle {
+                    name,
+                    language,
+                    steps,
+                    tags,
+                    locations,
+                };
 
                 pickles.push(pickle);
             }
@@ -174,7 +186,11 @@ impl Compiler {
                 self.pickle_step_location(scenario_outline_step),
             ];
 
-            let pickle_step = PickleStep { text, arguments, locations };
+            let pickle_step = PickleStep {
+                text,
+                arguments,
+                locations,
+            };
             steps.push(pickle_step);
         }
 
@@ -242,7 +258,11 @@ impl Compiler {
                 }
                 None => None,
             };
-            let pickle_string = PickleString { location, content, content_type };
+            let pickle_string = PickleString {
+                location,
+                content,
+                content_type,
+            };
 
             vec![Argument::String(pickle_string)]
         } else {
@@ -266,7 +286,11 @@ impl Compiler {
         let arguments = self.create_pickle_arguments(step.get_argument(), &Vec::new(), &Vec::new());
         let locations = vec![self.pickle_step_location(step)];
 
-        PickleStep { text, arguments, locations }
+        PickleStep {
+            text,
+            arguments,
+            locations,
+        }
     }
 
     fn interpolate(

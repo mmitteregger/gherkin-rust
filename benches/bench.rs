@@ -1,16 +1,16 @@
 #![feature(test)]
 
-extern crate test;
 extern crate gherkin;
+extern crate test;
 
 #[cfg(test)]
 mod tests {
-    use test::Bencher;
-    use std::path::{Path, PathBuf};
     use std::fs;
+    use std::path::{Path, PathBuf};
+    use test::Bencher;
 
-    use gherkin::Parser;
     use gherkin::event;
+    use gherkin::Parser;
 
     #[bench]
     fn bench_parser_good_features(bencher: &mut Bencher) {
