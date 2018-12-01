@@ -225,7 +225,7 @@ impl AstBuilder {
                 let examples_line = examples_node.remove_token(TokenType::ExamplesLine);
                 let examples_line = examples_line.borrow();
                 let description = self.get_description(&mut examples_node);
-                let mut rows: Option<Vec<TableRow>> =
+                let rows: Option<Vec<TableRow>> =
                     examples_node.remove_opt(RuleType::ExamplesTable);
                 let (table_header, table_body) = match rows {
                     Some(mut rows) => {
@@ -258,7 +258,7 @@ impl AstBuilder {
                 Ok(Box::new(rows))
             }
             RuleType::Description => {
-                let mut line_tokens = node.remove_tokens(TokenType::Other);
+                let line_tokens = node.remove_tokens(TokenType::Other);
 
                 let mut end = line_tokens.len();
                 while end > 0

@@ -127,7 +127,7 @@ impl GherkinLine {
                     // Skip the first empty span
                     before_first = false;
                 } else {
-                    let mut content_start = cell.chars()
+                    let content_start = cell.chars()
                         .enumerate()
                         .skip_while(|(_index, cell_char)| cell_char.is_whitespace())
                         .map(|(index, _cell_char)| index)
