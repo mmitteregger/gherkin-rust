@@ -1,13 +1,13 @@
 use std::any::Any;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
 
 use parser::{RuleType, TokenType};
 use token::Token;
 
 pub struct AstNode {
-    sub_items: HashMap<RuleType, Vec<Box<Any>>>,
+    sub_items: HashMap<RuleType, VecDeque<Box<Any>>>,
     pub rule_type: RuleType,
 }
 
@@ -22,15 +22,16 @@ impl AstNode {
     pub fn add(&mut self, rule_type: RuleType, node: Box<Any>) {
         self.sub_items
             .entry(rule_type)
-            .or_insert_with(Vec::new)
-            .push(node);
+            .or_insert_with(VecDeque::new)
+            .push_back(node);
     }
 
     pub fn remove<T: 'static>(&mut self, rule_type: RuleType) -> T {
         let items = self.sub_items.remove(&rule_type);
         match items {
             Some(mut items) => *items
-                .remove(0)
+                .pop_front()
+                .unwrap()
                 .downcast::<T>()
                 .expect("failed to downcast item"),
             None => panic!("could not find item for RuleType::{}", rule_type),
@@ -45,7 +46,8 @@ impl AstNode {
                     default
                 } else {
                     *items
-                        .remove(0)
+                        .pop_front()
+                        .unwrap()
                         .downcast::<T>()
                         .expect("failed to downcast item")
                 }
@@ -62,7 +64,8 @@ impl AstNode {
                     None
                 } else {
                     let item = *items
-                        .remove(0)
+                        .pop_front()
+                        .unwrap()
                         .downcast::<T>()
                         .expect("failed to downcast item");
                     Some(item)
