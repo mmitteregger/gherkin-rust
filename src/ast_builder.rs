@@ -101,15 +101,15 @@ impl AstBuilder {
                 let step_line: Rc<RefCell<Token>> = node.remove_token(TokenType::StepLine);
                 let step_line = step_line.borrow();
 
-                let step_arg: Option<Box<Node>> = {
+                let step_arg: Option<Argument> = {
                     let data_table: Option<DataTable> = node.remove_opt(RuleType::DataTable);
                     match data_table {
-                        Some(data_table) => Some(Box::new(data_table)),
+                        Some(data_table) => Some(Argument::from(data_table)),
                         None => {
                             let doc_string: Option<DocString> =
                                 node.remove_opt(RuleType::DocString);
                             match doc_string {
-                                Some(doc_string) => Some(Box::new(doc_string)),
+                                Some(doc_string) => Some(Argument::from(doc_string)),
                                 None => None,
                             }
                         }

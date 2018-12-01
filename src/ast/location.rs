@@ -12,11 +12,11 @@ impl Location {
         Location { line, column }
     }
 
-    pub fn get_line(&self) -> u32 {
+    pub fn get_line(self) -> u32 {
         self.line
     }
 
-    pub fn get_column(&self) -> u32 {
+    pub fn get_column(self) -> u32 {
         self.column
     }
 }

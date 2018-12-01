@@ -2,7 +2,7 @@ use pickle::*;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum Argument {
+pub enum PickleArgument {
     String(PickleString),
     Table(PickleTable),
     /// Hints that destructuring should not be exhaustive.
@@ -14,12 +14,12 @@ pub enum Argument {
     __Nonexhaustive,
 }
 
-impl Argument {
+impl PickleArgument {
     pub fn get_location(&self) -> &PickleLocation {
         match self {
-            Argument::String(pickle_string) => pickle_string.get_location(),
-            Argument::Table(pickle_table) => pickle_table.get_location(),
-            Argument::__Nonexhaustive => unreachable!(),
+            PickleArgument::String(pickle_string) => pickle_string.get_location(),
+            PickleArgument::Table(pickle_table) => pickle_table.get_location(),
+            PickleArgument::__Nonexhaustive => unreachable!(),
         }
     }
 }

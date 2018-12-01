@@ -1,6 +1,13 @@
+use std::fmt::Debug;
+
+use erased_serde::Serialize;
+use downcast::Downcast;
+
 use ast::*;
 
-pub trait ScenarioDefinition: Node {
+pub trait ScenarioDefinition: Serialize + Downcast + Debug + Send + Sync {
+    fn get_location(&self) -> Location;
+
     fn get_keyword(&self) -> &String;
 
     fn get_name(&self) -> &String;

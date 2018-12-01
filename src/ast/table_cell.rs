@@ -21,10 +21,8 @@ impl TableCell {
     pub fn get_value(&self) -> &String {
         &self.value
     }
-}
 
-impl Node for TableCell {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

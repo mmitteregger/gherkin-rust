@@ -21,10 +21,8 @@ impl DataTable {
     pub fn get_rows(&self) -> &Vec<TableRow> {
         &self.rows
     }
-}
 
-impl Node for DataTable {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

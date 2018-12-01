@@ -9,7 +9,7 @@ pub struct Step {
     keyword: String,
     text: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    argument: Option<Box<Node>>,
+    argument: Option<Argument>,
 }
 
 impl Step {
@@ -17,7 +17,7 @@ impl Step {
         location: Location,
         keyword: String,
         text: String,
-        argument: Option<Box<Node>>,
+        argument: Option<Argument>,
     ) -> Step {
         Step {
             node_type: "Step",
@@ -36,14 +36,11 @@ impl Step {
         &self.text
     }
 
-    #[allow(unknown_lints, borrowed_box)] // required for downcasting to a concrete type
-    pub fn get_argument(&self) -> Option<&Box<Node>> {
+    pub fn get_argument(&self) -> Option<&Argument> {
         self.argument.as_ref()
     }
-}
 
-impl Node for Step {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

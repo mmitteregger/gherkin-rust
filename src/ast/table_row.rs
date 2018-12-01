@@ -21,10 +21,8 @@ impl TableRow {
     pub fn get_cells(&self) -> &Vec<TableCell> {
         &self.cells
     }
-}
 
-impl Node for TableRow {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

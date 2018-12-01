@@ -28,10 +28,8 @@ impl DocString {
     pub fn get_content(&self) -> &String {
         &self.content
     }
-}
 
-impl Node for DocString {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

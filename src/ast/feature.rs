@@ -60,10 +60,8 @@ impl Feature {
     pub fn get_children(&self) -> &Vec<Box<ScenarioDefinition>> {
         &self.children
     }
-}
 
-impl Node for Feature {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

@@ -37,15 +37,17 @@ impl Scenario {
     pub fn get_tags(&self) -> &Vec<Tag> {
         &self.tags
     }
-}
 
-impl Node for Scenario {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }
 
 impl ScenarioDefinition for Scenario {
+    fn get_location(&self) -> Location {
+        self.location
+    }
+
     fn get_keyword(&self) -> &String {
         &self.keyword
     }

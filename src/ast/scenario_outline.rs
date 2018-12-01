@@ -44,15 +44,17 @@ impl ScenarioOutline {
     pub fn get_examples(&self) -> &Vec<Examples> {
         &self.examples
     }
-}
 
-impl Node for ScenarioOutline {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }
 
 impl ScenarioDefinition for ScenarioOutline {
+    fn get_location(&self) -> Location {
+        self.location
+    }
+
     fn get_keyword(&self) -> &String {
         &self.keyword
     }

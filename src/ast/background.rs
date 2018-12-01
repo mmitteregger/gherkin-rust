@@ -30,15 +30,17 @@ impl Background {
             steps,
         }
     }
-}
 
-impl Node for Background {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }
 
 impl ScenarioDefinition for Background {
+    fn get_location(&self) -> Location {
+        self.location
+    }
+
     fn get_keyword(&self) -> &String {
         &self.keyword
     }

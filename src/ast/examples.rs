@@ -50,10 +50,8 @@ impl Examples {
     pub fn get_table_body(&self) -> Option<&Vec<TableRow>> {
         self.table_body.as_ref()
     }
-}
 
-impl Node for Examples {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

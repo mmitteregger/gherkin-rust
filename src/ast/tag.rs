@@ -25,10 +25,8 @@ impl Tag {
     pub(crate) fn take_name(self) -> String {
         self.name
     }
-}
 
-impl Node for Tag {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

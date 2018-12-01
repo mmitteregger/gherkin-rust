@@ -21,10 +21,8 @@ impl Comment {
     pub fn get_text(&self) -> &String {
         &self.text
     }
-}
 
-impl Node for Comment {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         self.location
     }
 }

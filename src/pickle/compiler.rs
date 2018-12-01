@@ -215,58 +215,58 @@ impl Compiler {
         self.pickle_tags(tags)
     }
 
-    #[allow(unknown_lints, borrowed_box)] // required for downcasting to a concrete type
     fn create_pickle_arguments(
         &mut self,
-        argument: Option<&Box<Node>>,
+        argument: Option<&Argument>,
         variable_cells: &[TableCell],
         value_cells: &[TableCell],
-    ) -> Vec<Argument> {
+    ) -> Vec<PickleArgument> {
         let argument = match argument {
             Some(argument) => argument,
             None => return Vec::new(),
         };
 
-        if let Some(data_table) = argument.downcast_ref::<DataTable>() {
-            let rows = data_table
-                .get_rows()
-                .iter()
-                .map(|row: &TableRow| {
-                    let cells = row.get_cells()
-                        .iter()
-                        .map(|cell: &TableCell| {
-                            let location = self.pickle_location(cell.get_location());
-                            let value =
-                                self.interpolate(cell.get_value(), variable_cells, value_cells);
+        match argument {
+            Argument::DataTable(data_table) => {
+                let rows = data_table
+                    .get_rows()
+                    .iter()
+                    .map(|row: &TableRow| {
+                        let cells = row.get_cells()
+                            .iter()
+                            .map(|cell: &TableCell| {
+                                let location = self.pickle_location(cell.get_location());
+                                let value =
+                                    self.interpolate(cell.get_value(), variable_cells, value_cells);
 
-                            PickleCell { location, value }
-                        })
-                        .collect::<Vec<PickleCell>>();
+                                PickleCell { location, value }
+                            })
+                            .collect::<Vec<PickleCell>>();
 
-                    PickleRow { cells }
-                })
-                .collect::<Vec<PickleRow>>();
-            let pickle_table = PickleTable { rows };
+                        PickleRow { cells }
+                    })
+                    .collect::<Vec<PickleRow>>();
+                let pickle_table = PickleTable { rows };
 
-            vec![Argument::Table(pickle_table)]
-        } else if let Some(doc_string) = argument.downcast_ref::<DocString>() {
-            let location = self.pickle_location(doc_string.get_location());
-            let content = self.interpolate(doc_string.get_content(), variable_cells, value_cells);
-            let content_type = match doc_string.get_content_type() {
-                Some(content_type) => {
-                    Some(self.interpolate(content_type, variable_cells, value_cells))
-                }
-                None => None,
-            };
-            let pickle_string = PickleString {
-                location,
-                content,
-                content_type,
-            };
+                vec![PickleArgument::Table(pickle_table)]
+            },
+            Argument::DocString(doc_string) => {
+                let location = self.pickle_location(doc_string.get_location());
+                let content = self.interpolate(doc_string.get_content(), variable_cells, value_cells);
+                let content_type = match doc_string.get_content_type() {
+                    Some(content_type) => {
+                        Some(self.interpolate(content_type, variable_cells, value_cells))
+                    }
+                    None => None,
+                };
+                let pickle_string = PickleString {
+                    location,
+                    content,
+                    content_type,
+                };
 
-            vec![Argument::String(pickle_string)]
-        } else {
-            panic!("Unexpected argument: {:?}", argument);
+                vec![PickleArgument::String(pickle_string)]
+            },
         }
     }
 
@@ -276,7 +276,7 @@ impl Compiler {
     ) -> Vec<PickleStep> {
         scenario_definition
             .get_steps()
-            .into_iter()
+            .iter()
             .map(|step| self.pickle_step(step))
             .collect()
     }

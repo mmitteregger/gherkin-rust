@@ -26,10 +26,8 @@ impl GherkinDocument {
     pub fn get_comments(&self) -> &Vec<Comment> {
         &self.comments
     }
-}
 
-impl Node for GherkinDocument {
-    fn get_location(&self) -> Location {
+    pub fn get_location(&self) -> Location {
         Location::new(0, 0)
     }
 }
