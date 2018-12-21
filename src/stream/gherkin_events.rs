@@ -81,8 +81,8 @@ impl GherkinEvents {
                     .get_location()
                     .unwrap_or_else(|| Location::new(0, 0));
                 let event_location = attachment_event::Location::new(
-                    error_location.get_line(),
-                    error_location.get_column(),
+                    error_location.line,
+                    error_location.column,
                 );
                 let source_ref = attachment_event::SourceRef::new(uri.to_owned(), event_location);
                 let attachment_event = AttachmentEvent::new(source_ref, error.to_string());

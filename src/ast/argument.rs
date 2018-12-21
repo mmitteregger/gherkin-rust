@@ -10,8 +10,8 @@ pub enum Argument {
 impl Argument {
     pub fn get_location(&self) -> Location {
         match self {
-            Argument::DataTable(data_table) => data_table.get_location(),
-            Argument::DocString(doc_string) => doc_string.get_location(),
+            Argument::DataTable(data_table) => data_table.location,
+            Argument::DocString(doc_string) => doc_string.location,
         }
     }
 }

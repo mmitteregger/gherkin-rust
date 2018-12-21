@@ -80,7 +80,7 @@ impl GherkinLine {
         for (preceding_whitespace_count, text) in spans {
             column += preceding_whitespace_count;
             let text_chars_count = text.chars().count() as u32;
-            let span = GherkinLineSpan::new(column, text);
+            let span = GherkinLineSpan { column, text };
             line_spans.push(span);
             column += text_chars_count;
         }
@@ -136,7 +136,7 @@ impl GherkinLine {
 
                     let column = self.indent() + start_col + content_start + 2;
                     let text = cell.trim().to_owned();
-                    line_spans.push(GherkinLineSpan::new(column, text));
+                    line_spans.push(GherkinLineSpan { column, text });
 
                     start_col = col as u32;
                 }
@@ -165,9 +165,9 @@ mod tests {
         assert_eq!(
             gherkin_line_spans,
             vec![
-                GherkinLineSpan::new(5, "@this".to_owned()),
-                GherkinLineSpan::new(11, "@is".to_owned()),
-                GherkinLineSpan::new(16, "@atag".to_owned()),
+                GherkinLineSpan { column: 5, text: "@this".to_owned() },
+                GherkinLineSpan { column: 11, text: "@is".to_owned() },
+                GherkinLineSpan { column: 16, text: "@atag".to_owned() },
             ]
         );
     }

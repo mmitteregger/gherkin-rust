@@ -75,7 +75,7 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
         });
         let token_location = {
             let location = token.location.as_ref().expect("token location");
-            let line = location.get_line();
+            let line = location.line;
             let column = token.matched_indent.unwrap() + 1;
             Location::new(line, column)
         };

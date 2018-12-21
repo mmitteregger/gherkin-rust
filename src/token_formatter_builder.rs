@@ -64,7 +64,7 @@ fn format_token(token: &Token) -> String {
 
 fn format_location(location: Option<Location>) -> String {
     match location {
-        Some(location) => format!("({}:{})", location.get_line(), location.get_column()),
+        Some(location) => format!("({}:{})", location.line, location.column),
         None => String::new(),
     }
 }
@@ -82,7 +82,7 @@ fn format_gherkin_line_spans(spans: &[GherkinLineSpan]) -> String {
     } else {
         spans
             .iter()
-            .map(|ref span| format!("{}:{}", span.get_column(), span.get_text()))
+            .map(|ref span| format!("{}:{}", span.column, span.text))
             .collect::<Vec<String>>()
             .join(",")
     }

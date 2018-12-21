@@ -5,24 +5,16 @@ use ast::*;
 pub struct DataTable {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    rows: Vec<TableRow>,
+    pub location: Location,
+    pub rows: Vec<TableRow>,
 }
 
 impl DataTable {
     pub fn new(rows: Vec<TableRow>) -> DataTable {
         DataTable {
             node_type: "DataTable",
-            location: rows.get(0).expect("no rows for data table").get_location(),
+            location: rows.get(0).expect("no rows for data table").location,
             rows,
         }
-    }
-
-    pub fn get_rows(&self) -> &Vec<TableRow> {
-        &self.rows
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }

@@ -5,16 +5,16 @@ use ast::*;
 pub struct Examples {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    tags: Vec<Tag>,
-    keyword: String,
-    name: String,
+    pub location: Location,
+    pub tags: Vec<Tag>,
+    pub keyword: String,
+    pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
+    pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    table_header: Option<TableRow>,
+    pub table_header: Option<TableRow>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    table_body: Option<Vec<TableRow>>,
+    pub table_body: Option<Vec<TableRow>>,
 }
 
 impl Examples {
@@ -37,21 +37,5 @@ impl Examples {
             table_header,
             table_body,
         }
-    }
-
-    pub fn get_tags(&self) -> &Vec<Tag> {
-        &self.tags
-    }
-
-    pub fn get_table_header(&self) -> Option<&TableRow> {
-        self.table_header.as_ref()
-    }
-
-    pub fn get_table_body(&self) -> Option<&Vec<TableRow>> {
-        self.table_body.as_ref()
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }

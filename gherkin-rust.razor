@@ -61,11 +61,11 @@
                 expected_tokens,
             }
         } else {
-            let location = if token_location.get_column() > 1 {
+            let location = if token_location.column > 1 {
                 token_location
             } else {
                 let token_line = token.line.as_ref().expect("token line");
-                let line = token_location.get_line();
+                let line = token_location.line;
                 let column = token_line.indent() + 1;
                 Location::new(line, column)
             };

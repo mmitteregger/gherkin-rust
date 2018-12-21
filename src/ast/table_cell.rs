@@ -5,8 +5,8 @@ use ast::*;
 pub struct TableCell {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    value: String,
+    pub location: Location,
+    pub value: String,
 }
 
 impl TableCell {
@@ -16,13 +16,5 @@ impl TableCell {
             location,
             value,
         }
-    }
-
-    pub fn get_value(&self) -> &String {
-        &self.value
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }

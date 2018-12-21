@@ -5,13 +5,13 @@ use ast::*;
 pub struct Scenario {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    keyword: String,
-    name: String,
+    pub location: Location,
+    pub keyword: String,
+    pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
-    steps: Vec<Step>,
-    tags: Vec<Tag>,
+    pub description: Option<String>,
+    pub steps: Vec<Step>,
+    pub tags: Vec<Tag>,
 }
 
 impl Scenario {
@@ -32,29 +32,5 @@ impl Scenario {
             steps,
             tags,
         }
-    }
-
-    pub fn get_tags(&self) -> &Vec<Tag> {
-        &self.tags
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
-    }
-
-    pub fn get_keyword(&self) -> &String {
-        &self.keyword
-    }
-
-    pub fn get_name(&self) -> &String {
-        &self.name
-    }
-
-    pub fn get_description(&self) -> Option<&String> {
-        self.description.as_ref()
-    }
-
-    pub fn get_steps(&self) -> &Vec<Step> {
-        &self.steps
     }
 }

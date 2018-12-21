@@ -5,11 +5,11 @@ use ast::*;
 pub struct Step {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    keyword: String,
-    text: String,
+    pub location: Location,
+    pub keyword: String,
+    pub text: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    argument: Option<Argument>,
+    pub argument: Option<Argument>,
 }
 
 impl Step {
@@ -26,21 +26,5 @@ impl Step {
             text,
             argument,
         }
-    }
-
-    pub fn get_keyword(&self) -> &String {
-        &self.keyword
-    }
-
-    pub fn get_text(&self) -> &String {
-        &self.text
-    }
-
-    pub fn get_argument(&self) -> Option<&Argument> {
-        self.argument.as_ref()
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }

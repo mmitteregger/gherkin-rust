@@ -6,8 +6,8 @@ pub struct GherkinDocument {
     #[serde(rename = "type")]
     node_type: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
-    feature: Option<Feature>,
-    comments: Vec<Comment>,
+    pub feature: Option<Feature>,
+    pub comments: Vec<Comment>,
 }
 
 impl GherkinDocument {
@@ -17,18 +17,6 @@ impl GherkinDocument {
             feature,
             comments,
         }
-    }
-
-    pub fn get_feature(&self) -> Option<&Feature> {
-        self.feature.as_ref()
-    }
-
-    pub fn get_comments(&self) -> &Vec<Comment> {
-        &self.comments
-    }
-
-    pub fn get_location(&self) -> Location {
-        Location::new(0, 0)
     }
 }
 

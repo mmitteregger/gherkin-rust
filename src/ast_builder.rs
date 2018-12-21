@@ -91,7 +91,7 @@ impl AstBuilder {
         if column == 0 {
             token_location
         } else {
-            Location::new(token_location.get_line(), column)
+            Location::new(token_location.line, column)
         }
     }
 
@@ -354,12 +354,12 @@ impl AstBuilder {
             return Ok(());
         }
 
-        let cell_count = rows[0].get_cells().len();
+        let cell_count = rows[0].cells.len();
 
         for row in rows {
-            if row.get_cells().len() != cell_count {
+            if row.cells.len() != cell_count {
                 return Err(Error::AstBuilder {
-                    location: row.get_location(),
+                    location: row.location,
                     message: "inconsistent cell count within the table".to_owned(),
                 });
             }
@@ -373,8 +373,8 @@ impl AstBuilder {
             .matched_items
             .iter()
             .map(|cell_item| {
-                let location = self.get_location(&token, cell_item.get_column());
-                let text = cell_item.get_text().to_owned();
+                let location = self.get_location(&token, cell_item.column);
+                let text = cell_item.text.to_owned();
                 TableCell::new(location, text)
             })
             .collect()
@@ -399,8 +399,8 @@ impl AstBuilder {
             let mut token = token.borrow_mut();
             let tag_items = mem::replace(&mut token.matched_items, Vec::new());
             for tag_item in tag_items {
-                let location = self.get_location(&token, tag_item.get_column());
-                tags.push(Tag::new(location, tag_item.take_text()))
+                let location = self.get_location(&token, tag_item.column);
+                tags.push(Tag::new(location, tag_item.text))
             }
         }
 
@@ -420,7 +420,7 @@ mod tests {
         let document_1 = parser.parse_str("Feature: 1").unwrap();
         let document_2 = parser.parse_str("Feature: 2").unwrap();
 
-        assert_eq!(document_1.get_feature().unwrap().get_name(), "1");
-        assert_eq!(document_2.get_feature().unwrap().get_name(), "2");
+        assert_eq!(document_1.feature.unwrap().name, "1");
+        assert_eq!(document_2.feature.unwrap().name, "2");
     }
 }

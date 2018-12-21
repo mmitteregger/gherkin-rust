@@ -5,8 +5,8 @@ use ast::*;
 pub struct Comment {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    text: String,
+    pub location: Location,
+    pub text: String,
 }
 
 impl Comment {
@@ -16,13 +16,5 @@ impl Comment {
             location,
             text,
         }
-    }
-
-    pub fn get_text(&self) -> &String {
-        &self.text
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }

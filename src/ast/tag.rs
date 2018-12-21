@@ -5,8 +5,8 @@ use ast::*;
 pub struct Tag {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    name: String,
+    pub location: Location,
+    pub name: String,
 }
 
 impl Tag {
@@ -16,17 +16,5 @@ impl Tag {
             location,
             name,
         }
-    }
-
-    pub fn get_name(&self) -> &String {
-        &self.name
-    }
-
-    pub(crate) fn take_name(self) -> String {
-        self.name
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }

@@ -5,8 +5,8 @@ use ast::*;
 pub struct TableRow {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
-    cells: Vec<TableCell>,
+    pub location: Location,
+    pub cells: Vec<TableCell>,
 }
 
 impl TableRow {
@@ -16,13 +16,5 @@ impl TableRow {
             location,
             cells,
         }
-    }
-
-    pub fn get_cells(&self) -> &Vec<TableCell> {
-        &self.cells
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }

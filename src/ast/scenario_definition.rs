@@ -11,41 +11,41 @@ pub enum ScenarioDefinition {
 impl ScenarioDefinition {
     pub fn get_location(&self) -> Location {
         match self {
-            ScenarioDefinition::Background(background) => background.get_location(),
-            ScenarioDefinition::Scenario(scenario) => scenario.get_location(),
-            ScenarioDefinition::ScenarioOutline(scenario_outline) => scenario_outline.get_location(),
+            ScenarioDefinition::Background(background) => background.location,
+            ScenarioDefinition::Scenario(scenario) => scenario.location,
+            ScenarioDefinition::ScenarioOutline(scenario_outline) => scenario_outline.location,
         }
     }
 
     pub fn get_keyword(&self) -> &String {
         match self {
-            ScenarioDefinition::Background(background) => background.get_keyword(),
-            ScenarioDefinition::Scenario(scenario) => scenario.get_keyword(),
-            ScenarioDefinition::ScenarioOutline(scenario_outline) => scenario_outline.get_keyword(),
+            ScenarioDefinition::Background(background) => &background.keyword,
+            ScenarioDefinition::Scenario(scenario) => &scenario.keyword,
+            ScenarioDefinition::ScenarioOutline(scenario_outline) => &scenario_outline.keyword,
         }
     }
 
     pub fn get_name(&self) -> &String {
         match self {
-            ScenarioDefinition::Background(background) => background.get_name(),
-            ScenarioDefinition::Scenario(scenario) => scenario.get_name(),
-            ScenarioDefinition::ScenarioOutline(scenario_outline) => scenario_outline.get_name(),
+            ScenarioDefinition::Background(background) => &background.name,
+            ScenarioDefinition::Scenario(scenario) => &scenario.name,
+            ScenarioDefinition::ScenarioOutline(scenario_outline) => &scenario_outline.name,
         }
     }
 
     pub fn get_description(&self) -> Option<&String> {
         match self {
-            ScenarioDefinition::Background(background) => background.get_description(),
-            ScenarioDefinition::Scenario(scenario) => scenario.get_description(),
-            ScenarioDefinition::ScenarioOutline(scenario_outline) => scenario_outline.get_description(),
+            ScenarioDefinition::Background(background) => background.description.as_ref(),
+            ScenarioDefinition::Scenario(scenario) => scenario.description.as_ref(),
+            ScenarioDefinition::ScenarioOutline(outline) => outline.description.as_ref(),
         }
     }
 
     pub fn get_steps(&self) -> &Vec<Step> {
         match self {
-            ScenarioDefinition::Background(background) => background.get_steps(),
-            ScenarioDefinition::Scenario(scenario) => scenario.get_steps(),
-            ScenarioDefinition::ScenarioOutline(scenario_outline) => scenario_outline.get_steps(),
+            ScenarioDefinition::Background(background) => &background.steps,
+            ScenarioDefinition::Scenario(scenario) => &scenario.steps,
+            ScenarioDefinition::ScenarioOutline(scenario_outline) => &scenario_outline.steps,
         }
     }
 }

@@ -5,10 +5,10 @@ use ast::*;
 pub struct DocString {
     #[serde(rename = "type")]
     node_type: &'static str,
-    location: Location,
+    pub location: Location,
     #[serde(skip_serializing_if = "Option::is_none")]
-    content_type: Option<String>,
-    content: String,
+    pub content_type: Option<String>,
+    pub content: String,
 }
 
 impl DocString {
@@ -19,17 +19,5 @@ impl DocString {
             content_type,
             content,
         }
-    }
-
-    pub fn get_content_type(&self) -> Option<&String> {
-        self.content_type.as_ref()
-    }
-
-    pub fn get_content(&self) -> &String {
-        &self.content
-    }
-
-    pub fn get_location(&self) -> Location {
-        self.location
     }
 }
