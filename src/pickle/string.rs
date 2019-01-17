@@ -14,3 +14,9 @@ impl PickleString {
         &self.location
     }
 }
+
+impl AsRef<str> for PickleString {
+    fn as_ref(&self) -> &str {
+        &self.content
+    }
+}
