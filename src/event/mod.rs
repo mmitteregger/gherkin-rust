@@ -5,7 +5,8 @@ pub use self::source_event::SourceEvent;
 use error::Result;
 use parser::GherkinDialectProvide;
 use parser::ParserOptions;
-use pickle::Compiler;
+use pickle::Pickle;
+use cuke::Compiler;
 use token_matcher::TokenMatcher;
 
 pub mod attachment_event;
@@ -86,7 +87,10 @@ where
     let mut compiler = Compiler::default();
 
     let gherkin_document = parser.parse_str(&data)?;
-    let pickles = compiler.compile(&gherkin_document);
+    let pickles: Vec<Pickle> = compiler.compile(&gherkin_document)
+        .into_iter()
+        .map(Pickle::from)
+        .collect();
 
     let mut events: Vec<CucumberEvent> = Vec::with_capacity(2 + pickles.len());
     events.push(CucumberEvent::from(SourceEvent::new(data, uri.to_owned())));

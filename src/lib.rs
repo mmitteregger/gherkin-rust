@@ -8,6 +8,7 @@ extern crate regex;
 extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
+extern crate core;
 
 pub use ast_builder::AstBuilder;
 pub use error::{Error, Result};
@@ -25,6 +26,7 @@ mod gherkin_dialect_provider;
 mod gherkin_line;
 mod gherkin_line_span;
 mod parser;
+pub mod cuke;
 pub mod pickle;
 pub mod stream;
 mod token;

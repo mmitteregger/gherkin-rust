@@ -1,7 +1,8 @@
 extern crate gherkin;
 extern crate serde_json;
 
-use gherkin::pickle::Compiler;
+use gherkin::pickle::Pickle;
+use gherkin::cuke::Compiler;
 use gherkin::{Parser, ParserOptions};
 
 #[test]
@@ -178,7 +179,10 @@ Feature: Foo
     );
 
     let mut compiler = Compiler::default();
-    let pickles = compiler.compile(&gherkin_document);
+    let pickles: Vec<Pickle> = compiler.compile(&gherkin_document)
+        .into_iter()
+        .map(Pickle::from)
+        .collect();
     let pickles_json = serde_json::to_string_pretty(&pickles).unwrap();
 
     assert_eq!(

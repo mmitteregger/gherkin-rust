@@ -1,4 +1,5 @@
 use pickle::{String, Table, Location};
+use cuke;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]
@@ -12,6 +13,15 @@ pub enum Argument {
     /// could break existing code.)
     #[doc(hidden)]
     __Nonexhaustive,
+}
+
+impl<'d> From<cuke::Argument<'d>> for Argument {
+    fn from(cuke_argument: cuke::Argument<'d>) -> Self {
+        match cuke_argument {
+            cuke::Argument::String(string) => Argument::String(String::from(string)),
+            cuke::Argument::Table(table) => Argument::Table(Table::from(table)),
+        }
+    }
 }
 
 impl Argument {

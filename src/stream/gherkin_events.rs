@@ -3,7 +3,8 @@ use ast_builder::AstBuilder;
 use error::Error;
 use event::*;
 use parser::Parser;
-use pickle::Compiler;
+use pickle::Pickle;
+use cuke::Compiler;
 
 pub struct GherkinEvents {
     parser: Parser<AstBuilder>,
@@ -43,8 +44,11 @@ impl GherkinEvents {
             cucumber_events.push(CucumberEvent::from(source_event));
         }
 
-        let pickles = if self.print_pickles {
+        let pickles: Vec<Pickle> = if self.print_pickles {
             self.compiler.compile(&gherkin_document)
+                .into_iter()
+                .map(Pickle::from)
+                .collect()
         } else {
             Vec::new()
         };
