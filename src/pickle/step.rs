@@ -1,9 +1,9 @@
-use pickle::*;
+use pickle::{Argument, Location};
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PickleStep {
+pub struct Step {
     pub text: String,
-    pub arguments: Vec<PickleArgument>,
-    pub locations: Vec<PickleLocation>,
+    pub arguments: Vec<Argument>,
+    pub locations: Vec<Location>,
 }

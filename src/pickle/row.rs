@@ -1,7 +1,7 @@
-use pickle::*;
+use pickle::Cell;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PickleRow {
-    pub cells: Vec<PickleCell>,
+pub struct Row {
+    pub cells: Vec<Cell>,
 }

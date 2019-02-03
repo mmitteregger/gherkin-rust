@@ -2,12 +2,12 @@ use pickle::*;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PickleTable {
-    pub rows: Vec<PickleRow>,
+pub struct Table {
+    pub rows: Vec<Row>,
 }
 
-impl PickleTable {
-    pub fn get_location(&self) -> &PickleLocation {
+impl Table {
+    pub fn get_location(&self) -> &Location {
         &self.rows[0].cells[0].location
     }
 }

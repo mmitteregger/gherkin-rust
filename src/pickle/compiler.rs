@@ -1,5 +1,5 @@
-use ast::*;
-use pickle::*;
+use ast;
+use pickle;
 use std::default::Default;
 
 pub struct Compiler;
@@ -11,8 +11,8 @@ impl Default for Compiler {
 }
 
 impl Compiler {
-    pub fn compile(&mut self, gherkin_document: &GherkinDocument) -> Vec<Pickle> {
-        let feature: &Feature = match &gherkin_document.feature {
+    pub fn compile(&mut self, gherkin_document: &ast::GherkinDocument) -> Vec<pickle::Pickle> {
+        let feature: &ast::Feature = match &gherkin_document.feature {
             Some(feature) => feature,
             None => return Vec::new(),
         };
@@ -20,14 +20,14 @@ impl Compiler {
         let mut pickles = Vec::with_capacity(feature.scenario_definitions.len());
         let feature_tags = &feature.tags;
         let language = &feature.language;
-        let mut background_steps: Vec<PickleStep> = Vec::new();
+        let mut background_steps: Vec<pickle::Step> = Vec::new();
 
         for scenario_definition in &feature.scenario_definitions {
             match scenario_definition {
-                ScenarioDefinition::Background(background) => {
+                ast::ScenarioDefinition::Background(background) => {
                     background_steps = self.background_pickle_steps(background);
                 },
-                ScenarioDefinition::Scenario(scenario) => {
+                ast::ScenarioDefinition::Scenario(scenario) => {
                     self.compile_scenario(
                         &mut pickles,
                         &background_steps,
@@ -36,7 +36,7 @@ impl Compiler {
                         language,
                     );
                 },
-                ScenarioDefinition::ScenarioOutline(scenario_outline) => {
+                ast::ScenarioDefinition::ScenarioOutline(scenario_outline) => {
                     self.compile_scenario_outline(
                         &mut pickles,
                         &background_steps,
@@ -53,10 +53,10 @@ impl Compiler {
 
     fn compile_scenario(
         &mut self,
-        pickles: &mut Vec<Pickle>,
-        background_steps: &[PickleStep],
-        scenario: &Scenario,
-        feature_tags: &[Tag],
+        pickles: &mut Vec<pickle::Pickle>,
+        background_steps: &[pickle::Step],
+        scenario: &ast::Scenario,
+        feature_tags: &[ast::Tag],
         language: &str,
     ) {
         let name = scenario.name.to_owned();
@@ -64,7 +64,7 @@ impl Compiler {
         let steps = self.compile_scenario_steps(background_steps, scenario);
         let tags = self.compile_scenario_tags(feature_tags, scenario);
         let locations = vec![self.pickle_location(scenario.location)];
-        let pickle = Pickle {
+        let pickle = pickle::Pickle {
             name,
             language,
             steps,
@@ -77,9 +77,9 @@ impl Compiler {
 
     fn compile_scenario_steps(
         &mut self,
-        background_steps: &[PickleStep],
-        scenario: &Scenario,
-    ) -> Vec<PickleStep> {
+        background_steps: &[pickle::Step],
+        scenario: &ast::Scenario,
+    ) -> Vec<pickle::Step> {
         let scenario_steps = &scenario.steps;
         let steps_capacity = background_steps.len() + scenario_steps.len();
         let mut steps = Vec::with_capacity(steps_capacity);
@@ -94,9 +94,9 @@ impl Compiler {
 
     fn compile_scenario_tags(
         &mut self,
-        feature_tags: &[Tag],
-        scenario: &Scenario,
-    ) -> Vec<PickleTag> {
+        feature_tags: &[ast::Tag],
+        scenario: &ast::Scenario,
+    ) -> Vec<pickle::Tag> {
         let scenario_tags = &scenario.tags;
         let mut tags = Vec::with_capacity(feature_tags.len() + scenario_tags.len());
 
@@ -108,14 +108,14 @@ impl Compiler {
 
     fn compile_scenario_outline(
         &mut self,
-        pickles: &mut Vec<Pickle>,
-        background_steps: &[PickleStep],
-        scenario_outline: &ScenarioOutline,
-        feature_tags: &[Tag],
+        pickles: &mut Vec<pickle::Pickle>,
+        background_steps: &[pickle::Step],
+        scenario_outline: &ast::ScenarioOutline,
+        feature_tags: &[ast::Tag],
         language: &str,
     ) {
         for examples in &scenario_outline.examples {
-            let table_header: &TableRow = match &examples.table_header {
+            let table_header: &ast::TableRow = match &examples.table_header {
                 Some(table_header) => table_header,
                 None => return,
             };
@@ -141,7 +141,7 @@ impl Compiler {
                     self.pickle_location(values.location),
                     self.pickle_location(scenario_outline.location),
                 ];
-                let pickle = Pickle {
+                let pickle = pickle::Pickle {
                     name,
                     language,
                     steps,
@@ -156,12 +156,12 @@ impl Compiler {
 
     fn compile_scenario_outline_steps(
         &mut self,
-        background_steps: &[PickleStep],
-        scenario_outline: &ScenarioOutline,
-        variable_cells: &[TableCell],
-        value_cells: &[TableCell],
-        values: &TableRow,
-    ) -> Vec<PickleStep> {
+        background_steps: &[pickle::Step],
+        scenario_outline: &ast::ScenarioOutline,
+        variable_cells: &[ast::TableCell],
+        value_cells: &[ast::TableCell],
+        values: &ast::TableRow,
+    ) -> Vec<pickle::Step> {
         let scenario_outline_steps = &scenario_outline.steps;
         let steps_capacity = background_steps.len() + scenario_outline_steps.len();
         let mut steps = Vec::with_capacity(steps_capacity);
@@ -186,7 +186,7 @@ impl Compiler {
                 self.pickle_step_location(scenario_outline_step),
             ];
 
-            let pickle_step = PickleStep {
+            let pickle_step = pickle::Step {
                 text,
                 arguments,
                 locations,
@@ -199,10 +199,10 @@ impl Compiler {
 
     fn compile_scenario_outline_tags(
         &mut self,
-        feature_tags: &[Tag],
-        scenario_outline: &ScenarioOutline,
-        examples: &Examples,
-    ) -> Vec<PickleTag> {
+        feature_tags: &[ast::Tag],
+        scenario_outline: &ast::ScenarioOutline,
+        examples: &ast::Examples,
+    ) -> Vec<pickle::Tag> {
         let scenario_outline_tags = &scenario_outline.tags;
         let examples_tags = &examples.tags;
         let tags_capacity = feature_tags.len() + scenario_outline_tags.len() + examples_tags.len();
@@ -217,39 +217,17 @@ impl Compiler {
 
     fn create_pickle_arguments(
         &mut self,
-        argument: Option<&Argument>,
-        variable_cells: &[TableCell],
-        value_cells: &[TableCell],
-    ) -> Vec<PickleArgument> {
+        argument: Option<&ast::Argument>,
+        variable_cells: &[ast::TableCell],
+        value_cells: &[ast::TableCell],
+    ) -> Vec<pickle::Argument> {
         let argument = match argument {
             Some(argument) => argument,
             None => return Vec::new(),
         };
 
         match argument {
-            Argument::DataTable(data_table) => {
-                let rows = data_table.rows
-                    .iter()
-                    .map(|row: &TableRow| {
-                        let cells = row.cells
-                            .iter()
-                            .map(|cell: &TableCell| {
-                                let location = self.pickle_location(cell.location);
-                                let value =
-                                    self.interpolate(&cell.value, variable_cells, value_cells);
-
-                                PickleCell { location, value }
-                            })
-                            .collect::<Vec<PickleCell>>();
-
-                        PickleRow { cells }
-                    })
-                    .collect::<Vec<PickleRow>>();
-                let pickle_table = PickleTable { rows };
-
-                vec![PickleArgument::Table(pickle_table)]
-            },
-            Argument::DocString(doc_string) => {
+            ast::Argument::DocString(doc_string) => {
                 let location = self.pickle_location(doc_string.location);
                 let content = self.interpolate(&doc_string.content, variable_cells, value_cells);
                 let content_type = match &doc_string.content_type {
@@ -258,21 +236,43 @@ impl Compiler {
                     }
                     None => None,
                 };
-                let pickle_string = PickleString {
+                let pickle_string = pickle::String {
                     location,
                     content,
                     content_type,
                 };
 
-                vec![PickleArgument::String(pickle_string)]
+                vec![pickle::Argument::String(pickle_string)]
+            },
+            ast::Argument::DataTable(data_table) => {
+                let rows = data_table.rows
+                    .iter()
+                    .map(|row: &ast::TableRow| {
+                        let cells = row.cells
+                            .iter()
+                            .map(|cell: &ast::TableCell| {
+                                let location = self.pickle_location(cell.location);
+                                let value =
+                                    self.interpolate(&cell.value, variable_cells, value_cells);
+
+                                pickle::Cell { location, value }
+                            })
+                            .collect::<Vec<pickle::Cell>>();
+
+                        pickle::Row { cells }
+                    })
+                    .collect::<Vec<pickle::Row>>();
+                let pickle_table = pickle::Table { rows };
+
+                vec![pickle::Argument::Table(pickle_table)]
             },
         }
     }
 
     fn background_pickle_steps(
         &mut self,
-        background: &Background,
-    ) -> Vec<PickleStep> {
+        background: &ast::Background,
+    ) -> Vec<pickle::Step> {
         background.steps
             .iter()
             .map(|step| self.pickle_step(step))
@@ -281,20 +281,20 @@ impl Compiler {
 
     fn scenario_pickle_steps(
         &mut self,
-        scenario: &Scenario,
-    ) -> Vec<PickleStep> {
+        scenario: &ast::Scenario,
+    ) -> Vec<pickle::Step> {
         scenario.steps
             .iter()
             .map(|step| self.pickle_step(step))
             .collect()
     }
 
-    fn pickle_step(&mut self, step: &Step) -> PickleStep {
+    fn pickle_step(&mut self, step: &ast::Step) -> pickle::Step {
         let text = step.text.to_owned();
         let arguments = self.create_pickle_arguments(step.argument.as_ref(), &Vec::new(), &Vec::new());
         let locations = vec![self.pickle_step_location(step)];
 
-        PickleStep {
+        pickle::Step {
             text,
             arguments,
             locations,
@@ -304,8 +304,8 @@ impl Compiler {
     fn interpolate(
         &mut self,
         text: &str,
-        variable_cells: &[TableCell],
-        value_cells: &[TableCell],
+        variable_cells: &[ast::TableCell],
+        value_cells: &[ast::TableCell],
     ) -> String {
         let mut interpolated_text = text.to_owned();
 
@@ -319,7 +319,7 @@ impl Compiler {
         interpolated_text
     }
 
-    fn pickle_step_location(&mut self, step: &Step) -> PickleLocation {
+    fn pickle_step_location(&mut self, step: &ast::Step) -> pickle::Location {
         let keyword_column = if step.keyword.is_empty() {
             0
         } else {
@@ -328,22 +328,22 @@ impl Compiler {
         let step_location = step.location;
         let line = step_location.line;
         let column = step_location.column + keyword_column;
-        PickleLocation { line, column }
+        pickle::Location { line, column }
     }
 
-    fn pickle_location(&mut self, location: Location) -> PickleLocation {
-        PickleLocation {
+    fn pickle_location(&mut self, location: ast::Location) -> pickle::Location {
+        pickle::Location {
             line: location.line,
             column: location.column,
         }
     }
 
-    fn pickle_tags(&mut self, tags: Vec<Tag>) -> Vec<PickleTag> {
+    fn pickle_tags(&mut self, tags: Vec<ast::Tag>) -> Vec<pickle::Tag> {
         tags.into_iter().map(|tag| self.pickle_tag(tag)).collect()
     }
 
-    fn pickle_tag(&mut self, tag: Tag) -> PickleTag {
-        PickleTag {
+    fn pickle_tag(&mut self, tag: ast::Tag) -> pickle::Tag {
+        pickle::Tag {
             location: self.pickle_location(tag.location),
             name: tag.name,
         }

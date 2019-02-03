@@ -1,21 +1,21 @@
-use pickle::*;
+use pickle::Location;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PickleString {
-    pub location: PickleLocation,
-    pub content: String,
+pub struct String {
+    pub location: Location,
+    pub content: ::std::string::String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub content_type: Option<String>,
+    pub content_type: Option<::std::string::String>,
 }
 
-impl PickleString {
-    pub fn get_location(&self) -> &PickleLocation {
+impl String {
+    pub fn get_location(&self) -> &Location {
         &self.location
     }
 }
 
-impl AsRef<str> for PickleString {
+impl AsRef<str> for String {
     fn as_ref(&self) -> &str {
         &self.content
     }

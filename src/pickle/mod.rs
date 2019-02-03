@@ -21,11 +21,11 @@ mod tag;
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Pickle {
-    pub name: String,
-    pub language: String,
-    pub steps: Vec<PickleStep>,
-    pub tags: Vec<PickleTag>,
-    pub locations: Vec<PickleLocation>,
+    pub name: ::std::string::String,
+    pub language: ::std::string::String,
+    pub steps: Vec<Step>,
+    pub tags: Vec<Tag>,
+    pub locations: Vec<Location>,
 }
 
 #[cfg(test)]
