@@ -3,12 +3,10 @@
 // Changes to this file may cause incorrect behavior and will be lost if
 // the code is regenerated.
 
-use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::default::Default;
 use std::fmt;
 use std::io::Read;
-use std::rc::Rc;
 use std::sync::Arc;
 
 use ast::Location;
@@ -194,7 +192,7 @@ impl<B: Builder> ParserOptions<B> {
 
 struct ParserContext<'a> {
     token_scan: &'a mut TokenScan,
-    token_queue: VecDeque<Rc<RefCell<Token>>>,
+    token_queue: VecDeque<Token>,
     errors: Vec<Error>,
 }
 
@@ -222,8 +220,10 @@ impl<B: Builder> Parser<B> {
         };
 
         self.start_rule(&mut context, RuleType::GherkinDocument)?;
+
+        let mut token: Token;
+        let mut token_is_eof;
         let mut state: u32 = 0;
-        let mut token: Rc<RefCell<Token>>;
         loop {
             match self.read_token(&mut context) {
                 Ok(t) => token = t,
@@ -235,9 +235,12 @@ impl<B: Builder> Parser<B> {
                     continue;
                 }
             };
-            state = self.match_token(state, token.clone(), &mut context)?;
 
-            if token.borrow().is_eof() {
+            token_is_eof = token.is_eof();
+
+            state = self.match_token(state, token, &mut context)?;
+
+            if token_is_eof {
                 break;
             }
         }
@@ -286,7 +289,7 @@ impl<B: Builder> Parser<B> {
         Ok(default_value)
     }
 
-    fn build(&mut self, context: &mut ParserContext, token: Rc<RefCell<Token>>) -> Result<()> {
+    fn build(&mut self, context: &mut ParserContext, token: Token) -> Result<()> {
         let result = self.builder.build(token);
         self.handle_ast_result(context, result)
     }
@@ -301,13 +304,12 @@ impl<B: Builder> Parser<B> {
         self.handle_ast_result(context, result)
     }
 
-    fn read_token(&mut self, context: &mut ParserContext) -> Result<Rc<RefCell<Token>>> {
+    fn read_token(&mut self, context: &mut ParserContext) -> Result<Token> {
         match context.token_queue.pop_front() {
             Some(token) => Ok(token),
             None => context
                 .token_scan
-                .next()
-                .map(|token| Rc::new(RefCell::new(token))),
+                .next(),
         }
     }
 
@@ -493,7 +495,7 @@ impl<B: Builder> Parser<B> {
     fn match_token(
         &mut self,
         state: u32,
-        token: Rc<RefCell<Token>>,
+        token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
         match state {
@@ -537,37 +539,37 @@ impl<B: Builder> Parser<B> {
     // Start
     fn match_token_at_0(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_language(context, &mut *token.borrow_mut())? {
+        if self.match_language(context, &mut token)? {
             self.start_rule(context, RuleType::Feature)?;
             self.start_rule(context, RuleType::FeatureHeader)?;
             self.build(context, token)?;
             return Ok(1);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.start_rule(context, RuleType::Feature)?;
             self.start_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(2);
         }
-        if self.match_feature_line(context, &mut *token.borrow_mut())? {
+        if self.match_feature_line(context, &mut token)? {
             self.start_rule(context, RuleType::Feature)?;
             self.start_rule(context, RuleType::FeatureHeader)?;
             self.build(context, token)?;
             return Ok(3);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(0);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(0);
         }
@@ -575,7 +577,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 0 - Start");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -587,7 +589,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -625,23 +626,23 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:0>Feature_Header:0>#Language:0
     fn match_token_at_1(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(2);
         }
-        if self.match_feature_line(context, &mut *token.borrow_mut())? {
+        if self.match_feature_line(context, &mut token)? {
             self.build(context, token)?;
             return Ok(3);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(1);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(1);
         }
@@ -649,7 +650,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 1 - GherkinDocument:0>Feature:0>Feature_Header:0>#Language:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -659,7 +660,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -697,23 +697,23 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:0>Feature_Header:1>Tags:0>#TagLine:0
     fn match_token_at_2(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.build(context, token)?;
             return Ok(2);
         }
-        if self.match_feature_line(context, &mut *token.borrow_mut())? {
+        if self.match_feature_line(context, &mut token)? {
             self.end_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(3);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(2);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(2);
         }
@@ -721,7 +721,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 2 - GherkinDocument:0>Feature:0>Feature_Header:1>Tags:0>#TagLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -731,7 +731,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -769,51 +768,51 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:0>Feature_Header:2>#FeatureLine:0
     fn match_token_at_3(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(3);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(5);
         }
-        if self.match_background_line(context, &mut *token.borrow_mut())? {
+        if self.match_background_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::Background)?;
             self.build(context, token)?;
             return Ok(6);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Scenario)?;
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioOutline)?;
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.start_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(4);
@@ -822,7 +821,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 3 - GherkinDocument:0>Feature:0>Feature_Header:2>#FeatureLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -836,7 +835,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -874,29 +872,29 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:1>Description:0>#Other:0
     fn match_token_at_4(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(5);
         }
-        if self.match_background_line(context, &mut *token.borrow_mut())? {
+        if self.match_background_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::Background)?;
             self.build(context, token)?;
             return Ok(6);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -904,7 +902,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -912,7 +910,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -920,7 +918,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(4);
         }
@@ -928,7 +926,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 4 - GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:1>Description:0>#Other:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -941,7 +939,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -979,47 +976,47 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:2>#Comment:0
     fn match_token_at_5(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(5);
         }
-        if self.match_background_line(context, &mut *token.borrow_mut())? {
+        if self.match_background_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::Background)?;
             self.build(context, token)?;
             return Ok(6);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Scenario)?;
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioOutline)?;
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(5);
         }
@@ -1027,7 +1024,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 5 - GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:2>#Comment:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1040,7 +1037,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1078,50 +1074,50 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:1>Background:0>#BackgroundLine:0
     fn match_token_at_6(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(6);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(8);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(9);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Scenario)?;
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioOutline)?;
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.start_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(7);
@@ -1130,7 +1126,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 6 - GherkinDocument:0>Feature:1>Background:0>#BackgroundLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1144,7 +1140,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1182,28 +1177,28 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:1>Background:1>Description_Helper:1>Description:0>#Other:0
     fn match_token_at_7(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Background)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(8);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(9);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1211,7 +1206,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1219,7 +1214,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1227,7 +1222,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(7);
         }
@@ -1235,7 +1230,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 7 - GherkinDocument:0>Feature:1>Background:1>Description_Helper:1>Description:0>#Other:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1248,7 +1243,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1286,46 +1280,46 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:1>Background:1>Description_Helper:2>#Comment:0
     fn match_token_at_8(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(8);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(9);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::Scenario)?;
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioOutline)?;
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(8);
         }
@@ -1333,7 +1327,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 8 - GherkinDocument:0>Feature:1>Background:1>Description_Helper:2>#Comment:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1346,7 +1340,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1384,33 +1377,33 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:1>Background:2>Step:0>#StepLine:0
     fn match_token_at_9(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.start_rule(context, RuleType::DataTable)?;
             self.build(context, token)?;
             return Ok(10);
         }
-        if self.match_doc_string_separator(context, &mut *token.borrow_mut())? {
+        if self.match_doc_string_separator(context, &mut token)? {
             self.start_rule(context, RuleType::DocString)?;
             self.build(context, token)?;
             return Ok(32);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(9);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1418,7 +1411,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1426,7 +1419,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1434,11 +1427,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(9);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(9);
         }
@@ -1446,7 +1439,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 9 - GherkinDocument:0>Feature:1>Background:2>Step:0>#StepLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1461,7 +1454,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1499,10 +1491,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0
     fn match_token_at_10(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -1510,18 +1502,18 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.build(context, token)?;
             return Ok(10);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(9);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -1530,7 +1522,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -1539,7 +1531,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -1548,11 +1540,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(10);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(10);
         }
@@ -1560,7 +1552,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 10 - GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1574,7 +1566,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1612,30 +1603,30 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:0>Tags:0>#TagLine:0
     fn match_token_at_11(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Tags)?;
             self.start_rule(context, RuleType::Scenario)?;
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Tags)?;
             self.start_rule(context, RuleType::ScenarioOutline)?;
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(11);
         }
@@ -1643,7 +1634,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 11 - GherkinDocument:0>Feature:2>Scenario_Definition:0>Tags:0>#TagLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1654,7 +1645,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1692,30 +1682,30 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:0>#ScenarioLine:0
     fn match_token_at_12(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(14);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(15);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1723,7 +1713,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1731,7 +1721,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1739,7 +1729,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.start_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(13);
@@ -1748,7 +1738,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 12 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:0>#ScenarioLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1762,7 +1752,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1800,10 +1789,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:1>Description:0>#Other:0
     fn match_token_at_13(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -1811,18 +1800,18 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(14);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(15);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -1831,7 +1820,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -1840,7 +1829,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -1849,7 +1838,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(13);
         }
@@ -1857,7 +1846,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 13 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:1>Description:0>#Other:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1870,7 +1859,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -1908,26 +1896,26 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:2>#Comment:0
     fn match_token_at_14(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(14);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(15);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1935,7 +1923,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1943,7 +1931,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -1951,7 +1939,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(14);
         }
@@ -1959,7 +1947,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 14 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:2>#Comment:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -1972,7 +1960,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2010,10 +1997,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:0>#StepLine:0
     fn match_token_at_15(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2021,23 +2008,23 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.start_rule(context, RuleType::DataTable)?;
             self.build(context, token)?;
             return Ok(16);
         }
-        if self.match_doc_string_separator(context, &mut *token.borrow_mut())? {
+        if self.match_doc_string_separator(context, &mut token)? {
             self.start_rule(context, RuleType::DocString)?;
             self.build(context, token)?;
             return Ok(30);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(15);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2046,7 +2033,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2055,7 +2042,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2064,11 +2051,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(15);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(15);
         }
@@ -2076,7 +2063,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 15 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:0>#StepLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2091,7 +2078,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2129,10 +2115,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0
     fn match_token_at_16(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -2141,18 +2127,18 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.build(context, token)?;
             return Ok(16);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(15);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -2162,7 +2148,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -2172,7 +2158,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -2182,11 +2168,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(16);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(16);
         }
@@ -2194,7 +2180,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 16 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2208,7 +2194,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2246,34 +2231,32 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:0>#ScenarioOutlineLine:0
     fn match_token_at_17(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(19);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(20);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -2281,7 +2264,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -2289,13 +2272,13 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Examples)?;
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -2303,7 +2286,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -2311,7 +2294,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.start_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(18);
@@ -2320,7 +2303,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 17 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:0>#ScenarioOutlineLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2335,7 +2318,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2373,10 +2355,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:1>Description:0>#Other:0
     fn match_token_at_18(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2384,22 +2366,20 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(19);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(20);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Description)?;
@@ -2408,7 +2388,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2417,14 +2397,14 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Examples)?;
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2433,7 +2413,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2442,7 +2422,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(18);
         }
@@ -2450,7 +2430,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 18 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:1>Description:0>#Other:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2464,7 +2444,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2502,30 +2481,28 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:2>#Comment:0
     fn match_token_at_19(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.end_rule(context, RuleType::Feature)?;
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(19);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(20);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -2533,7 +2510,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -2541,13 +2518,13 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Examples)?;
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -2555,7 +2532,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
             self.start_rule(context, RuleType::ScenarioDefinition)?;
@@ -2563,7 +2540,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(19);
         }
@@ -2571,7 +2548,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 19 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:2>#Comment:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2585,7 +2562,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2623,10 +2599,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:0>#StepLine:0
     fn match_token_at_20(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2634,27 +2610,25 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.start_rule(context, RuleType::DataTable)?;
             self.build(context, token)?;
             return Ok(21);
         }
-        if self.match_doc_string_separator(context, &mut *token.borrow_mut())? {
+        if self.match_doc_string_separator(context, &mut token)? {
             self.start_rule(context, RuleType::DocString)?;
             self.build(context, token)?;
             return Ok(28);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(20);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Step)?;
@@ -2663,7 +2637,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2672,14 +2646,14 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Examples)?;
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2688,7 +2662,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
             self.end_rule(context, RuleType::ScenarioDefinition)?;
@@ -2697,11 +2671,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(20);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(20);
         }
@@ -2709,7 +2683,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 20 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:0>#StepLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2725,7 +2699,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2763,10 +2736,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0
     fn match_token_at_21(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2775,11 +2748,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.build(context, token)?;
             return Ok(21);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
@@ -2787,10 +2760,8 @@ impl<B: Builder> Parser<B> {
             return Ok(20);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::DataTable)?;
@@ -2800,7 +2771,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2810,7 +2781,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -2818,7 +2789,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2828,7 +2799,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2838,11 +2809,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(21);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(21);
         }
@@ -2850,7 +2821,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 21 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2865,7 +2836,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2903,24 +2873,24 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:0>Tags:0>#TagLine:0
     fn match_token_at_22(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::Tags)?;
             self.start_rule(context, RuleType::Examples)?;
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(22);
         }
@@ -2928,7 +2898,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 22 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:0>Tags:0>#TagLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -2938,7 +2908,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -2976,10 +2945,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:0>#ExamplesLine:0
     fn match_token_at_23(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2988,24 +2957,22 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(25);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.start_rule(context, RuleType::ExamplesTable)?;
             self.build(context, token)?;
             return Ok(26);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Examples)?;
@@ -3015,7 +2982,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3025,7 +2992,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -3033,7 +3000,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3043,7 +3010,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3053,7 +3020,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.start_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(24);
@@ -3062,7 +3029,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 23 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:0>#ExamplesLine:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3077,7 +3044,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3115,10 +3081,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:1>Description:0>#Other:0
     fn match_token_at_24(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3128,22 +3094,20 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.build(context, token)?;
             return Ok(25);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.start_rule(context, RuleType::ExamplesTable)?;
             self.build(context, token)?;
             return Ok(26);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Description)?;
@@ -3154,7 +3118,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3165,7 +3129,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3174,7 +3138,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3185,7 +3149,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3196,7 +3160,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(24);
         }
@@ -3204,7 +3168,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 24 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:1>Description:0>#Other:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3218,7 +3182,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3256,10 +3219,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:2>#Comment:0
     fn match_token_at_25(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3268,20 +3231,18 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(25);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.start_rule(context, RuleType::ExamplesTable)?;
             self.build(context, token)?;
             return Ok(26);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Examples)?;
@@ -3291,7 +3252,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3301,7 +3262,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -3309,7 +3270,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3319,7 +3280,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3329,7 +3290,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(25);
         }
@@ -3337,7 +3298,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 25 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:2>#Comment:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3351,7 +3312,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3389,10 +3349,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:2>Examples_Table:0>#TableRow:0
     fn match_token_at_26(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::ExamplesTable)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3402,15 +3362,13 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_table_row(context, &mut *token.borrow_mut())? {
+        if self.match_table_row(context, &mut token)? {
             self.build(context, token)?;
             return Ok(26);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::ExamplesTable)?;
@@ -3421,7 +3379,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::ExamplesTable)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3432,7 +3390,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::ExamplesTable)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3441,7 +3399,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::ExamplesTable)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3452,7 +3410,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::ExamplesTable)?;
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3463,11 +3421,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(26);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(26);
         }
@@ -3475,7 +3433,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 26 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:2>Examples_Table:0>#TableRow:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3489,7 +3447,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3527,14 +3484,14 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0
     fn match_token_at_28(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_doc_string_separator(context, &mut *token.borrow_mut())? {
+        if self.match_doc_string_separator(context, &mut token)? {
             self.build(context, token)?;
             return Ok(29);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(28);
         }
@@ -3542,7 +3499,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 28 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3550,7 +3507,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3588,10 +3544,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0
     fn match_token_at_29(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3600,7 +3556,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
@@ -3608,10 +3564,8 @@ impl<B: Builder> Parser<B> {
             return Ok(20);
         }
         let match_tag_line_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_tag_line(context, &mut token_borrow)?
-                && self.lookahead_0(context, &token_borrow)
+            self.match_tag_line(context, &mut token)?
+                && self.lookahead_0(context, &token)
         };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::DocString)?;
@@ -3621,7 +3575,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(22);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3631,7 +3585,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_examples_line(context, &mut *token.borrow_mut())? {
+        if self.match_examples_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -3639,7 +3593,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(23);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3649,7 +3603,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -3659,11 +3613,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(29);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(29);
         }
@@ -3671,7 +3625,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 29 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3685,7 +3639,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3723,14 +3676,14 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0
     fn match_token_at_30(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_doc_string_separator(context, &mut *token.borrow_mut())? {
+        if self.match_doc_string_separator(context, &mut token)? {
             self.build(context, token)?;
             return Ok(31);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(30);
         }
@@ -3738,7 +3691,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 30 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3746,7 +3699,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3784,10 +3736,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0
     fn match_token_at_31(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -3796,14 +3748,14 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(15);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -3813,7 +3765,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -3823,7 +3775,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Scenario)?;
@@ -3833,11 +3785,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(31);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(31);
         }
@@ -3845,7 +3797,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 31 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3858,7 +3810,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3896,14 +3847,14 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0
     fn match_token_at_32(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_doc_string_separator(context, &mut *token.borrow_mut())? {
+        if self.match_doc_string_separator(context, &mut token)? {
             self.build(context, token)?;
             return Ok(33);
         }
-        if self.match_other(context, &mut *token.borrow_mut())? {
+        if self.match_other(context, &mut token)? {
             self.build(context, token)?;
             return Ok(32);
         }
@@ -3911,7 +3862,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 32 - GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -3919,7 +3870,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Other"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -3957,10 +3907,10 @@ impl<B: Builder> Parser<B> {
     // GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0
     fn match_token_at_33(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
-        if self.match_eof(context, &mut *token.borrow_mut())? {
+        if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -3968,14 +3918,14 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(27);
         }
-        if self.match_step_line(context, &mut *token.borrow_mut())? {
+        if self.match_step_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::Step)?;
             self.build(context, token)?;
             return Ok(9);
         }
-        if self.match_tag_line(context, &mut *token.borrow_mut())? {
+        if self.match_tag_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -3984,7 +3934,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(11);
         }
-        if self.match_scenario_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -3993,7 +3943,7 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(12);
         }
-        if self.match_scenario_outline_line(context, &mut *token.borrow_mut())? {
+        if self.match_scenario_outline_line(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;
             self.end_rule(context, RuleType::Background)?;
@@ -4002,11 +3952,11 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(17);
         }
-        if self.match_comment(context, &mut *token.borrow_mut())? {
+        if self.match_comment(context, &mut token)? {
             self.build(context, token)?;
             return Ok(33);
         }
-        if self.match_empty(context, &mut *token.borrow_mut())? {
+        if self.match_empty(context, &mut token)? {
             self.build(context, token)?;
             return Ok(33);
         }
@@ -4014,7 +3964,7 @@ impl<B: Builder> Parser<B> {
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: 33 - GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -4027,7 +3977,6 @@ impl<B: Builder> Parser<B> {
             String::from("#Empty"),
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -4066,25 +4015,25 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
     fn lookahead_0(&mut self, context: &mut ParserContext, current_token: &Token) -> bool {
         current_token.detach();
-        let mut token: Rc<RefCell<Token>>;
-        let mut queue: VecDeque<Rc<RefCell<Token>>> = VecDeque::new();
+        let mut token: Token;
+        let mut queue: VecDeque<Token> = VecDeque::new();
         let mut found_match = false;
         loop {
             token = self.read_token(context).expect("read next token");
-            token.borrow().detach();
+            token.detach();
             queue.push_back(token.clone());
 
             if false
-                || self.match_examples_line(context, &mut *token.borrow_mut()) .unwrap_or(false)
+                || self.match_examples_line(context, &mut token) .unwrap_or(false)
             {
                 found_match = true;
                 break;
             }
 
              if true
-                 && !self.match_empty(context, &mut *token.borrow_mut()) .unwrap_or(true)
-                 && !self.match_comment(context, &mut *token.borrow_mut()) .unwrap_or(true)
-                 && !self.match_tag_line(context, &mut *token.borrow_mut()) .unwrap_or(true)
+                 && !self.match_empty(context, &mut token) .unwrap_or(true)
+                 && !self.match_comment(context, &mut token) .unwrap_or(true)
+                 && !self.match_tag_line(context, &mut token) .unwrap_or(true)
              {
                  break;
              }
@@ -4099,7 +4048,7 @@ impl<B: Builder> Parser<B> {
 pub trait Builder {
     type BuilderResult;
 
-    fn build(&mut self, token: Rc<RefCell<Token>>) -> Result<()>;
+    fn build(&mut self, token: Token) -> Result<()>;
     fn start_rule(&mut self, rule_type: RuleType) -> Result<()>;
     fn end_rule(&mut self, rule_type: RuleType) -> Result<()>;
     fn get_result(&mut self) -> Self::BuilderResult;

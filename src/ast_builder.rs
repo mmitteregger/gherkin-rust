@@ -1,8 +1,6 @@
 use std::any::Any;
-use std::cell::RefCell;
 use std::default::Default;
 use std::mem;
-use std::rc::Rc;
 
 use ast::*;
 use ast_node::AstNode;
@@ -29,9 +27,8 @@ impl Default for AstBuilder {
 impl parser::Builder for AstBuilder {
     type BuilderResult = GherkinDocument;
 
-    fn build(&mut self, token: Rc<RefCell<Token>>) -> Result<()> {
+    fn build(&mut self, token: Token) -> Result<()> {
         let (rule_type, is_comment) = {
-            let token = token.borrow();
             let token_type = token.matched_type.unwrap();
             let rule_type = RuleType::from(token_type);
             let is_comment = token_type == TokenType::Comment;
@@ -39,7 +36,6 @@ impl parser::Builder for AstBuilder {
         };
 
         if is_comment {
-            let token = token.borrow();
             let location = self.get_location(&token, 0);
             let text = token.matched_text.as_ref().unwrap().clone();
             let comment = Comment::new(location, text);
@@ -58,7 +54,7 @@ impl parser::Builder for AstBuilder {
 
     fn end_rule(&mut self, _rule_type: RuleType) -> Result<()> {
         let node = self.stack.pop().unwrap();
-        let rule_type = node.rule_type;
+        let rule_type = node.rule_type();
 
         let transformed_node = self.get_transformed_node(node)?;
         self.current_node().add(rule_type, transformed_node);
@@ -96,10 +92,9 @@ impl AstBuilder {
     }
 
     fn get_transformed_node(&mut self, mut node: AstNode) -> Result<Box<Any>> {
-        match node.rule_type {
+        match node.rule_type() {
             RuleType::Step => {
-                let step_line: Rc<RefCell<Token>> = node.remove_token(TokenType::StepLine);
-                let step_line = step_line.borrow();
+                let step_line: Token = node.remove_token(TokenType::StepLine);
 
                 let step_arg: Option<Argument> = {
                     let data_table: Option<DataTable> = node.remove_opt(RuleType::DataTable);
@@ -125,7 +120,7 @@ impl AstBuilder {
             }
             RuleType::DocString => {
                 let separator_tokens = node.remove_tokens(TokenType::DocStringSeparator);
-                let separator_token = separator_tokens[0].borrow();
+                let separator_token = &separator_tokens[0];
                 let separator_token_text = separator_token.matched_text.as_ref().unwrap();
                 let content_type = if separator_token_text.chars().count() > 0 {
                     Some(separator_token_text.to_owned())
@@ -136,7 +131,6 @@ impl AstBuilder {
                     .into_iter()
                     .map(|line_token| {
                         line_token
-                            .borrow()
                             .matched_text
                             .as_ref()
                             .unwrap()
@@ -155,9 +149,7 @@ impl AstBuilder {
                 Ok(Box::new(DataTable::new(rows)))
             }
             RuleType::Background => {
-                let background_line: Rc<RefCell<Token>> =
-                    node.remove_token(TokenType::BackgroundLine);
-                let background_line = background_line.borrow();
+                let background_line: Token = node.remove_token(TokenType::BackgroundLine);
 
                 let description = self.get_description(&mut node);
                 let steps = self.get_steps(&mut node);
@@ -175,7 +167,6 @@ impl AstBuilder {
                 let scenario_definition: ScenarioDefinition = match scenario_node {
                     Some(mut scenario_node) => {
                         let scenario_line = scenario_node.remove_token(TokenType::ScenarioLine);
-                        let scenario_line = scenario_line.borrow();
 
                         let location = self.get_location(&scenario_line, 0);
                         let keyword = scenario_line.matched_keyword.as_ref().unwrap().to_owned();
@@ -196,7 +187,6 @@ impl AstBuilder {
                         let mut outline_node = node.remove::<AstNode>(RuleType::ScenarioOutline);
                         let outline_line =
                             outline_node.remove_token(TokenType::ScenarioOutlineLine);
-                        let outline_line = outline_line.borrow();
 
                         let location = self.get_location(&outline_line, 0);
                         let keyword = outline_line.matched_keyword.as_ref().unwrap().to_owned();
@@ -223,7 +213,6 @@ impl AstBuilder {
                 let tags = self.get_tags(&mut node);
                 let mut examples_node: AstNode = node.remove(RuleType::Examples);
                 let examples_line = examples_node.remove_token(TokenType::ExamplesLine);
-                let examples_line = examples_line.borrow();
                 let description = self.get_description(&mut examples_node);
                 let rows: Option<Vec<TableRow>> =
                     examples_node.remove_opt(RuleType::ExamplesTable);
@@ -263,13 +252,11 @@ impl AstBuilder {
                 let mut end = line_tokens.len();
                 while end > 0
                     && line_tokens[end - 1]
-                        .borrow()
-                        .matched_text
-                        .as_ref()
-                        .unwrap()
-                        .chars()
-                        .all(|c| c.is_whitespace())
-                {
+                    .matched_text
+                    .as_ref()
+                    .unwrap()
+                    .chars()
+                    .all(|c| c.is_whitespace()) {
                     end -= 1;
                 }
 
@@ -277,7 +264,7 @@ impl AstBuilder {
 
                 let description = line_tokens
                     .iter()
-                    .map(|token| token.borrow().matched_text.as_ref().unwrap().to_owned())
+                    .map(|token| token.matched_text.as_ref().unwrap().to_owned())
                     .collect::<Vec<String>>()
                     .join("\n");
 
@@ -287,7 +274,6 @@ impl AstBuilder {
                 let mut feature_header = node.remove(RuleType::FeatureHeader);
                 let tags = self.get_tags(&mut feature_header);
                 let feature_line = feature_header.remove_token(TokenType::FeatureLine);
-                let feature_line = feature_line.borrow();
 
                 let mut scenario_definitions: Vec<ScenarioDefinition> = Vec::new();
 
@@ -336,8 +322,6 @@ impl AstBuilder {
         let rows: Vec<TableRow> = node.remove_tokens(TokenType::TableRow)
             .into_iter()
             .map(|token| {
-                let token = token.borrow();
-
                 let location = self.get_location(&token, 0);
                 let cells = self.get_cells(&token);
                 TableRow::new(location, cells)
@@ -392,11 +376,10 @@ impl AstBuilder {
         let default_tags_node = AstNode::new(RuleType::None);
         let mut tags_node = node.remove_or(RuleType::Tags, default_tags_node);
 
-        let tokens = tags_node.remove_tokens(TokenType::TagLine);
+        let mut tokens = tags_node.remove_tokens(TokenType::TagLine);
 
         let mut tags = Vec::new();
-        for token in tokens {
-            let mut token = token.borrow_mut();
+        for token in tokens.iter_mut() {
             let tag_items = mem::replace(&mut token.matched_items, Vec::new());
             for tag_item in tag_items {
                 let location = self.get_location(&token, tag_item.column);

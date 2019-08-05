@@ -43,7 +43,7 @@
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let state_comment = String::from("State: @state.Id - @Raw(state.Comment)");
 
-        token.borrow().detach();
+        token.detach();
 
         #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
@@ -51,7 +51,6 @@
 </text>}
         ];
 
-        let token = token.borrow();
         let token_location = token.location.expect("token location");
 
         let error = if token.is_eof() {
@@ -86,14 +85,12 @@
         Ok(@state.Id)
 </text>}
 @helper MatchToken(TokenType tokenType)
-{<text>match_@(FormatMethodName(tokenType.Name))(context, &mut *token.borrow_mut())</text>}
+{<text>match_@(FormatMethodName(tokenType.Name))(context, &mut token)</text>}
 
-use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::default::Default;
 use std::fmt;
 use std::io::Read;
-use std::rc::Rc;
 use std::sync::Arc;
 
 use ast::Location;
@@ -229,7 +226,7 @@ impl<B: Builder> @(Model.ParserClassName)Options<B> {
 
 struct @(Model.ParserClassName)Context<'a> {
     token_scan: &'a mut TokenScan,
-    token_queue: VecDeque<Rc<RefCell<Token>>>,
+    token_queue: VecDeque<Token>,
     errors: Vec<Error>,
 }
 
@@ -257,8 +254,10 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         };
 
         self.start_rule(&mut context, RuleType::@Model.RuleSet.StartRule.Name)?;
+
+        let mut token: Token;
+        let mut token_is_eof;
         let mut state: u32 = 0;
-        let mut token: Rc<RefCell<Token>>;
         loop {
             match self.read_token(&mut context) {
                 Ok(t) => token = t,
@@ -270,9 +269,12 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
                     continue;
                 }
             };
-            state = self.match_token(state, token.clone(), &mut context)?;
 
-            if token.borrow().is_eof() {
+            token_is_eof = token.is_eof();
+
+            state = self.match_token(state, token, &mut context)?;
+
+            if token_is_eof {
                 break;
             }
         }
@@ -321,7 +323,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         Ok(default_value)
     }
 
-    fn build(&mut self, context: &mut ParserContext, token: Rc<RefCell<Token>>) -> Result<()> {
+    fn build(&mut self, context: &mut ParserContext, token: Token) -> Result<()> {
         let result = self.builder.build(token);
         self.handle_ast_result(context, result)
     }
@@ -336,13 +338,12 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         self.handle_ast_result(context, result)
     }
 
-    fn read_token(&mut self, context: &mut ParserContext) -> Result<Rc<RefCell<Token>>> {
+    fn read_token(&mut self, context: &mut ParserContext) -> Result<Token> {
         match context.token_queue.pop_front() {
             Some(token) => Ok(token),
             None => context
                 .token_scan
-                .next()
-                .map(|token| Rc::new(RefCell::new(token))),
+                .next(),
         }
     }
 @foreach(var rule in Model.RuleSet.TokenRules)
@@ -367,7 +368,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
     fn match_token(
         &mut self,
         state: u32,
-        token: Rc<RefCell<Token>>,
+        token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
         match state {
@@ -384,7 +385,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
     // @Raw(state.Comment)
     fn match_token_at_@(state.Id)(
         &mut self,
-        token: Rc<RefCell<Token>>,
+        mut token: Token,
         context: &mut ParserContext,
     ) -> Result<u32> {
 </text>foreach(var transition in state.Transitions)
@@ -393,10 +394,8 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         @:if self.@MatchToken(transition.TokenType)? {
         } else {
         <text>let match_@(FormatMethodName(transition.TokenType.Name))_with_lookahead = {
-            // Workaround for borrow checking
-            let mut token_borrow = token.borrow_mut();
-            self.match_@(FormatMethodName(transition.TokenType.Name))(context, &mut token_borrow)?
-                && self.lookahead_@(transition.LookAheadHint.Id)(context, &token_borrow)
+            self.match_@(FormatMethodName(transition.TokenType.Name))(context, &mut token)?
+                && self.lookahead_@(transition.LookAheadHint.Id)(context, &token)
         };
         if match_@(FormatMethodName(transition.TokenType.Name))_with_lookahead {</text>
         }
@@ -416,12 +415,12 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
     fn lookahead_@(lookAheadHint.Id)(&mut self, context: &mut ParserContext, current_token: &Token) -> bool {
         current_token.detach();
-        let mut token: Rc<RefCell<Token>>;
-        let mut queue: VecDeque<Rc<RefCell<Token>>> = VecDeque::new();
+        let mut token: Token;
+        let mut queue: VecDeque<Token> = VecDeque::new();
         let mut found_match = false;
         loop {
             token = self.read_token(context).expect("read next token");
-            token.borrow().detach();
+            token.detach();
             queue.push_back(token.clone());
 
             if false
@@ -452,7 +451,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
 pub trait Builder {
     type BuilderResult;
 
-    fn build(&mut self, token: Rc<RefCell<Token>>) -> Result<()>;
+    fn build(&mut self, token: Token) -> Result<()>;
     fn start_rule(&mut self, rule_type: RuleType) -> Result<()>;
     fn end_rule(&mut self, rule_type: RuleType) -> Result<()>;
     fn get_result(&mut self) -> Self::BuilderResult;

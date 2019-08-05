@@ -1,7 +1,5 @@
-use std::cell::RefCell;
 use std::default::Default;
 use std::mem;
-use std::rc::Rc;
 use std::string::ToString;
 
 use ast::Location;
@@ -25,8 +23,8 @@ impl Default for TokenFormatterBuilder {
 impl parser::Builder for TokenFormatterBuilder {
     type BuilderResult = String;
 
-    fn build(&mut self, token: Rc<RefCell<Token>>) -> Result<()> {
-        let formatted_token = format_token(&*token.borrow());
+    fn build(&mut self, token: Token) -> Result<()> {
+        let formatted_token = format_token(token);
         self.tokens_text_builder += &formatted_token;
         self.tokens_text_builder += "\n";
         Ok(())
@@ -47,7 +45,7 @@ impl parser::Builder for TokenFormatterBuilder {
     fn reset(&mut self) {}
 }
 
-fn format_token(token: &Token) -> String {
+fn format_token(token: Token) -> String {
     if token.is_eof() {
         return String::from("EOF");
     }
