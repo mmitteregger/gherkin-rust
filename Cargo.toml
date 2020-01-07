@@ -12,6 +12,7 @@ readme = "README.md"
 keywords = ["cucumber", "bdd", "testing"]
 categories = ["parser-implementations", "development-tools::testing"]
 license = "MIT"
+edition = "2018"
 
 [lib]
 name = "gherkin"
