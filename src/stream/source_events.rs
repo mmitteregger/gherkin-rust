@@ -40,7 +40,7 @@ impl Iterator for SourceEventsIter {
                         return Some(Err(error.into()));
                     }
                 };
-                Some(Ok(SourceEvent::new(path.to_owned(), data)))
+                Some(Ok(SourceEvent::new(path, data)))
             }
             None => None,
         }

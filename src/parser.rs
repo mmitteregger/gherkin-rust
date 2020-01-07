@@ -43,7 +43,7 @@ impl fmt::Display for TokenType {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-#[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
+#[rustfmt::skip] // simplifies the parser template
 pub enum RuleType {
     None,
     Eof, // #EOF
@@ -248,7 +248,7 @@ impl<B: Builder> Parser<B> {
         self.end_rule(&mut context, RuleType::GherkinDocument)?;
 
         if !context.errors.is_empty() {
-            Err(Error::Composite(context.errors))?;
+            return Err(Error::Composite(context.errors));
         }
 
         Ok(self.builder.get_result())
@@ -315,7 +315,7 @@ impl<B: Builder> Parser<B> {
         }
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_eof(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -325,7 +325,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_empty(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -338,7 +338,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_comment(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -351,7 +351,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_tag_line(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -364,7 +364,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_feature_line(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -377,7 +377,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_background_line(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -390,7 +390,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_scenario_line(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -403,7 +403,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_scenario_outline_line(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -416,7 +416,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_examples_line(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -429,7 +429,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_step_line(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -442,7 +442,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_doc_string_separator(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -455,7 +455,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_table_row(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -468,7 +468,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_language(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -481,7 +481,7 @@ impl<B: Builder> Parser<B> {
         self.handle_external_result(context, result, false)
     }
 
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_other(
         &mut self,
         context: &mut ParserContext<'_>,
@@ -576,12 +576,12 @@ impl<B: Builder> Parser<B> {
             return Ok(0);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 0 - Start");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Language"),
@@ -612,7 +612,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -649,12 +649,12 @@ impl<B: Builder> Parser<B> {
             return Ok(1);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 1 - GherkinDocument:0>Feature:0>Feature_Header:0>#Language:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#TagLine"),
             String::from("#FeatureLine"),
@@ -683,7 +683,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -720,12 +720,12 @@ impl<B: Builder> Parser<B> {
             return Ok(2);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 2 - GherkinDocument:0>Feature:0>Feature_Header:1>Tags:0>#TagLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#TagLine"),
             String::from("#FeatureLine"),
@@ -754,7 +754,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -820,12 +820,12 @@ impl<B: Builder> Parser<B> {
             return Ok(4);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 3 - GherkinDocument:0>Feature:0>Feature_Header:2>#FeatureLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Empty"),
@@ -858,7 +858,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -925,12 +925,12 @@ impl<B: Builder> Parser<B> {
             return Ok(4);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 4 - GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:1>Description:0>#Other:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -962,7 +962,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1023,12 +1023,12 @@ impl<B: Builder> Parser<B> {
             return Ok(5);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 5 - GherkinDocument:0>Feature:0>Feature_Header:3>Description_Helper:2>#Comment:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -1060,7 +1060,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1125,12 +1125,12 @@ impl<B: Builder> Parser<B> {
             return Ok(7);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 6 - GherkinDocument:0>Feature:1>Background:0>#BackgroundLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Empty"),
@@ -1163,7 +1163,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1229,12 +1229,12 @@ impl<B: Builder> Parser<B> {
             return Ok(7);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 7 - GherkinDocument:0>Feature:1>Background:1>Description_Helper:1>Description:0>#Other:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -1266,7 +1266,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1326,12 +1326,12 @@ impl<B: Builder> Parser<B> {
             return Ok(8);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 8 - GherkinDocument:0>Feature:1>Background:1>Description_Helper:2>#Comment:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -1363,7 +1363,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1438,12 +1438,12 @@ impl<B: Builder> Parser<B> {
             return Ok(9);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 9 - GherkinDocument:0>Feature:1>Background:2>Step:0>#StepLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#TableRow"),
@@ -1477,7 +1477,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1551,12 +1551,12 @@ impl<B: Builder> Parser<B> {
             return Ok(10);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 10 - GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#TableRow"),
@@ -1589,7 +1589,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1633,12 +1633,12 @@ impl<B: Builder> Parser<B> {
             return Ok(11);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 11 - GherkinDocument:0>Feature:2>Scenario_Definition:0>Tags:0>#TagLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#TagLine"),
             String::from("#ScenarioLine"),
@@ -1668,7 +1668,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1737,12 +1737,12 @@ impl<B: Builder> Parser<B> {
             return Ok(13);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 12 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:0>#ScenarioLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Empty"),
@@ -1775,7 +1775,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1845,12 +1845,12 @@ impl<B: Builder> Parser<B> {
             return Ok(13);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 13 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:1>Description:0>#Other:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -1882,7 +1882,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -1946,12 +1946,12 @@ impl<B: Builder> Parser<B> {
             return Ok(14);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 14 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:1>Description_Helper:2>#Comment:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -1983,7 +1983,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2062,12 +2062,12 @@ impl<B: Builder> Parser<B> {
             return Ok(15);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 15 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:0>#StepLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#TableRow"),
@@ -2101,7 +2101,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2179,12 +2179,12 @@ impl<B: Builder> Parser<B> {
             return Ok(16);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 16 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#TableRow"),
@@ -2217,7 +2217,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2300,12 +2300,12 @@ impl<B: Builder> Parser<B> {
             return Ok(18);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 17 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:0>#ScenarioOutlineLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Empty"),
@@ -2339,7 +2339,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2425,12 +2425,12 @@ impl<B: Builder> Parser<B> {
             return Ok(18);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 18 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:1>Description:0>#Other:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -2463,7 +2463,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2541,12 +2541,12 @@ impl<B: Builder> Parser<B> {
             return Ok(19);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 19 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:1>Description_Helper:2>#Comment:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -2579,7 +2579,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2674,12 +2674,12 @@ impl<B: Builder> Parser<B> {
             return Ok(20);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 20 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:0>#StepLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#TableRow"),
@@ -2714,7 +2714,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2810,12 +2810,12 @@ impl<B: Builder> Parser<B> {
             return Ok(21);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 21 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:0>DataTable:0>#TableRow:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#TableRow"),
@@ -2849,7 +2849,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -2887,12 +2887,12 @@ impl<B: Builder> Parser<B> {
             return Ok(22);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 22 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:0>Tags:0>#TagLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#TagLine"),
             String::from("#ExamplesLine"),
@@ -2921,7 +2921,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3016,12 +3016,12 @@ impl<B: Builder> Parser<B> {
             return Ok(24);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 23 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:0>#ExamplesLine:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Empty"),
@@ -3055,7 +3055,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3153,12 +3153,12 @@ impl<B: Builder> Parser<B> {
             return Ok(24);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 24 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:1>Description:0>#Other:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -3191,7 +3191,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3281,12 +3281,12 @@ impl<B: Builder> Parser<B> {
             return Ok(25);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 25 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:1>Description_Helper:2>#Comment:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#Comment"),
@@ -3319,7 +3319,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3414,12 +3414,12 @@ impl<B: Builder> Parser<B> {
             return Ok(26);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 26 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:3>Examples_Definition:1>Examples:2>Examples_Table:0>#TableRow:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#TableRow"),
@@ -3452,7 +3452,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3480,12 +3480,12 @@ impl<B: Builder> Parser<B> {
             return Ok(28);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 28 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#DocStringSeparator"),
             String::from("#Other"),
@@ -3512,7 +3512,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3604,12 +3604,12 @@ impl<B: Builder> Parser<B> {
             return Ok(29);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 29 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:1>ScenarioOutline:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#StepLine"),
@@ -3642,7 +3642,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3670,12 +3670,12 @@ impl<B: Builder> Parser<B> {
             return Ok(30);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 30 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#DocStringSeparator"),
             String::from("#Other"),
@@ -3702,7 +3702,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3776,12 +3776,12 @@ impl<B: Builder> Parser<B> {
             return Ok(31);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 31 - GherkinDocument:0>Feature:2>Scenario_Definition:1>__alt0:0>Scenario:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#StepLine"),
@@ -3813,7 +3813,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3841,12 +3841,12 @@ impl<B: Builder> Parser<B> {
             return Ok(32);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 32 - GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:0>#DocStringSeparator:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#DocStringSeparator"),
             String::from("#Other"),
@@ -3873,7 +3873,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3943,12 +3943,12 @@ impl<B: Builder> Parser<B> {
             return Ok(33);
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: 33 - GherkinDocument:0>Feature:1>Background:2>Step:1>Step_Arg:0>__alt1:1>DocString:2>#DocStringSeparator:0");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             String::from("#EOF"),
             String::from("#StepLine"),
@@ -3980,7 +3980,7 @@ impl<B: Builder> Parser<B> {
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -3993,8 +3993,8 @@ impl<B: Builder> Parser<B> {
         Ok(33)
     }
 
-    #[allow(unknown_lints, nonminimal_bool)] // simplifies the parser template
-    #[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
+    #[allow(clippy::nonminimal_bool)] // simplifies the parser template
+    #[rustfmt::skip] // simplifies the parser template
     fn lookahead_0(&mut self, context: &mut ParserContext<'_>, current_token: &Token) -> bool {
         current_token.detach();
         let mut token: Token;

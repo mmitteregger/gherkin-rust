@@ -40,12 +40,12 @@
 }
 @helper HandleParserError(IEnumerable<string> expectedTokens, State state)
 {<text>
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let state_comment = String::from("State: @state.Id - @Raw(state.Comment)");
 
         token.detach();
 
-        #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+        #[rustfmt::skip] // because the generated lengths differ
         let expected_tokens: Vec<String> = vec![
             @foreach(var expectedToken in expectedTokens) {<text>            String::from("@expectedToken"),
 </text>}
@@ -72,7 +72,7 @@
             Error::UnexpectedToken {
                 location,
                 state_comment,
-                received_token: Box::new(token.clone()),
+                received_token: Box::new(token),
                 expected_tokens,
             }
         };
@@ -116,7 +116,7 @@ impl fmt::Display for TokenType {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-#[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
+#[rustfmt::skip] // simplifies the parser template
 pub enum RuleType {
     None,
     @foreach(var rule in Model.RuleSet.Where(r => !r.TempRule)) {
@@ -282,7 +282,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         self.end_rule(&mut context, RuleType::@Model.RuleSet.StartRule.Name)?;
 
         if !context.errors.is_empty() {
-            Err(Error::Composite(context.errors))?;
+            return Err(Error::Composite(context.errors));
         }
 
         Ok(self.builder.get_result())
@@ -350,7 +350,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
     }
 @foreach(var rule in Model.RuleSet.TokenRules)
 {<text>
-    #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
+    #[rustfmt::skip] // because the generated lengths differ
     fn match_@(FormatMethodName(rule.Name))(</text>
         @:&mut self,
         @:context: &mut ParserContext<'_>,
@@ -411,8 +411,8 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
 @foreach(var lookAheadHint in Model.RuleSet.LookAheadHints)
 {
 <text>
-    #[allow(unknown_lints, nonminimal_bool)] // simplifies the parser template
-    #[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
+    #[allow(clippy::nonminimal_bool)] // simplifies the parser template
+    #[rustfmt::skip] // simplifies the parser template
     fn lookahead_@(lookAheadHint.Id)</text>@:(&mut self, context: &mut ParserContext<'_>, current_token: &Token) -> bool {
 <text>        current_token.detach();
         let mut token: Token;
