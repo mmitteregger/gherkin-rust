@@ -91,7 +91,7 @@ impl AstBuilder {
         }
     }
 
-    fn get_transformed_node(&mut self, mut node: AstNode) -> Result<Box<Any>> {
+    fn get_transformed_node(&mut self, mut node: AstNode) -> Result<Box<dyn Any>> {
         match node.rule_type() {
             RuleType::Step => {
                 let step_line: Token = node.remove_token(TokenType::StepLine);

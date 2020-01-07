@@ -9,7 +9,7 @@ pub struct GherkinLine {
 
 impl GherkinLine {
     pub fn new(line_text: String) -> GherkinLine {
-        let trimmed_line_text = line_text.trim_left().to_string();
+        let trimmed_line_text = line_text.trim_start().to_string();
 
         GherkinLine {
             line_text,

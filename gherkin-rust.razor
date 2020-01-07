@@ -143,7 +143,7 @@ impl From<TokenType> for RuleType {
 
 pub struct @(Model.ParserClassName)<B: Builder> {
     builder: B,
-    token_match: Box<TokenMatch>,
+    token_match: Box<dyn TokenMatch>,
     stop_at_first_error: bool,
 }
 
@@ -155,7 +155,7 @@ impl Default for @(Model.ParserClassName)<AstBuilder> {
 
 pub struct @(Model.ParserClassName)Options<B: Builder> {
     builder: B,
-    token_match: Option<Box<TokenMatch>>,
+    token_match: Option<Box<dyn TokenMatch>>,
     stop_at_first_error: Option<bool>,
 }
 
@@ -225,7 +225,7 @@ impl<B: Builder> @(Model.ParserClassName)Options<B> {
 }
 
 struct @(Model.ParserClassName)Context<'a> {
-    token_scan: &'a mut TokenScan,
+    token_scan: &'a mut dyn TokenScan,
     token_queue: VecDeque<Token>,
     errors: Vec<Error>,
 }

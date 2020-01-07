@@ -6,7 +6,7 @@ use token::Token;
 
 pub struct AstNode {
     rule_type: RuleType,
-    items: HashMap<RuleType, VecDeque<Box<Any>>>,
+    items: HashMap<RuleType, VecDeque<Box<dyn Any>>>,
 }
 
 impl AstNode {
@@ -21,7 +21,7 @@ impl AstNode {
         self.rule_type
     }
 
-    pub fn add(&mut self, rule_type: RuleType, node: Box<Any>) {
+    pub fn add(&mut self, rule_type: RuleType, node: Box<dyn Any>) {
         self.items
             .entry(rule_type)
             .or_insert_with(VecDeque::new)
