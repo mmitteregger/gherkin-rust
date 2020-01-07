@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::ast::GherkinDocument;
 
 #[derive(Serialize, Debug)]

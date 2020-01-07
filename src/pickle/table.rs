@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::pickle::{Row, Location};
 use crate::cuke;
 

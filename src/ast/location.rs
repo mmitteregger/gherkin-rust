@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use std::fmt;
 
 #[derive(Serialize, Debug, Copy, Clone)]

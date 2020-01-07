@@ -1,12 +1,3 @@
-#[macro_use]
-extern crate failure_derive;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate serde_derive;
-
-use failure;
-
 pub use crate::ast_builder::AstBuilder;
 pub use crate::error::{Error, Result};
 pub use crate::parser::{GherkinDialectProvide, Parser, ParserOptions};

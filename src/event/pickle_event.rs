@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::pickle::Pickle;
 
 #[derive(Serialize, Debug)]

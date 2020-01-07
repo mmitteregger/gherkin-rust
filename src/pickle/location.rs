@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::cuke;
 
 #[derive(Serialize, Debug, Copy, Clone)]

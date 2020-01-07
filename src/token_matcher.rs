@@ -1,6 +1,7 @@
 use std::default::Default;
 use std::sync::Arc;
 
+use lazy_static::lazy_static;
 use regex::Regex;
 
 use crate::ast::*;

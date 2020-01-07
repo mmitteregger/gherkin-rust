@@ -2,6 +2,7 @@ use std::fmt;
 use std::io;
 use std::result;
 
+use failure::Fail;
 use serde_json;
 
 use crate::ast::Location;

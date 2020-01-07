@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::pickle::Location;
 use crate::cuke;
 

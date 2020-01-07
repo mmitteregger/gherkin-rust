@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 pub use self::attachment_event::AttachmentEvent;
 pub use self::gherkin_document_event::GherkinDocumentEvent;
 pub use self::pickle_event::PickleEvent;
