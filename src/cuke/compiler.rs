@@ -7,7 +7,10 @@ use crate::cuke;
 pub struct Compiler;
 
 impl Compiler {
-    pub fn compile<'d>(&mut self, gherkin_document: &'d ast::GherkinDocument) -> Vec<cuke::Cuke<'d>> {
+    pub fn compile<'d>(
+        &mut self,
+        gherkin_document: &'d ast::GherkinDocument,
+    ) -> Vec<cuke::Cuke<'d>> {
         let feature: &ast::Feature = match &gherkin_document.feature {
             Some(feature) => feature,
             None => return Vec::new(),
@@ -22,7 +25,7 @@ impl Compiler {
                 ast::ScenarioDefinition::Background(ref bg) => {
                     background = Some(bg);
                     background_steps = self.background_cuke_steps(bg);
-                },
+                }
                 ast::ScenarioDefinition::Scenario(scenario) => {
                     self.compile_scenario(
                         &mut cukes,
@@ -31,7 +34,7 @@ impl Compiler {
                         &background_steps,
                         scenario,
                     );
-                },
+                }
                 ast::ScenarioDefinition::ScenarioOutline(scenario_outline) => {
                     self.compile_scenario_outline(
                         &mut cukes,
@@ -40,7 +43,7 @@ impl Compiler {
                         &background_steps,
                         scenario_outline,
                     );
-                },
+                }
             }
         }
 
@@ -58,7 +61,8 @@ impl Compiler {
         let scenario_definition = cuke::ScenarioDefinition::from(scenario);
         let name = Cow::Borrowed(scenario.name.as_str());
         let language = &feature.language;
-        let (background_steps, scenario_steps) = self.compile_scenario_steps(background_steps, scenario);
+        let (background_steps, scenario_steps) =
+            self.compile_scenario_steps(background_steps, scenario);
         let tags = self.compile_scenario_tags(feature, scenario);
         let locations = vec![cuke::Location::from(scenario.location)];
         let cuke = cuke::Cuke {
@@ -80,8 +84,7 @@ impl Compiler {
         &mut self,
         background_steps: &[cuke::Step<'d>],
         scenario: &'d ast::Scenario,
-    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>)
-    {
+    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>) {
         if scenario.steps.is_empty() {
             (Vec::new(), Vec::new())
         } else {
@@ -107,8 +110,14 @@ impl Compiler {
 
         let mut tags = Vec::with_capacity(tags_capacity);
 
-        feature_tags.iter().map(cuke::Tag::from).for_each(|tag| tags.push(tag));
-        scenario_tags.iter().map(cuke::Tag::from).for_each(|tag| tags.push(tag));
+        feature_tags
+            .iter()
+            .map(cuke::Tag::from)
+            .for_each(|tag| tags.push(tag));
+        scenario_tags
+            .iter()
+            .map(cuke::Tag::from)
+            .for_each(|tag| tags.push(tag));
 
         tags
     }
@@ -133,8 +142,7 @@ impl Compiler {
                 let value_cells = &values.cells;
 
                 let scenario_definition = cuke::ScenarioDefinition::from(scenario_outline);
-                let name =
-                    self.interpolate(&scenario_outline.name, variable_cells, value_cells);
+                let name = self.interpolate(&scenario_outline.name, variable_cells, value_cells);
                 let language = &feature.language;
                 let (background_steps, scenario_steps) = self.compile_scenario_outline_steps(
                     background_steps,
@@ -172,8 +180,7 @@ impl Compiler {
         variable_cells: &'d [ast::TableCell],
         value_cells: &'d [ast::TableCell],
         values: &'d ast::TableRow,
-    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>)
-    {
+    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>) {
         if scenario_outline.steps.is_empty() {
             (Vec::new(), Vec::new())
         } else {
@@ -181,16 +188,9 @@ impl Compiler {
 
             for step in &scenario_outline.steps {
                 let keyword = &step.keyword;
-                let text = self.interpolate(
-                    &step.text,
-                    variable_cells,
-                    value_cells,
-                );
-                let argument = self.create_cuke_argument(
-                    step.argument.as_ref(),
-                    variable_cells,
-                    value_cells,
-                );
+                let text = self.interpolate(&step.text, variable_cells, value_cells);
+                let argument =
+                    self.create_cuke_argument(step.argument.as_ref(), variable_cells, value_cells);
                 let locations = vec![
                     cuke::Location::from(values.location),
                     self.cuke_step_location(step),
@@ -222,9 +222,18 @@ impl Compiler {
 
         let mut tags = Vec::with_capacity(tags_capacity);
 
-        feature_tags.iter().map(cuke::Tag::from).for_each(|tag| tags.push(tag));
-        scenario_outline_tags.iter().map(cuke::Tag::from).for_each(|tag| tags.push(tag));
-        examples_tags.iter().map(cuke::Tag::from).for_each(|tag| tags.push(tag));
+        feature_tags
+            .iter()
+            .map(cuke::Tag::from)
+            .for_each(|tag| tags.push(tag));
+        scenario_outline_tags
+            .iter()
+            .map(cuke::Tag::from)
+            .for_each(|tag| tags.push(tag));
+        examples_tags
+            .iter()
+            .map(cuke::Tag::from)
+            .for_each(|tag| tags.push(tag));
 
         tags
     }
@@ -234,8 +243,7 @@ impl Compiler {
         argument: Option<&'d ast::Argument>,
         variable_cells: &'d [ast::TableCell],
         value_cells: &'d [ast::TableCell],
-    ) -> Option<cuke::Argument<'d>>
-    {
+    ) -> Option<cuke::Argument<'d>> {
         let argument = match argument {
             Some(argument) => argument,
             None => return None,
@@ -255,12 +263,14 @@ impl Compiler {
                 };
 
                 Some(cuke::Argument::String(cuke_string))
-            },
+            }
             ast::Argument::DataTable(data_table) => {
-                let rows = data_table.rows
+                let rows = data_table
+                    .rows
                     .iter()
                     .map(|row: &ast::TableRow| {
-                        let cells = row.cells
+                        let cells = row
+                            .cells
                             .iter()
                             .map(|cell: &ast::TableCell| {
                                 let location = cuke::Location::from(cell.location);
@@ -277,16 +287,16 @@ impl Compiler {
                 let cuke_table = cuke::Table { rows };
 
                 Some(cuke::Argument::Table(cuke_table))
-            },
+            }
         }
     }
 
     fn background_cuke_steps<'d>(
         &mut self,
         background: &'d ast::Background,
-    ) -> Vec<cuke::Step<'d>>
-    {
-        background.steps
+    ) -> Vec<cuke::Step<'d>> {
+        background
+            .steps
             .iter()
             .map(|step| self.cuke_step(step))
             .collect()

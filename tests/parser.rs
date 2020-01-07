@@ -1,7 +1,7 @@
 use serde_json;
 
-use gherkin::pickle::Pickle;
 use gherkin::cuke::Compiler;
+use gherkin::pickle::Pickle;
 use gherkin::{Parser, ParserOptions};
 
 #[test]
@@ -178,7 +178,8 @@ Feature: Foo
     );
 
     let mut compiler = Compiler::default();
-    let pickles: Vec<Pickle> = compiler.compile(&gherkin_document)
+    let pickles: Vec<Pickle> = compiler
+        .compile(&gherkin_document)
         .into_iter()
         .map(Pickle::from)
         .collect();

@@ -127,7 +127,8 @@ impl GherkinLine {
                     // Skip the first empty span
                     before_first = false;
                 } else {
-                    let content_start = cell.chars()
+                    let content_start = cell
+                        .chars()
                         .enumerate()
                         .skip_while(|(_index, cell_char)| cell_char.is_whitespace())
                         .map(|(index, _cell_char)| index)
@@ -165,9 +166,18 @@ mod tests {
         assert_eq!(
             gherkin_line_spans,
             vec![
-                GherkinLineSpan { column: 5, text: "@this".to_owned() },
-                GherkinLineSpan { column: 11, text: "@is".to_owned() },
-                GherkinLineSpan { column: 16, text: "@atag".to_owned() },
+                GherkinLineSpan {
+                    column: 5,
+                    text: "@this".to_owned()
+                },
+                GherkinLineSpan {
+                    column: 11,
+                    text: "@is".to_owned()
+                },
+                GherkinLineSpan {
+                    column: 16,
+                    text: "@atag".to_owned()
+                },
             ]
         );
     }

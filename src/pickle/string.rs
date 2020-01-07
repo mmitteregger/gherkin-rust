@@ -1,7 +1,7 @@
 use serde::Serialize;
 
-use crate::pickle::Location;
 use crate::cuke;
+use crate::pickle::Location;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -17,7 +17,9 @@ impl<'d> From<cuke::String<'d>> for String {
         String {
             location: Location::from(cuke_string.location),
             content: cuke_string.content.to_string(),
-            content_type: cuke_string.content_type.map(|content_type| content_type.to_string()),
+            content_type: cuke_string
+                .content_type
+                .map(|content_type| content_type.to_string()),
         }
     }
 }

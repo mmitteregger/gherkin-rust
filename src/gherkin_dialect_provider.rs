@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::default::Default;
 use std::sync::Arc;
 
-use serde_json;
 use lazy_static::lazy_static;
+use serde_json;
 
 use crate::ast::Location;
 use crate::error::{Error, Result};

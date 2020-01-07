@@ -260,7 +260,11 @@ impl<B: Builder> Parser<B> {
         //     throw new ParserException.CompositeParserException(context.errors);
     }
 
-    fn handle_ast_result(&mut self, context: &mut ParserContext<'_>, result: Result<()>) -> Result<()> {
+    fn handle_ast_result(
+        &mut self,
+        context: &mut ParserContext<'_>,
+        result: Result<()>,
+    ) -> Result<()> {
         self.handle_external_result(context, result, ())
     }
 
@@ -307,9 +311,7 @@ impl<B: Builder> Parser<B> {
     fn read_token(&mut self, context: &mut ParserContext<'_>) -> Result<Token> {
         match context.token_queue.pop_front() {
             Some(token) => Ok(token),
-            None => context
-                .token_scan
-                .next(),
+            None => context.token_scan.next(),
         }
     }
 
@@ -2254,10 +2256,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
@@ -2377,10 +2377,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Description)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -2500,10 +2498,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.start_rule(context, RuleType::ExamplesDefinition)?;
             self.start_rule(context, RuleType::Tags)?;
@@ -2626,10 +2622,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Step)?;
             self.start_rule(context, RuleType::ExamplesDefinition)?;
@@ -2759,10 +2753,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::DataTable)?;
             self.end_rule(context, RuleType::Step)?;
@@ -2970,10 +2962,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3105,10 +3095,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Description)?;
             self.end_rule(context, RuleType::Examples)?;
@@ -3240,10 +3228,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::Examples)?;
             self.end_rule(context, RuleType::ExamplesDefinition)?;
@@ -3366,10 +3352,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(26);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::ExamplesTable)?;
             self.end_rule(context, RuleType::Examples)?;
@@ -3563,10 +3547,8 @@ impl<B: Builder> Parser<B> {
             self.build(context, token)?;
             return Ok(20);
         }
-        let match_tag_line_with_lookahead = {
-            self.match_tag_line(context, &mut token)?
-                && self.lookahead_0(context, &token)
-        };
+        let match_tag_line_with_lookahead =
+            { self.match_tag_line(context, &mut token)? && self.lookahead_0(context, &token) };
         if match_tag_line_with_lookahead {
             self.end_rule(context, RuleType::DocString)?;
             self.end_rule(context, RuleType::Step)?;

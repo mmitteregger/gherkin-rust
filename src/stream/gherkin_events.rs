@@ -1,10 +1,10 @@
 use crate::ast::Location;
 use crate::ast_builder::AstBuilder;
+use crate::cuke::Compiler;
 use crate::error::Error;
 use crate::event::*;
 use crate::parser::Parser;
 use crate::pickle::Pickle;
-use crate::cuke::Compiler;
 
 pub struct GherkinEvents {
     parser: Parser<AstBuilder>,
@@ -45,7 +45,8 @@ impl GherkinEvents {
         }
 
         let pickles: Vec<Pickle> = if self.print_pickles {
-            self.compiler.compile(&gherkin_document)
+            self.compiler
+                .compile(&gherkin_document)
                 .into_iter()
                 .map(Pickle::from)
                 .collect()
@@ -55,7 +56,10 @@ impl GherkinEvents {
 
         if self.print_ast {
             let uri = uri.clone();
-            cucumber_events.push(CucumberEvent::from(GherkinDocumentEvent::new(uri, gherkin_document)));
+            cucumber_events.push(CucumberEvent::from(GherkinDocumentEvent::new(
+                uri,
+                gherkin_document,
+            )));
         }
 
         for pickle in pickles {
@@ -84,10 +88,8 @@ impl GherkinEvents {
                 let error_location = error_kind
                     .get_location()
                     .unwrap_or_else(|| Location::new(0, 0));
-                let event_location = attachment_event::Location::new(
-                    error_location.line,
-                    error_location.column,
-                );
+                let event_location =
+                    attachment_event::Location::new(error_location.line, error_location.column);
                 let source_ref = attachment_event::SourceRef::new(uri.to_owned(), event_location);
                 let attachment_event = AttachmentEvent::new(source_ref, error.to_string());
                 cucumber_events.push(CucumberEvent::from(attachment_event));

@@ -127,15 +127,10 @@ impl AstBuilder {
                 } else {
                     None
                 };
-                let content = node.remove_tokens(TokenType::Other)
+                let content = node
+                    .remove_tokens(TokenType::Other)
                     .into_iter()
-                    .map(|line_token| {
-                        line_token
-                            .matched_text
-                            .as_ref()
-                            .unwrap()
-                            .to_owned()
-                    })
+                    .map(|line_token| line_token.matched_text.as_ref().unwrap().to_owned())
                     .collect::<Vec<String>>()
                     .join("\n");
                 let location = self.get_location(&separator_token, 0);
@@ -214,8 +209,7 @@ impl AstBuilder {
                 let mut examples_node: AstNode = node.remove(RuleType::Examples);
                 let examples_line = examples_node.remove_token(TokenType::ExamplesLine);
                 let description = self.get_description(&mut examples_node);
-                let rows: Option<Vec<TableRow>> =
-                    examples_node.remove_opt(RuleType::ExamplesTable);
+                let rows: Option<Vec<TableRow>> = examples_node.remove_opt(RuleType::ExamplesTable);
                 let (table_header, table_body) = match rows {
                     Some(mut rows) => {
                         if rows.is_empty() {
@@ -252,11 +246,12 @@ impl AstBuilder {
                 let mut end = line_tokens.len();
                 while end > 0
                     && line_tokens[end - 1]
-                    .matched_text
-                    .as_ref()
-                    .unwrap()
-                    .chars()
-                    .all(|c| c.is_whitespace()) {
+                        .matched_text
+                        .as_ref()
+                        .unwrap()
+                        .chars()
+                        .all(|c| c.is_whitespace())
+                {
                     end -= 1;
                 }
 
@@ -281,9 +276,8 @@ impl AstBuilder {
                     scenario_definitions.push(ScenarioDefinition::from(background));
                 }
 
-                scenario_definitions.extend(node.remove_items::<ScenarioDefinition>(
-                    RuleType::ScenarioDefinition,
-                ));
+                scenario_definitions
+                    .extend(node.remove_items::<ScenarioDefinition>(RuleType::ScenarioDefinition));
 
                 let location = self.get_location(&feature_line, 0);
                 let language = feature_line
@@ -319,7 +313,8 @@ impl AstBuilder {
     }
 
     fn get_table_rows(&self, mut node: AstNode) -> Result<Vec<TableRow>> {
-        let rows: Vec<TableRow> = node.remove_tokens(TokenType::TableRow)
+        let rows: Vec<TableRow> = node
+            .remove_tokens(TokenType::TableRow)
             .into_iter()
             .map(|token| {
                 let location = self.get_location(&token, 0);

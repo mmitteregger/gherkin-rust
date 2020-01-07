@@ -4,11 +4,11 @@ pub use self::attachment_event::AttachmentEvent;
 pub use self::gherkin_document_event::GherkinDocumentEvent;
 pub use self::pickle_event::PickleEvent;
 pub use self::source_event::SourceEvent;
+use crate::cuke::Compiler;
 use crate::error::Result;
 use crate::parser::GherkinDialectProvide;
 use crate::parser::ParserOptions;
 use crate::pickle::Pickle;
-use crate::cuke::Compiler;
 use crate::token_matcher::TokenMatcher;
 
 pub mod attachment_event;
@@ -24,7 +24,6 @@ pub enum CucumberEvent {
     Pickle(PickleEvent),
     Source(SourceEvent),
 }
-
 
 impl From<AttachmentEvent> for CucumberEvent {
     fn from(attachment_event: AttachmentEvent) -> Self {
@@ -58,11 +57,7 @@ where
     generate_with_matcher(data, uri, TokenMatcher::default())
 }
 
-pub fn generate_with_language<D, U, L>(
-    data: D,
-    uri: U,
-    language: L,
-) -> Result<Vec<CucumberEvent>>
+pub fn generate_with_language<D, U, L>(data: D, uri: U, language: L) -> Result<Vec<CucumberEvent>>
 where
     D: Into<String>,
     U: AsRef<str>,
@@ -89,7 +84,8 @@ where
     let mut compiler = Compiler::default();
 
     let gherkin_document = parser.parse_str(&data)?;
-    let pickles: Vec<Pickle> = compiler.compile(&gherkin_document)
+    let pickles: Vec<Pickle> = compiler
+        .compile(&gherkin_document)
         .into_iter()
         .map(Pickle::from)
         .collect();
@@ -101,7 +97,10 @@ where
         gherkin_document,
     )));
     for pickle in pickles {
-        events.push(CucumberEvent::from(PickleEvent::new(uri.to_owned(), pickle)));
+        events.push(CucumberEvent::from(PickleEvent::new(
+            uri.to_owned(),
+            pickle,
+        )));
     }
 
     Ok(events)

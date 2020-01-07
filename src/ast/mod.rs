@@ -1,3 +1,4 @@
+pub use self::argument::*;
 pub use self::background::*;
 pub use self::comment::*;
 pub use self::data_table::*;
@@ -13,8 +14,8 @@ pub use self::step::*;
 pub use self::table_cell::*;
 pub use self::table_row::*;
 pub use self::tag::*;
-pub use self::argument::*;
 
+mod argument;
 mod background;
 mod comment;
 mod data_table;
@@ -30,4 +31,3 @@ mod step;
 mod table_cell;
 mod table_row;
 mod tag;
-mod argument;

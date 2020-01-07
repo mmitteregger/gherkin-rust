@@ -1,4 +1,4 @@
-use crate::cuke::{Row, Location};
+use crate::cuke::{Location, Row};
 
 #[derive(Debug, Clone)]
 pub struct Table<'d> {

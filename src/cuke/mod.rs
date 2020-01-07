@@ -1,9 +1,9 @@
-pub use self::scenario_definition::*;
 pub use self::argument::*;
 pub use self::cell::*;
 pub use self::compiler::*;
 pub use self::location::*;
 pub use self::row::*;
+pub use self::scenario_definition::*;
 pub use self::step::*;
 pub use self::string::*;
 pub use self::table::*;
@@ -11,12 +11,12 @@ pub use self::tag::*;
 use crate::ast;
 use std::borrow::Cow;
 
-mod scenario_definition;
 mod argument;
 mod cell;
 mod compiler;
 mod location;
 mod row;
+mod scenario_definition;
 mod step;
 mod string;
 mod table;

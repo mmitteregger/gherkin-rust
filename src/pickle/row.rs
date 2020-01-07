@@ -1,7 +1,7 @@
 use serde::Serialize;
 
-use crate::pickle::Cell;
 use crate::cuke;
+use crate::pickle::Cell;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]

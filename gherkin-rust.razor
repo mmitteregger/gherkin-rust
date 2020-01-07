@@ -294,7 +294,11 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         //     throw new ParserException.CompositeParserException(context.errors);
     }
 
-    fn handle_ast_result(&mut self, context: &mut ParserContext<'_>, result: Result<()>) -> Result<()> {
+    fn handle_ast_result(
+        &mut self,
+        context: &mut ParserContext<'_>,
+        result: Result<()>,
+    ) -> Result<()> {
         self.handle_external_result(context, result, ())
     }
 
@@ -341,9 +345,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
     fn read_token(&mut self, context: &mut ParserContext<'_>) -> Result<Token> {
         match context.token_queue.pop_front() {
             Some(token) => Ok(token),
-            None => context
-                .token_scan
-                .next(),
+            None => context.token_scan.next(),
         }
     }
 @foreach(var rule in Model.RuleSet.TokenRules)
@@ -393,10 +395,8 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         if (transition.LookAheadHint == null) {
         @:if self.@MatchToken(transition.TokenType)? {
         } else {
-        <text>let match_@(FormatMethodName(transition.TokenType.Name))_with_lookahead = {
-            self.match_@(FormatMethodName(transition.TokenType.Name))(context, &mut token)?
-                && self.lookahead_@(transition.LookAheadHint.Id)(context, &token)
-        };
+        <text>let match_@(FormatMethodName(transition.TokenType.Name))_with_lookahead =
+            { self.match_@(FormatMethodName(transition.TokenType.Name))(context, &mut token)? && self.lookahead_@(transition.LookAheadHint.Id)(context, &token) };
         if match_@(FormatMethodName(transition.TokenType.Name))_with_lookahead {</text>
         }
             foreach(var production in transition.Productions) {

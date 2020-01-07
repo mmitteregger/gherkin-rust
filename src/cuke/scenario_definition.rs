@@ -1,4 +1,4 @@
-use crate::ast::{Scenario, ScenarioOutline, Location, Step};
+use crate::ast::{Location, Scenario, ScenarioOutline, Step};
 
 #[derive(Debug)]
 pub enum ScenarioDefinition<'d> {
@@ -30,8 +30,14 @@ impl<'d> ScenarioDefinition<'d> {
 
     pub fn get_description(&self) -> Option<&str> {
         match self {
-            ScenarioDefinition::Scenario(scenario) => scenario.description.as_ref().map(|description|description.as_str()),
-            ScenarioDefinition::ScenarioOutline(outline) => outline.description.as_ref().map(|description|description.as_str()),
+            ScenarioDefinition::Scenario(scenario) => scenario
+                .description
+                .as_ref()
+                .map(|description| description.as_str()),
+            ScenarioDefinition::ScenarioOutline(outline) => outline
+                .description
+                .as_ref()
+                .map(|description| description.as_str()),
         }
     }
 

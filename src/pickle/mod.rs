@@ -35,8 +35,14 @@ impl<'d> From<cuke::Cuke<'d>> for Pickle {
     fn from(cuke: cuke::Cuke<'d>) -> Self {
         let steps_capacity = cuke.background_steps.len() + cuke.scenario_steps.len();
         let mut steps = Vec::with_capacity(steps_capacity);
-        cuke.background_steps.into_iter().map(Step::from).for_each(|step| steps.push(step));
-        cuke.scenario_steps.into_iter().map(Step::from).for_each(|step| steps.push(step));
+        cuke.background_steps
+            .into_iter()
+            .map(Step::from)
+            .for_each(|step| steps.push(step));
+        cuke.scenario_steps
+            .into_iter()
+            .map(Step::from)
+            .for_each(|step| steps.push(step));
 
         Pickle {
             name: cuke.name.to_string(),

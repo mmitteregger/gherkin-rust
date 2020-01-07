@@ -306,7 +306,8 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
 
             let location = token.location.expect("token location");
             let dialect_language = token.matched_text.as_ref().unwrap();
-            self.current_dialect = self.dialect_provider
+            self.current_dialect = self
+                .dialect_provider
                 .get_dialect(dialect_language, location)?;
             return Ok(true);
         }
@@ -335,7 +336,8 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
     fn reset(&mut self) {
         self.active_doc_string_separator = None;
         self.indent_to_remove = 0;
-        self.current_dialect = self.dialect_provider
+        self.current_dialect = self
+            .dialect_provider
             .get_default_dialect()
             .expect("get default dialect");
     }

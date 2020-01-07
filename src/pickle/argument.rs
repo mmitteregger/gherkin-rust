@@ -1,7 +1,7 @@
 use serde::Serialize;
 
-use crate::pickle::{String, Table, Location};
 use crate::cuke;
+use crate::pickle::{Location, String, Table};
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]

@@ -1,7 +1,7 @@
 use serde::Serialize;
 
-use crate::pickle::{Argument, Location};
 use crate::cuke;
+use crate::pickle::{Argument, Location};
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -16,7 +16,11 @@ impl<'d> From<cuke::Step<'d>> for Step {
         Step {
             text: cuke_step.text.to_string(),
             arguments: cuke_step.argument.into_iter().map(Argument::from).collect(),
-            locations: cuke_step.locations.into_iter().map(Location::from).collect(),
+            locations: cuke_step
+                .locations
+                .into_iter()
+                .map(Location::from)
+                .collect(),
         }
     }
 }
