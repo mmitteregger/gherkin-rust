@@ -1,1 +1,11 @@
-{"pickle":{"language":"en","locations":[{"column":3,"line":6}],"name":"no steps","steps":[],"tags":[]},"type":"pickle","uri":"testdata/good/incomplete_scenario.feature"}
+{
+  "pickle": {
+    "astNodeIds": [
+      "1"
+    ],
+    "id": "2",
+    "language": "en",
+    "name": "no steps",
+    "uri": "testdata/good/incomplete_scenario.feature"
+  }
+}

@@ -179,9 +179,9 @@ impl AstBuilder {
                         ))
                     }
                     None => {
-                        let mut outline_node = node.remove::<AstNode>(RuleType::ScenarioOutline);
+                        let mut outline_node = node.remove::<AstNode>(RuleType::Scenario);
                         let outline_line =
-                            outline_node.remove_token(TokenType::ScenarioOutlineLine);
+                            outline_node.remove_token(TokenType::ScenarioLine);
 
                         let location = self.get_location(&outline_line, 0);
                         let keyword = outline_line.matched_keyword.as_ref().unwrap().to_owned();

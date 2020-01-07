@@ -1,3 +1,166 @@
-{"pickle":{"language":"en","locations":[{"column":1,"line":7}],"name":"minimalistic","steps":[{"arguments":[],"locations":[{"column":11,"line":8}],"text":"the minimalism"}],"tags":[{"location":{"column":1,"line":1},"name":"@feature_tag1"},{"location":{"column":15,"line":1},"name":"@feature_tag2"},{"location":{"column":3,"line":2},"name":"@feature_tag3"},{"location":{"column":1,"line":5},"name":"@scenario_tag1"},{"location":{"column":16,"line":5},"name":"@scenario_tag2"},{"location":{"column":3,"line":6},"name":"@scenario_tag3"}]},"type":"pickle","uri":"testdata/good/tags.feature"}
-{"pickle":{"language":"en","locations":[{"column":3,"line":19},{"column":1,"line":12}],"name":"minimalistic outline","steps":[{"arguments":[],"locations":[{"column":3,"line":19},{"column":11,"line":13}],"text":"the minimalism"}],"tags":[{"location":{"column":1,"line":1},"name":"@feature_tag1"},{"location":{"column":15,"line":1},"name":"@feature_tag2"},{"location":{"column":3,"line":2},"name":"@feature_tag3"},{"location":{"column":1,"line":10},"name":"@so_tag1"},{"location":{"column":11,"line":10},"name":"@so_tag2"},{"location":{"column":3,"line":11},"name":"@so_tag3"},{"location":{"column":1,"line":15},"name":"@ex_tag1"},{"location":{"column":10,"line":15},"name":"@ex_tag2"},{"location":{"column":3,"line":16},"name":"@ex_tag3"}]},"type":"pickle","uri":"testdata/good/tags.feature"}
-{"pickle":{"language":"en","locations":[{"column":3,"line":25},{"column":1,"line":12}],"name":"minimalistic outline","steps":[{"arguments":[],"locations":[{"column":3,"line":25},{"column":11,"line":13}],"text":"the more minimalism"}],"tags":[{"location":{"column":1,"line":1},"name":"@feature_tag1"},{"location":{"column":15,"line":1},"name":"@feature_tag2"},{"location":{"column":3,"line":2},"name":"@feature_tag3"},{"location":{"column":1,"line":10},"name":"@so_tag1"},{"location":{"column":11,"line":10},"name":"@so_tag2"},{"location":{"column":3,"line":11},"name":"@so_tag3"},{"location":{"column":1,"line":21},"name":"@ex_tag4"},{"location":{"column":10,"line":21},"name":"@ex_tag5"},{"location":{"column":3,"line":22},"name":"@ex_tag6"}]},"type":"pickle","uri":"testdata/good/tags.feature"}
+{
+  "pickle": {
+    "astNodeIds": [
+      "4"
+    ],
+    "id": "24",
+    "language": "en",
+    "name": "minimalistic",
+    "steps": [
+      {
+        "astNodeIds": [
+          "0"
+        ],
+        "id": "23",
+        "text": "the minimalism"
+      }
+    ],
+    "tags": [
+      {
+        "astNodeId": "20",
+        "name": "@feature_tag1"
+      },
+      {
+        "astNodeId": "21",
+        "name": "@feature_tag2"
+      },
+      {
+        "astNodeId": "22",
+        "name": "@feature_tag3"
+      },
+      {
+        "astNodeId": "1",
+        "name": "@scenario_tag1"
+      },
+      {
+        "astNodeId": "2",
+        "name": "@scenario_tag2"
+      },
+      {
+        "astNodeId": "3",
+        "name": "@scenario_tag3"
+      }
+    ],
+    "uri": "testdata/good/tags.feature"
+  }
+}
+{
+  "pickle": {
+    "astNodeIds": [
+      "19",
+      "7"
+    ],
+    "id": "26",
+    "language": "en",
+    "name": "minimalistic outline",
+    "steps": [
+      {
+        "astNodeIds": [
+          "5",
+          "7"
+        ],
+        "id": "25",
+        "text": "the minimalism"
+      }
+    ],
+    "tags": [
+      {
+        "astNodeId": "20",
+        "name": "@feature_tag1"
+      },
+      {
+        "astNodeId": "21",
+        "name": "@feature_tag2"
+      },
+      {
+        "astNodeId": "22",
+        "name": "@feature_tag3"
+      },
+      {
+        "astNodeId": "16",
+        "name": "@so_tag1"
+      },
+      {
+        "astNodeId": "17",
+        "name": "@so_tag2"
+      },
+      {
+        "astNodeId": "18",
+        "name": "@so_tag3"
+      },
+      {
+        "astNodeId": "8",
+        "name": "@ex_tag1"
+      },
+      {
+        "astNodeId": "9",
+        "name": "@ex_tag2"
+      },
+      {
+        "astNodeId": "10",
+        "name": "@ex_tag3"
+      }
+    ],
+    "uri": "testdata/good/tags.feature"
+  }
+}
+{
+  "pickle": {
+    "astNodeIds": [
+      "19",
+      "12"
+    ],
+    "id": "28",
+    "language": "en",
+    "name": "minimalistic outline",
+    "steps": [
+      {
+        "astNodeIds": [
+          "5",
+          "12"
+        ],
+        "id": "27",
+        "text": "the more minimalism"
+      }
+    ],
+    "tags": [
+      {
+        "astNodeId": "20",
+        "name": "@feature_tag1"
+      },
+      {
+        "astNodeId": "21",
+        "name": "@feature_tag2"
+      },
+      {
+        "astNodeId": "22",
+        "name": "@feature_tag3"
+      },
+      {
+        "astNodeId": "16",
+        "name": "@so_tag1"
+      },
+      {
+        "astNodeId": "17",
+        "name": "@so_tag2"
+      },
+      {
+        "astNodeId": "18",
+        "name": "@so_tag3"
+      },
+      {
+        "astNodeId": "13",
+        "name": "@ex_tag4"
+      },
+      {
+        "astNodeId": "14",
+        "name": "@ex_tag5"
+      },
+      {
+        "astNodeId": "15",
+        "name": "@ex_tag6"
+      }
+    ],
+    "uri": "testdata/good/tags.feature"
+  }
+}

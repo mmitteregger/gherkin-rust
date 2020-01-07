@@ -11,6 +11,8 @@ pub struct GherkinDialect {
     pub(crate) native_name: String,
     #[serde(rename = "feature")]
     feature_keywords: Vec<String>,
+    #[serde(rename = "rule")]
+    rule_keywords: Vec<String>,
     #[serde(rename = "scenario")]
     scenario_keywords: Vec<String>,
     #[serde(rename = "background")]
@@ -55,6 +57,7 @@ impl GherkinDialect {
         mut keywords: HashMap<String, Vec<String>>,
     ) -> GherkinDialect {
         let feature_keywords = get_keywords(&mut keywords, "feature");
+        let rule_keywords = get_keywords(&mut keywords, "rule");
         let scenario_keywords = get_keywords(&mut keywords, "scenario");
         let background_keywords = get_keywords(&mut keywords, "background");
         let scenario_outline_keywords = get_keywords(&mut keywords, "scenarioOutline");
@@ -71,6 +74,7 @@ impl GherkinDialect {
             name,
             native_name,
             feature_keywords,
+            rule_keywords,
             scenario_keywords,
             background_keywords,
             scenario_outline_keywords,
@@ -105,6 +109,10 @@ impl GherkinDialect {
 
     pub fn get_feature_keywords(&self) -> &Vec<String> {
         &self.feature_keywords
+    }
+
+    pub fn get_rule_keywords(&self) -> &Vec<String> {
+        &self.rule_keywords
     }
 
     pub fn get_scenario_keywords(&self) -> &Vec<String> {

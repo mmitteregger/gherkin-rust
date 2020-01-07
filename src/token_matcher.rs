@@ -203,6 +203,12 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
         Ok(is_match)
     }
 
+    fn match_rule_line(&mut self, token: &mut Token) -> Result<bool> {
+        let keywords = self.current_dialect.get_rule_keywords();
+        let is_match = self.match_title_line(token, TokenType::RuleLine, keywords);
+        Ok(is_match)
+    }
+
     fn match_background_line(&mut self, token: &mut Token) -> Result<bool> {
         let keywords = self.current_dialect.get_background_keywords();
         let is_match = self.match_title_line(token, TokenType::BackgroundLine, keywords);
@@ -212,12 +218,6 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
     fn match_scenario_line(&mut self, token: &mut Token) -> Result<bool> {
         let keywords = self.current_dialect.get_scenario_keywords();
         let is_match = self.match_title_line(token, TokenType::ScenarioLine, keywords);
-        Ok(is_match)
-    }
-
-    fn match_scenario_outline_line(&mut self, token: &mut Token) -> Result<bool> {
-        let keywords = self.current_dialect.get_scenario_outline_keywords();
-        let is_match = self.match_title_line(token, TokenType::ScenarioOutlineLine, keywords);
         Ok(is_match)
     }
 
