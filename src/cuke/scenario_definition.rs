@@ -1,4 +1,4 @@
-use ast::{Scenario, ScenarioOutline, Location, Step};
+use crate::ast::{Scenario, ScenarioOutline, Location, Step};
 
 #[derive(Debug)]
 pub enum ScenarioDefinition<'d> {

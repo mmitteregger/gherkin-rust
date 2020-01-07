@@ -1,4 +1,4 @@
-use ast::GherkinDocument;
+use crate::ast::GherkinDocument;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]

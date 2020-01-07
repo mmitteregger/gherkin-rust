@@ -1,7 +1,7 @@
 use std::fs;
 
-use error::Result;
-use event::SourceEvent;
+use crate::error::Result;
+use crate::event::SourceEvent;
 
 pub struct SourceEvents {
     paths: Vec<String>,

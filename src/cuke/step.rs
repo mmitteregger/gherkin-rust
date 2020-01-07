@@ -1,4 +1,4 @@
-use cuke::{Argument, Location};
+use crate::cuke::{Argument, Location};
 use std::borrow::Cow;
 
 #[derive(Debug, Clone)]

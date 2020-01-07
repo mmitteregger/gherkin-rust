@@ -6,7 +6,7 @@ pub use self::step::*;
 pub use self::string::*;
 pub use self::table::*;
 pub use self::tag::*;
-use cuke;
+use crate::cuke;
 use std::string::String as StdString;
 
 mod argument;

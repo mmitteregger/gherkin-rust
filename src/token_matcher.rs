@@ -3,15 +3,15 @@ use std::sync::Arc;
 
 use regex::Regex;
 
-use ast::*;
-use constant;
-use error::Result;
-use gherkin_dialect::GherkinDialect;
-use gherkin_dialect_provider::BuiltInGherkinDialectProvider;
-use gherkin_line_span::GherkinLineSpan;
-use parser::GherkinDialectProvide;
-use parser::{TokenMatch, TokenType};
-use token::Token;
+use crate::ast::*;
+use crate::constant;
+use crate::error::Result;
+use crate::gherkin_dialect::GherkinDialect;
+use crate::gherkin_dialect_provider::BuiltInGherkinDialectProvider;
+use crate::gherkin_line_span::GherkinLineSpan;
+use crate::parser::GherkinDialectProvide;
+use crate::parser::{TokenMatch, TokenType};
+use crate::token::Token;
 
 lazy_static! {
     static ref LANGUAGE_PATTERN: Regex =

@@ -1,4 +1,4 @@
-use cuke::{String, Table, Location};
+use crate::cuke::{String, Table, Location};
 
 #[derive(Debug, Clone)]
 pub enum Argument<'d> {

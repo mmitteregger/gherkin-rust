@@ -2,11 +2,11 @@ use std::any::Any;
 use std::default::Default;
 use std::mem;
 
-use ast::*;
-use ast_node::AstNode;
-use error::{Error, Result};
-use parser::{self, Builder, RuleType, TokenType};
-use token::Token;
+use crate::ast::*;
+use crate::ast_node::AstNode;
+use crate::error::{Error, Result};
+use crate::parser::{self, Builder, RuleType, TokenType};
+use crate::token::Token;
 
 pub struct AstBuilder {
     stack: Vec<AstNode>,
@@ -394,7 +394,7 @@ impl AstBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ParserOptions;
+    use crate::ParserOptions;
 
     #[test]
     fn is_reusable() {

@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use ast::Location;
-use gherkin_dialect::GherkinDialect;
-use gherkin_line::GherkinLine;
-use gherkin_line_span::GherkinLineSpan;
-use parser::TokenType;
+use crate::ast::Location;
+use crate::gherkin_dialect::GherkinDialect;
+use crate::gherkin_line::GherkinLine;
+use crate::gherkin_line_span::GherkinLineSpan;
+use crate::parser::TokenType;
 
 #[derive(Debug, Clone)]
 pub struct Token {

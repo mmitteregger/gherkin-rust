@@ -1,8 +1,8 @@
 use std::any::Any;
 use std::collections::{HashMap, VecDeque};
 
-use parser::{RuleType, TokenType};
-use token::Token;
+use crate::parser::{RuleType, TokenType};
+use crate::token::Token;
 
 pub struct AstNode {
     rule_type: RuleType,

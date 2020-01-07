@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use ast;
-use cuke;
+use crate::ast;
+use crate::cuke;
 
 #[derive(Default)]
 pub struct Compiler;

@@ -1,4 +1,4 @@
-use ast::*;
+use crate::ast::*;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]

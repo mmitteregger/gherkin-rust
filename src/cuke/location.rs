@@ -1,4 +1,4 @@
-use ast;
+use crate::ast;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Location {

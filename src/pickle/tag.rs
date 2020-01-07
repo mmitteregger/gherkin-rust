@@ -1,5 +1,5 @@
-use pickle::Location;
-use cuke;
+use crate::pickle::Location;
+use crate::cuke;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]

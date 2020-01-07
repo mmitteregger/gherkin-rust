@@ -1,5 +1,5 @@
-use pickle::{String, Table, Location};
-use cuke;
+use crate::pickle::{String, Table, Location};
+use crate::cuke;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]

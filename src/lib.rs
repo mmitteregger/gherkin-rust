@@ -10,10 +10,10 @@ extern crate serde;
 extern crate serde_json;
 extern crate core;
 
-pub use ast_builder::AstBuilder;
-pub use error::{Error, Result};
-pub use parser::{GherkinDialectProvide, Parser, ParserOptions};
-pub use token_formatter_builder::TokenFormatterBuilder;
+pub use crate::ast_builder::AstBuilder;
+pub use crate::error::{Error, Result};
+pub use crate::parser::{GherkinDialectProvide, Parser, ParserOptions};
+pub use crate::token_formatter_builder::TokenFormatterBuilder;
 
 pub mod ast;
 mod ast_builder;

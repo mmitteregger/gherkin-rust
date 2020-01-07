@@ -9,13 +9,13 @@ use std::fmt;
 use std::io::Read;
 use std::sync::Arc;
 
-use ast::Location;
-use ast_builder::AstBuilder;
-use error::{Error, Result};
-use gherkin_dialect::GherkinDialect;
-use token::Token;
-use token_matcher::TokenMatcher;
-use token_scanner::TokenScanner;
+use crate::ast::Location;
+use crate::ast_builder::AstBuilder;
+use crate::error::{Error, Result};
+use crate::gherkin_dialect::GherkinDialect;
+use crate::token::Token;
+use crate::token_matcher::TokenMatcher;
+use crate::token_scanner::TokenScanner;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum TokenType {

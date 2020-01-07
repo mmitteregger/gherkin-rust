@@ -1,5 +1,5 @@
-use pickle::Cell;
-use cuke;
+use crate::pickle::Cell;
+use crate::cuke;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]

@@ -1,4 +1,4 @@
-use pickle::Pickle;
+use crate::pickle::Pickle;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]

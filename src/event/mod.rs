@@ -2,12 +2,12 @@ pub use self::attachment_event::AttachmentEvent;
 pub use self::gherkin_document_event::GherkinDocumentEvent;
 pub use self::pickle_event::PickleEvent;
 pub use self::source_event::SourceEvent;
-use error::Result;
-use parser::GherkinDialectProvide;
-use parser::ParserOptions;
-use pickle::Pickle;
-use cuke::Compiler;
-use token_matcher::TokenMatcher;
+use crate::error::Result;
+use crate::parser::GherkinDialectProvide;
+use crate::parser::ParserOptions;
+use crate::pickle::Pickle;
+use crate::cuke::Compiler;
+use crate::token_matcher::TokenMatcher;
 
 pub mod attachment_event;
 pub mod gherkin_document_event;

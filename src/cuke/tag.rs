@@ -1,5 +1,5 @@
-use ast;
-use cuke::Location;
+use crate::ast;
+use crate::cuke::Location;
 
 #[derive(Debug)]
 pub struct Tag<'d> {

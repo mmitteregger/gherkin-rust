@@ -1,10 +1,10 @@
-use ast::Location;
-use ast_builder::AstBuilder;
-use error::Error;
-use event::*;
-use parser::Parser;
-use pickle::Pickle;
-use cuke::Compiler;
+use crate::ast::Location;
+use crate::ast_builder::AstBuilder;
+use crate::error::Error;
+use crate::event::*;
+use crate::parser::Parser;
+use crate::pickle::Pickle;
+use crate::cuke::Compiler;
 
 pub struct GherkinEvents {
     parser: Parser<AstBuilder>,

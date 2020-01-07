@@ -8,7 +8,7 @@ pub use self::step::*;
 pub use self::string::*;
 pub use self::table::*;
 pub use self::tag::*;
-use ast;
+use crate::ast;
 use std::borrow::Cow;
 
 mod scenario_definition;

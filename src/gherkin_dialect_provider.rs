@@ -4,10 +4,10 @@ use std::sync::Arc;
 
 use serde_json;
 
-use ast::Location;
-use error::{Error, Result};
-use gherkin_dialect::GherkinDialect;
-use parser::GherkinDialectProvide;
+use crate::ast::Location;
+use crate::error::{Error, Result};
+use crate::gherkin_dialect::GherkinDialect;
+use crate::parser::GherkinDialectProvide;
 
 static GHERKIN_LANGUAGES: &[u8] = include_bytes!("../gherkin-languages.json");
 

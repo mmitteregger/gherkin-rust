@@ -1,5 +1,5 @@
-use constant;
-use gherkin_line_span::GherkinLineSpan;
+use crate::constant;
+use crate::gherkin_line_span::GherkinLineSpan;
 
 #[derive(Debug, Clone)]
 pub struct GherkinLine {

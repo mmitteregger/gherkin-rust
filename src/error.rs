@@ -4,8 +4,8 @@ use std::result;
 
 use serde_json;
 
-use ast::Location;
-use token::Token;
+use crate::ast::Location;
+use crate::token::Token;
 
 /// A type alias for `Result<T, gherkin::Error>`.
 pub type Result<T> = result::Result<T, Error>;
