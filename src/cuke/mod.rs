@@ -44,7 +44,7 @@ mod tests {
 
     #[test]
     fn test_send_sync() {
-        assert_send::<Cuke>();
-        assert_sync::<Cuke>();
+        assert_send::<Cuke<'_>>();
+        assert_sync::<Cuke<'_>>();
     }
 }

@@ -37,7 +37,7 @@ pub enum TokenType {
 }
 
 impl fmt::Display for TokenType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
@@ -80,7 +80,7 @@ pub enum RuleType {
 }
 
 impl fmt::Display for RuleType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
@@ -254,19 +254,19 @@ impl<B: Builder> Parser<B> {
         Ok(self.builder.get_result())
     }
 
-    fn add_error(&mut self, context: &mut ParserContext, error: Error) {
+    fn add_error(&mut self, context: &mut ParserContext<'_>, error: Error) {
         context.errors.push(error);
         // if (context.errors.size() > 10)
         //     throw new ParserException.CompositeParserException(context.errors);
     }
 
-    fn handle_ast_result(&mut self, context: &mut ParserContext, result: Result<()>) -> Result<()> {
+    fn handle_ast_result(&mut self, context: &mut ParserContext<'_>, result: Result<()>) -> Result<()> {
         self.handle_external_result(context, result, ())
     }
 
     fn handle_external_result<V>(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         result: Result<V>,
         default_value: V,
     ) -> Result<V> {
@@ -289,22 +289,22 @@ impl<B: Builder> Parser<B> {
         Ok(default_value)
     }
 
-    fn build(&mut self, context: &mut ParserContext, token: Token) -> Result<()> {
+    fn build(&mut self, context: &mut ParserContext<'_>, token: Token) -> Result<()> {
         let result = self.builder.build(token);
         self.handle_ast_result(context, result)
     }
 
-    fn start_rule(&mut self, context: &mut ParserContext, rule_type: RuleType) -> Result<()> {
+    fn start_rule(&mut self, context: &mut ParserContext<'_>, rule_type: RuleType) -> Result<()> {
         let result = self.builder.start_rule(rule_type);
         self.handle_ast_result(context, result)
     }
 
-    fn end_rule(&mut self, context: &mut ParserContext, rule_type: RuleType) -> Result<()> {
+    fn end_rule(&mut self, context: &mut ParserContext<'_>, rule_type: RuleType) -> Result<()> {
         let result = self.builder.end_rule(rule_type);
         self.handle_ast_result(context, result)
     }
 
-    fn read_token(&mut self, context: &mut ParserContext) -> Result<Token> {
+    fn read_token(&mut self, context: &mut ParserContext<'_>) -> Result<Token> {
         match context.token_queue.pop_front() {
             Some(token) => Ok(token),
             None => context
@@ -316,7 +316,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_eof(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         let result = self.token_match.match_eof(token);
@@ -326,7 +326,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_empty(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -339,7 +339,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_comment(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -352,7 +352,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_tag_line(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -365,7 +365,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_feature_line(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -378,7 +378,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_background_line(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -391,7 +391,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_scenario_line(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -404,7 +404,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_scenario_outline_line(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -417,7 +417,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_examples_line(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -430,7 +430,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_step_line(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -443,7 +443,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_doc_string_separator(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -456,7 +456,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_table_row(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -469,7 +469,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_language(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -482,7 +482,7 @@ impl<B: Builder> Parser<B> {
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
     fn match_other(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         token: &mut Token,
     ) -> Result<bool> {
         if token.is_eof() {
@@ -496,7 +496,7 @@ impl<B: Builder> Parser<B> {
         &mut self,
         state: u32,
         token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         match state {
             0 => self.match_token_at_0(token, context),
@@ -540,7 +540,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_0(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.build(context, token)?;
@@ -627,7 +627,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_1(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_tag_line(context, &mut token)? {
             self.start_rule(context, RuleType::Tags)?;
@@ -698,7 +698,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_2(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_tag_line(context, &mut token)? {
             self.build(context, token)?;
@@ -769,7 +769,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_3(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
@@ -873,7 +873,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_4(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
@@ -977,7 +977,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_5(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::FeatureHeader)?;
@@ -1075,7 +1075,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_6(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
@@ -1178,7 +1178,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_7(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
@@ -1281,7 +1281,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_8(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Background)?;
@@ -1378,7 +1378,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_9(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
@@ -1492,7 +1492,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_10(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
@@ -1604,7 +1604,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_11(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_tag_line(context, &mut token)? {
             self.build(context, token)?;
@@ -1683,7 +1683,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_12(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
@@ -1790,7 +1790,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_13(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
@@ -1897,7 +1897,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_14(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Scenario)?;
@@ -1998,7 +1998,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_15(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
@@ -2116,7 +2116,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_16(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
@@ -2232,7 +2232,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_17(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2356,7 +2356,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_18(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
@@ -2482,7 +2482,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_19(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::ScenarioOutline)?;
@@ -2600,7 +2600,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_20(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Step)?;
@@ -2737,7 +2737,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_21(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DataTable)?;
@@ -2874,7 +2874,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_22(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_tag_line(context, &mut token)? {
             self.build(context, token)?;
@@ -2946,7 +2946,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_23(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
@@ -3082,7 +3082,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_24(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Description)?;
@@ -3220,7 +3220,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_25(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::Examples)?;
@@ -3350,7 +3350,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_26(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::ExamplesTable)?;
@@ -3485,7 +3485,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_28(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_doc_string_separator(context, &mut token)? {
             self.build(context, token)?;
@@ -3545,7 +3545,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_29(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
@@ -3677,7 +3677,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_30(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_doc_string_separator(context, &mut token)? {
             self.build(context, token)?;
@@ -3737,7 +3737,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_31(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
@@ -3848,7 +3848,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_32(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_doc_string_separator(context, &mut token)? {
             self.build(context, token)?;
@@ -3908,7 +3908,7 @@ impl<B: Builder> Parser<B> {
     fn match_token_at_33(
         &mut self,
         mut token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         if self.match_eof(context, &mut token)? {
             self.end_rule(context, RuleType::DocString)?;
@@ -4013,7 +4013,7 @@ impl<B: Builder> Parser<B> {
 
     #[allow(unknown_lints, nonminimal_bool)] // simplifies the parser template
     #[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
-    fn lookahead_0(&mut self, context: &mut ParserContext, current_token: &Token) -> bool {
+    fn lookahead_0(&mut self, context: &mut ParserContext<'_>, current_token: &Token) -> bool {
         current_token.detach();
         let mut token: Token;
         let mut queue: VecDeque<Token> = VecDeque::new();

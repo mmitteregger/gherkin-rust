@@ -15,7 +15,7 @@ impl Compiler {
 
         let mut cukes = Vec::with_capacity(feature.scenario_definitions.len());
         let mut background: Option<&ast::Background> = None;
-        let mut background_steps: Vec<cuke::Step> = Vec::new();
+        let mut background_steps: Vec<cuke::Step<'_>> = Vec::new();
 
         for scenario_definition in &feature.scenario_definitions {
             match scenario_definition {
@@ -269,11 +269,11 @@ impl Compiler {
 
                                 cuke::Cell { location, value }
                             })
-                            .collect::<Vec<cuke::Cell>>();
+                            .collect::<Vec<cuke::Cell<'_>>>();
 
                         cuke::Row { cells }
                     })
-                    .collect::<Vec<cuke::Row>>();
+                    .collect::<Vec<cuke::Row<'_>>>();
                 let cuke_table = cuke::Table { rows };
 
                 Some(cuke::Argument::Table(cuke_table))

@@ -1,5 +1,4 @@
-extern crate gherkin;
-extern crate serde_json;
+use serde_json;
 
 use gherkin::pickle::Pickle;
 use gherkin::cuke::Compiler;

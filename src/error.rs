@@ -58,7 +58,7 @@ impl From<serde_json::Error> for Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Error::Io(ref err) => err.fmt(f),
             Error::SerdeJson(ref err) => err.fmt(f),

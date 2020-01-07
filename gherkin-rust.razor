@@ -110,7 +110,7 @@ pub enum TokenType {
 }
 
 impl fmt::Display for TokenType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
@@ -125,7 +125,7 @@ pub enum RuleType {
 }
 
 impl fmt::Display for RuleType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
@@ -288,19 +288,19 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         Ok(self.builder.get_result())
     }
 
-    fn add_error(&mut self, context: &mut ParserContext, error: Error) {
+    fn add_error(&mut self, context: &mut ParserContext<'_>, error: Error) {
         context.errors.push(error);
         // if (context.errors.size() > 10)
         //     throw new ParserException.CompositeParserException(context.errors);
     }
 
-    fn handle_ast_result(&mut self, context: &mut ParserContext, result: Result<()>) -> Result<()> {
+    fn handle_ast_result(&mut self, context: &mut ParserContext<'_>, result: Result<()>) -> Result<()> {
         self.handle_external_result(context, result, ())
     }
 
     fn handle_external_result<V>(
         &mut self,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
         result: Result<V>,
         default_value: V,
     ) -> Result<V> {
@@ -323,22 +323,22 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         Ok(default_value)
     }
 
-    fn build(&mut self, context: &mut ParserContext, token: Token) -> Result<()> {
+    fn build(&mut self, context: &mut ParserContext<'_>, token: Token) -> Result<()> {
         let result = self.builder.build(token);
         self.handle_ast_result(context, result)
     }
 
-    fn start_rule(&mut self, context: &mut ParserContext, rule_type: RuleType) -> Result<()> {
+    fn start_rule(&mut self, context: &mut ParserContext<'_>, rule_type: RuleType) -> Result<()> {
         let result = self.builder.start_rule(rule_type);
         self.handle_ast_result(context, result)
     }
 
-    fn end_rule(&mut self, context: &mut ParserContext, rule_type: RuleType) -> Result<()> {
+    fn end_rule(&mut self, context: &mut ParserContext<'_>, rule_type: RuleType) -> Result<()> {
         let result = self.builder.end_rule(rule_type);
         self.handle_ast_result(context, result)
     }
 
-    fn read_token(&mut self, context: &mut ParserContext) -> Result<Token> {
+    fn read_token(&mut self, context: &mut ParserContext<'_>) -> Result<Token> {
         match context.token_queue.pop_front() {
             Some(token) => Ok(token),
             None => context
@@ -349,11 +349,11 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
 @foreach(var rule in Model.RuleSet.TokenRules)
 {<text>
     #[cfg_attr(rustfmt, rustfmt_skip)] // because the generated lengths differ
-    fn match_@(FormatMethodName(rule.Name))(
-        &mut self,
-        context: &mut ParserContext,
-        token: &mut Token,
-    ) -> Result<bool> {
+    fn match_@(FormatMethodName(rule.Name))(</text>
+        @:&mut self,
+        @:context: &mut ParserContext<'_>,
+        @:token: &mut Token,
+    <text>) -> Result<bool> {
         @if (rule.Name != "#EOF")
         {
         <text>if token.is_eof() {
@@ -369,7 +369,7 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
         &mut self,
         state: u32,
         token: Token,
-        context: &mut ParserContext,
+        context: &mut ParserContext<'_>,
     ) -> Result<u32> {
         match state {
         @foreach(var state in Model.States.Values.Where(s => !s.IsEndState))
@@ -383,11 +383,11 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
 {
 <text>
     // @Raw(state.Comment)
-    fn match_token_at_@(state.Id)(
-        &mut self,
-        mut token: Token,
-        context: &mut ParserContext,
-    ) -> Result<u32> {
+    fn match_token_at_@(state.Id)(</text>
+        @:&mut self,
+        @:mut token: Token,
+        @:context: &mut ParserContext<'_>,
+    <text>) -> Result<u32> {
 </text>foreach(var transition in state.Transitions)
         {
         if (transition.LookAheadHint == null) {
@@ -413,8 +413,8 @@ impl<B: Builder> @(Model.ParserClassName)<B> {
 <text>
     #[allow(unknown_lints, nonminimal_bool)] // simplifies the parser template
     #[cfg_attr(rustfmt, rustfmt_skip)] // simplifies the parser template
-    fn lookahead_@(lookAheadHint.Id)(&mut self, context: &mut ParserContext, current_token: &Token) -> bool {
-        current_token.detach();
+    fn lookahead_@(lookAheadHint.Id)</text>@:(&mut self, context: &mut ParserContext<'_>, current_token: &Token) -> bool {
+<text>        current_token.detach();
         let mut token: Token;
         let mut queue: VecDeque<Token> = VecDeque::new();
         let mut found_match = false;

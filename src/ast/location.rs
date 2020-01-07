@@ -14,7 +14,7 @@ impl Location {
 }
 
 impl fmt::Display for Location {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "({}:{})", self.line, self.column)
     }
 }

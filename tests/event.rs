@@ -1,5 +1,3 @@
-extern crate gherkin;
-
 use gherkin::event::{self, CucumberEvent};
 
 #[test]

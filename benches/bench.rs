@@ -1,6 +1,5 @@
 #![feature(test)]
 
-extern crate gherkin;
 extern crate test;
 
 #[cfg(test)]
