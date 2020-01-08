@@ -9,8 +9,8 @@ use std::fmt;
 use std::io::Read;
 use std::sync::Arc;
 
-use crate::ast::Location;
-use crate::ast_builder::AstBuilder;
+use crate::location::Location;
+use crate::gherkin_document_builder::GherkinDocumentBuilder;
 use crate::error::{Error, Result};
 use crate::gherkin_dialect::GherkinDialect;
 use crate::token::Token;
@@ -114,8 +114,8 @@ pub struct Parser<B: Builder> {
     stop_at_first_error: bool,
 }
 
-impl Default for Parser<AstBuilder> {
-    fn default() -> Parser<AstBuilder> {
+impl Default for Parser<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
+    fn default() -> Parser<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
         ParserOptions::new().create()
     }
 }
@@ -126,18 +126,18 @@ pub struct ParserOptions<B: Builder> {
     stop_at_first_error: Option<bool>,
 }
 
-impl Default for ParserOptions<AstBuilder> {
-    fn default() -> ParserOptions<AstBuilder> {
+impl Default for ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
+    fn default() -> ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
         ParserOptions {
-            builder: AstBuilder::default(),
+            builder: GherkinDocumentBuilder::default(),
             token_match: None,
             stop_at_first_error: None,
         }
     }
 }
 
-impl ParserOptions<AstBuilder> {
-    pub fn new() -> ParserOptions<AstBuilder> {
+impl ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
+    pub fn new() -> ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
         ParserOptions::default()
     }
 }

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::ast::Location;
+use crate::Location;
 use crate::gherkin_dialect::GherkinDialect;
 use crate::gherkin_line::GherkinLine;
 use crate::gherkin_line_span::GherkinLineSpan;

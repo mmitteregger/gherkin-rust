@@ -5,7 +5,7 @@ use std::sync::Arc;
 use lazy_static::lazy_static;
 use serde_json;
 
-use crate::ast::Location;
+use crate::Location;
 use crate::error::{Error, Result};
 use crate::gherkin_dialect::GherkinDialect;
 use crate::parser::GherkinDialectProvide;

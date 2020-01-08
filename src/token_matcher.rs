@@ -5,7 +5,7 @@ use regex::Regex;
 
 use lazy_static::lazy_static;
 
-use crate::ast::*;
+use crate::location::Location;
 use crate::constant;
 use crate::error::Result;
 use crate::gherkin_dialect::GherkinDialect;

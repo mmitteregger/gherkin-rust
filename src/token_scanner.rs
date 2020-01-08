@@ -1,7 +1,7 @@
 use std::io::prelude::*;
 use std::io::BufReader;
 
-use crate::ast::Location;
+use crate::location::Location;
 use crate::error::Result;
 use crate::gherkin_line::GherkinLine;
 use crate::parser::TokenScan;

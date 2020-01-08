@@ -2,7 +2,7 @@ use std::default::Default;
 use std::mem;
 use std::string::ToString;
 
-use crate::ast::Location;
+use crate::Location;
 use crate::error::Result;
 use crate::gherkin_line_span::GherkinLineSpan;
 use crate::parser::{self, RuleType};

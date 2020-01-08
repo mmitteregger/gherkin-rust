@@ -5,7 +5,7 @@ use std::result;
 use failure::Fail;
 use serde_json;
 
-use crate::ast::Location;
+use crate::Location;
 use crate::token::Token;
 
 /// A type alias for `Result<T, gherkin::Error>`.
@@ -17,7 +17,7 @@ pub enum Error {
     /// An I/O error that occurred while reading a feature file.
     Io(#[cause] io::Error),
     SerdeJson(#[cause] serde_json::Error),
-    AstBuilder {
+    GherkinDocumentBuilder {
         location: Location,
         message: String,
     },
@@ -63,7 +63,7 @@ impl fmt::Display for Error {
         match *self {
             Error::Io(ref err) => err.fmt(f),
             Error::SerdeJson(ref err) => err.fmt(f),
-            Error::AstBuilder {
+            Error::GherkinDocumentBuilder {
                 ref location,
                 ref message,
             } => write!(f, "{}: {}", location, message),
@@ -117,7 +117,7 @@ impl Error {
         match *self {
             Error::Io(ref _err) => None,
             Error::SerdeJson(ref _err) => None,
-            Error::AstBuilder { location, .. } => Some(location),
+            Error::GherkinDocumentBuilder { location, .. } => Some(location),
             Error::NoSuchLanguage { location, .. } => Some(location),
             Error::UnexpectedToken { location, .. } => Some(location),
             Error::UnexpectedEof { location, .. } => Some(location),

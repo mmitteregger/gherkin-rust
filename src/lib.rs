@@ -1,10 +1,11 @@
-pub use crate::ast_builder::AstBuilder;
+pub use crate::gherkin_document_builder::GherkinDocumentBuilder;
 pub use crate::error::{Error, Result};
 pub use crate::parser::{GherkinDialectProvide, Parser, ParserOptions};
 pub use crate::token_formatter_builder::TokenFormatterBuilder;
+pub use crate::location::Location;
 
 pub mod ast;
-mod ast_builder;
+mod gherkin_document_builder;
 mod ast_node;
 mod constant;
 pub mod cuke;
@@ -17,6 +18,7 @@ mod gherkin_line_span;
 mod parser;
 pub mod pickle;
 pub mod stream;
+mod location;
 mod token;
 mod token_formatter_builder;
 mod token_matcher;
