@@ -46,8 +46,8 @@
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            @foreach(var expectedToken in expectedTokens) {<text>            String::from("@expectedToken"),
+        let expected_tokens = &[
+            @foreach(var expectedToken in expectedTokens) {<text>            "@expectedToken",
 </text>}
         ];
 

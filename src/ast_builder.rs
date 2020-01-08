@@ -157,49 +157,35 @@ impl AstBuilder {
             }
             RuleType::ScenarioDefinition => {
                 let tags = self.get_tags(&mut node);
-                let scenario_node = node.remove_opt::<AstNode>(RuleType::Scenario);
+                let mut scenario_node = node.remove::<AstNode>(RuleType::Scenario);
+                let scenario_line = scenario_node.remove_token(TokenType::ScenarioLine);
 
-                let scenario_definition: ScenarioDefinition = match scenario_node {
-                    Some(mut scenario_node) => {
-                        let scenario_line = scenario_node.remove_token(TokenType::ScenarioLine);
+                let location = self.get_location(&scenario_line, 0);
+                let keyword = scenario_line.matched_keyword.as_ref().unwrap().to_owned();
+                let name = scenario_line.matched_text.as_ref().unwrap().to_owned();
+                let description = self.get_description(&mut scenario_node);
+                let steps = self.get_steps(&mut scenario_node);
+                let examples = scenario_node.remove_items(RuleType::ExamplesDefinition);
 
-                        let location = self.get_location(&scenario_line, 0);
-                        let keyword = scenario_line.matched_keyword.as_ref().unwrap().to_owned();
-                        let name = scenario_line.matched_text.as_ref().unwrap().to_owned();
-                        let description = self.get_description(&mut scenario_node);
-                        let steps = self.get_steps(&mut scenario_node);
-
-                        ScenarioDefinition::from(Scenario::new(
-                            location,
-                            keyword,
-                            name,
-                            description,
-                            steps,
-                            tags,
-                        ))
-                    }
-                    None => {
-                        let mut outline_node = node.remove::<AstNode>(RuleType::Scenario);
-                        let outline_line =
-                            outline_node.remove_token(TokenType::ScenarioLine);
-
-                        let location = self.get_location(&outline_line, 0);
-                        let keyword = outline_line.matched_keyword.as_ref().unwrap().to_owned();
-                        let name = outline_line.matched_text.as_ref().unwrap().to_owned();
-                        let description = self.get_description(&mut outline_node);
-                        let steps = self.get_steps(&mut outline_node);
-                        let examples = outline_node.remove_items(RuleType::ExamplesDefinition);
-
-                        ScenarioDefinition::from(ScenarioOutline::new(
-                            location,
-                            keyword,
-                            name,
-                            description,
-                            steps,
-                            tags,
-                            examples,
-                        ))
-                    }
+                let scenario_definition: ScenarioDefinition = if examples.is_empty() {
+                    ScenarioDefinition::from(Scenario::new(
+                        location,
+                        keyword,
+                        name,
+                        description,
+                        steps,
+                        tags,
+                    ))
+                } else {
+                    ScenarioDefinition::from(ScenarioOutline::new(
+                        location,
+                        keyword,
+                        name,
+                        description,
+                        steps,
+                        tags,
+                        examples,
+                    ))
                 };
 
                 Ok(Box::new(scenario_definition))

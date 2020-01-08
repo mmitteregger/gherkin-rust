@@ -29,12 +29,12 @@ pub enum Error {
         location: Location,
         state_comment: String,
         received_token: Box<Token>,
-        expected_tokens: Vec<String>,
+        expected_tokens: &'static [&'static str],
     },
     UnexpectedEof {
         location: Location,
         state_comment: String,
-        expected_tokens: Vec<String>,
+        expected_tokens: &'static [&'static str],
     },
     Composite(Vec<Error>),
     /// Hints that destructuring should not be exhaustive.

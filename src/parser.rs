@@ -599,13 +599,13 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Language"),
-            String::from("#TagLine"),
-            String::from("#FeatureLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Language",
+            "#TagLine",
+            "#FeatureLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -672,11 +672,11 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#TagLine"),
-            String::from("#FeatureLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#TagLine",
+            "#FeatureLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -743,11 +743,11 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#TagLine"),
-            String::from("#FeatureLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#TagLine",
+            "#FeatureLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -843,15 +843,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#BackgroundLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#BackgroundLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -948,14 +948,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#BackgroundLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#BackgroundLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1046,14 +1046,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#BackgroundLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#BackgroundLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1148,15 +1148,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1252,14 +1252,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1349,14 +1349,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1461,16 +1461,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#DocStringSeparator"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#DocStringSeparator",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1574,15 +1574,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1650,11 +1650,11 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#TagLine",
+            "#ScenarioLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1767,16 +1767,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -1892,15 +1892,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2008,15 +2008,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2141,17 +2141,17 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#DocStringSeparator"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#DocStringSeparator",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2277,16 +2277,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2354,11 +2354,11 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#TagLine",
+            "#ExamplesLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2483,16 +2483,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2620,15 +2620,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2748,15 +2748,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2881,15 +2881,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -2987,15 +2987,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#BackgroundLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#BackgroundLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3094,14 +3094,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#BackgroundLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#BackgroundLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3194,14 +3194,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#BackgroundLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#BackgroundLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3298,15 +3298,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3404,14 +3404,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3503,14 +3503,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3617,16 +3617,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#DocStringSeparator"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#DocStringSeparator",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3732,15 +3732,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3808,11 +3808,11 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#TagLine",
+            "#ScenarioLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -3927,16 +3927,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4054,15 +4054,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4172,15 +4172,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4307,17 +4307,17 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#DocStringSeparator"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#DocStringSeparator",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4445,16 +4445,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4522,11 +4522,11 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#TagLine",
+            "#ExamplesLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4653,16 +4653,16 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Empty"),
-            String::from("#Comment"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Empty",
+            "#Comment",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4792,15 +4792,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -4922,15 +4922,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#Comment"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#Comment",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5057,15 +5057,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#TableRow"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#TableRow",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5123,9 +5123,9 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#DocStringSeparator"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#DocStringSeparator",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5249,15 +5249,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5315,9 +5315,9 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#DocStringSeparator"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#DocStringSeparator",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5419,14 +5419,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5484,9 +5484,9 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#DocStringSeparator"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#DocStringSeparator",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5608,15 +5608,15 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ExamplesLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#StepLine",
+            "#TagLine",
+            "#ExamplesLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5674,9 +5674,9 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#DocStringSeparator"),
-            String::from("#Other"),
+        let expected_tokens = &[
+            "#DocStringSeparator",
+            "#Other",
         ];
 
         let token_location = token.location.expect("token location");
@@ -5776,14 +5776,14 @@ impl<B: Builder> Parser<B> {
         token.detach();
 
         #[rustfmt::skip] // because the generated lengths differ
-        let expected_tokens: Vec<String> = vec![
-            String::from("#EOF"),
-            String::from("#StepLine"),
-            String::from("#TagLine"),
-            String::from("#ScenarioLine"),
-            String::from("#RuleLine"),
-            String::from("#Comment"),
-            String::from("#Empty"),
+        let expected_tokens = &[
+            "#EOF",
+            "#StepLine",
+            "#TagLine",
+            "#ScenarioLine",
+            "#RuleLine",
+            "#Comment",
+            "#Empty",
         ];
 
         let token_location = token.location.expect("token location");

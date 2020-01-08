@@ -1,8 +1,9 @@
 use std::default::Default;
 use std::sync::Arc;
 
-use lazy_static::lazy_static;
 use regex::Regex;
+
+use lazy_static::lazy_static;
 
 use crate::ast::*;
 use crate::constant;
@@ -10,8 +11,8 @@ use crate::error::Result;
 use crate::gherkin_dialect::GherkinDialect;
 use crate::gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 use crate::gherkin_line_span::GherkinLineSpan;
-use crate::parser::GherkinDialectProvide;
 use crate::parser::{TokenMatch, TokenType};
+use crate::parser::GherkinDialectProvide;
 use crate::token::Token;
 
 lazy_static! {
@@ -143,7 +144,7 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
                 token,
                 TokenType::DocStringSeparator,
                 content_type,
-                None,
+                Some(separator.to_owned()),
                 None,
                 Vec::new(),
             );
@@ -216,8 +217,10 @@ impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
     }
 
     fn match_scenario_line(&mut self, token: &mut Token) -> Result<bool> {
-        let keywords = self.current_dialect.get_scenario_keywords();
-        let is_match = self.match_title_line(token, TokenType::ScenarioLine, keywords);
+        let scenario_keywords = self.current_dialect.get_scenario_keywords();
+        let scenario_outline_keywords = self.current_dialect.get_scenario_outline_keywords();
+        let is_match = self.match_title_line(token, TokenType::ScenarioLine, scenario_keywords)
+            || self.match_title_line(token, TokenType::ScenarioLine, scenario_outline_keywords);
         Ok(is_match)
     }
 
