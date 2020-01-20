@@ -1,3 +1,5 @@
+use cucumber_messages::pickle;
+
 use crate::cuke::{Location, String, Table};
 
 #[derive(Debug, Clone)]
@@ -11,6 +13,19 @@ impl<'d> Argument<'d> {
         match self {
             Argument::String(string) => string.get_location(),
             Argument::Table(table) => table.get_location(),
+        }
+    }
+}
+
+impl<'d> From<Argument<'d>> for pickle::Argument {
+    fn from(argument: Argument<'d>) -> Self {
+        match argument {
+            Argument::String(string) => pickle::Argument {
+                message: Some(pickle::ArgumentMessage::DocString(pickle::DocString::from(string))),
+            },
+            Argument::Table(table) => pickle::Argument {
+                message: Some(pickle::ArgumentMessage::DataTable(pickle::Table::from(table))),
+            },
         }
     }
 }

@@ -10,7 +10,6 @@ use std::io::Read;
 use std::sync::Arc;
 
 use crate::location::Location;
-use crate::gherkin_document_builder::GherkinDocumentBuilder;
 use crate::error::{Error, Result};
 use crate::gherkin_dialect::GherkinDialect;
 use crate::token::Token;
@@ -114,32 +113,10 @@ pub struct Parser<B: Builder> {
     stop_at_first_error: bool,
 }
 
-impl Default for Parser<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
-    fn default() -> Parser<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
-        ParserOptions::new().create()
-    }
-}
-
 pub struct ParserOptions<B: Builder> {
     builder: B,
     token_match: Option<Box<dyn TokenMatch>>,
     stop_at_first_error: Option<bool>,
-}
-
-impl Default for ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
-    fn default() -> ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
-        ParserOptions {
-            builder: GherkinDocumentBuilder::default(),
-            token_match: None,
-            stop_at_first_error: None,
-        }
-    }
-}
-
-impl ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
-    pub fn new() -> ParserOptions<GherkinDocumentBuilder<cucumber_messages::id_generator::Incrementing>> {
-        ParserOptions::default()
-    }
 }
 
 impl<B: Builder> ParserOptions<B> {
@@ -200,6 +177,10 @@ struct ParserContext<'a> {
 impl<B: Builder> Parser<B> {
     pub fn with_builder(builder: B) -> Parser<B> {
         ParserOptions::with_builder(builder).create()
+    }
+
+    pub fn builder_mut(&mut self) -> &mut B {
+        &mut self.builder
     }
 
     pub fn parse_str<S: AsRef<str>>(&mut self, source: S) -> Result<B::BuilderResult> {

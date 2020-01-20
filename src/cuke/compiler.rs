@@ -1,110 +1,172 @@
 use std::borrow::Cow;
 
-use crate::ast;
+use cucumber_messages::ast;
+use cucumber_messages::id_generator::IdGenerator;
+
 use crate::cuke;
 
-#[derive(Default)]
-pub struct Compiler;
+pub struct Compiler<'id_gen> {
+    id_generator: &'id_gen mut dyn IdGenerator,
+}
 
-impl Compiler {
+/// A session to store data for the compilation of a single `GherkinDocument`.
+///
+/// `'d` is the lifetime of the `GherkinDocument`.
+struct Session<'d> {
+    cukes: Vec<cuke::Cuke<'d>>,
+    uri: &'d str,
+    feature: &'d ast::Feature,
+    feature_background: Option<&'d ast::Background>,
+    feature_background_steps: Vec<cuke::Step<'d>>,
+    rule: Option<&'d ast::Rule>,
+    rule_background: Option<&'d ast::Background>,
+    rule_background_steps: Vec<cuke::Step<'d>>,
+}
+
+impl<'id_gen> Compiler<'id_gen> {
+    pub fn new(id_generator: &'id_gen mut dyn IdGenerator) -> Compiler<'id_gen> {
+        Compiler {
+            id_generator,
+        }
+    }
+
     pub fn compile<'d>(
         &mut self,
         gherkin_document: &'d ast::GherkinDocument,
     ) -> Vec<cuke::Cuke<'d>> {
-        let feature: &ast::Feature = match &gherkin_document.feature {
+        let feature = match &gherkin_document.feature {
             Some(feature) => feature,
             None => return Vec::new(),
         };
 
-        let mut cukes = Vec::with_capacity(feature.scenario_definitions.len());
-        let mut background: Option<&ast::Background> = None;
-        let mut background_steps: Vec<cuke::Step<'_>> = Vec::new();
+        let mut session = Session {
+            cukes: Vec::with_capacity(feature.children.len()),
+            uri: &gherkin_document.uri,
+            feature,
+            feature_background: None,
+            feature_background_steps: Vec::new(),
+            rule: None,
+            rule_background: None,
+            rule_background_steps: Vec::new(),
+        };
+        self.compile_feature(&mut session);
+        session.cukes
+    }
 
-        for scenario_definition in &feature.scenario_definitions {
-            match scenario_definition {
-                ast::ScenarioDefinition::Background(ref bg) => {
-                    background = Some(bg);
-                    background_steps = self.background_cuke_steps(bg);
-                }
-                ast::ScenarioDefinition::Scenario(scenario) => {
-                    self.compile_scenario(
-                        &mut cukes,
-                        feature,
-                        background,
-                        &background_steps,
-                        scenario,
-                    );
-                }
-                ast::ScenarioDefinition::ScenarioOutline(scenario_outline) => {
-                    self.compile_scenario_outline(
-                        &mut cukes,
-                        feature,
-                        background,
-                        &background_steps,
-                        scenario_outline,
-                    );
+    fn compile_feature<'d>(&mut self, session: &mut Session<'d>) {
+        session.feature_background = None;
+        session.feature_background_steps = Vec::new();
+
+        for feature_child in &session.feature.children {
+            if let Some(value) = &feature_child.value {
+                match value {
+                    ast::FeatureChildValue::Background(background) => {
+                        session.feature_background = Some(background);
+                        session.feature_background_steps = self.background_cuke_steps(background);
+                    }
+                    ast::FeatureChildValue::Rule(rule) => {
+                        self.compile_rule(
+                            session,
+                            rule,
+                        );
+                    }
+                    ast::FeatureChildValue::Scenario(scenario) => {
+                        if scenario.examples.is_empty() {
+                            self.compile_scenario(
+                                session,
+                                scenario,
+                            );
+                        } else {
+                            self.compile_scenario_outline(
+                                session,
+                                scenario,
+                            );
+                        }
+                    }
                 }
             }
         }
-
-        cukes
     }
 
-    fn compile_scenario<'d>(
-        &mut self,
-        cukes: &mut Vec<cuke::Cuke<'d>>,
-        feature: &'d ast::Feature,
-        background: Option<&'d ast::Background>,
-        background_steps: &[cuke::Step<'d>],
-        scenario: &'d ast::Scenario,
-    ) {
-        let scenario_definition = cuke::ScenarioDefinition::from(scenario);
+    fn compile_rule<'d>(&mut self, session: &mut Session<'d>, rule: &'d ast::Rule) {
+        session.rule_background = None;
+        session.rule_background_steps = Vec::new();
+
+        for rule_child in &rule.children {
+            if let Some(value) = &rule_child.value {
+                match value {
+                    ast::RuleChildValue::Background(background) => {
+                        session.rule_background = Some(background);
+                        session.rule_background_steps = self.background_cuke_steps(background);
+                    }
+                    ast::RuleChildValue::Scenario(scenario) => {
+                        if scenario.examples.is_empty() {
+                            self.compile_scenario(
+                                session,
+                                scenario,
+                            );
+                        } else {
+                            self.compile_scenario_outline(
+                                session,
+                                scenario,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn compile_scenario<'d>(&mut self, session: &mut Session<'d>, scenario: &'d ast::Scenario) {
         let name = Cow::Borrowed(scenario.name.as_str());
-        let language = &feature.language;
-        let (background_steps, scenario_steps) =
-            self.compile_scenario_steps(background_steps, scenario);
-        let tags = self.compile_scenario_tags(feature, scenario);
-        let locations = vec![cuke::Location::from(scenario.location)];
+        let language = &session.feature.language;
+        let (feature_background_steps, rule_background_steps) =
+            self.compile_feature_and_rule_background_steps(
+                session,
+                !scenario.steps.is_empty(),
+            );
+        let scenario_steps = self.compile_scenario_steps(scenario);
+        let tags = self.compile_scenario_tags(session, scenario);
+        let locations = vec![cuke::Location::from(scenario.location.unwrap())];
+        let ast_node_ids = vec![scenario.id.as_str()];
         let cuke = cuke::Cuke {
-            feature,
-            background,
-            scenario_definition,
+            id: self.id_generator.new_id(),
+            uri: session.uri,
+            feature: session.feature,
+            feature_background: session.feature_background,
+            rule: session.rule,
+            rule_background: session.rule_background,
+            scenario,
             name,
             language,
-            background_steps,
+            feature_background_steps,
+            rule_background_steps,
             scenario_steps,
             tags,
             locations,
+            ast_node_ids,
         };
 
-        cukes.push(cuke);
+        session.cukes.push(cuke);
     }
 
-    fn compile_scenario_steps<'d>(
-        &mut self,
-        background_steps: &[cuke::Step<'d>],
-        scenario: &'d ast::Scenario,
-    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>) {
-        if scenario.steps.is_empty() {
-            (Vec::new(), Vec::new())
-        } else {
-            let mut scenario_steps = Vec::with_capacity(scenario.steps.len());
+    fn compile_scenario_steps<'d>(&mut self, scenario: &'d ast::Scenario) -> Vec<cuke::Step<'d>> {
+        let mut scenario_steps = Vec::with_capacity(scenario.steps.len());
 
-            for step in &scenario.steps {
-                let cuke_step = self.cuke_step(step);
-                scenario_steps.push(cuke_step);
-            }
-
-            (background_steps.to_vec(), scenario_steps)
+        for step in &scenario.steps {
+            let cuke_step = self.cuke_step(step);
+            scenario_steps.push(cuke_step);
         }
+
+        scenario_steps
     }
 
     fn compile_scenario_tags<'d>(
         &mut self,
-        feature: &'d ast::Feature,
+        session: &mut Session<'d>,
         scenario: &'d ast::Scenario,
     ) -> Vec<cuke::Tag<'d>> {
-        let feature_tags = &feature.tags;
+        let feature_tags = &session.feature.tags;
         let scenario_tags = &scenario.tags;
         let tags_capacity = feature_tags.len() + scenario_tags.len();
 
@@ -124,101 +186,111 @@ impl Compiler {
 
     fn compile_scenario_outline<'d>(
         &mut self,
-        cukes: &mut Vec<cuke::Cuke<'d>>,
-        feature: &'d ast::Feature,
-        background: Option<&'d ast::Background>,
-        background_steps: &[cuke::Step<'d>],
-        scenario_outline: &'d ast::ScenarioOutline,
+        session: &mut Session<'d>,
+        scenario: &'d ast::Scenario,
     ) {
-        for examples in &scenario_outline.examples {
+        for examples in &scenario.examples {
             let table_header: &ast::TableRow = match &examples.table_header {
                 Some(table_header) => table_header,
                 None => return,
             };
-            let table_body = examples.table_body.as_ref().unwrap();
 
             let variable_cells = &table_header.cells;
-            for values in table_body {
+            for values in &examples.table_body {
                 let value_cells = &values.cells;
 
-                let scenario_definition = cuke::ScenarioDefinition::from(scenario_outline);
-                let name = self.interpolate(&scenario_outline.name, variable_cells, value_cells);
-                let language = &feature.language;
-                let (background_steps, scenario_steps) = self.compile_scenario_outline_steps(
-                    background_steps,
-                    scenario_outline,
+                let name = self.interpolate(&scenario.name, variable_cells, value_cells);
+                let language = &session.feature.language;
+                let (feature_background_steps, rule_background_steps) =
+                    self.compile_feature_and_rule_background_steps(
+                        session,
+                        !scenario.steps.is_empty(),
+                    );
+                let scenario_steps = self.compile_scenario_outline_steps(
+                    scenario,
                     variable_cells,
                     value_cells,
                     values,
                 );
-                let tags = self.compile_scenario_outline_tags(&feature, scenario_outline, examples);
+                let tags = self.compile_scenario_outline_tags(session, scenario, examples);
                 let locations = vec![
-                    cuke::Location::from(values.location),
-                    cuke::Location::from(scenario_outline.location),
+                    cuke::Location::from(values.location.unwrap()),
+                    cuke::Location::from(scenario.location.unwrap()),
                 ];
+                let ast_node_ids = vec![scenario.id.as_str(), values.id.as_str()];
                 let cuke = cuke::Cuke {
-                    feature,
-                    background,
-                    scenario_definition,
+                    id: self.id_generator.new_id(),
+                    uri: session.uri,
+                    feature: session.feature,
+                    feature_background: session.feature_background,
+                    rule: session.rule,
+                    rule_background: session.rule_background,
+                    scenario,
                     name,
                     language,
-                    background_steps,
+                    feature_background_steps,
+                    rule_background_steps,
                     scenario_steps,
                     tags,
                     locations,
+                    ast_node_ids,
                 };
 
-                cukes.push(cuke);
+                session.cukes.push(cuke);
             }
         }
     }
 
     fn compile_scenario_outline_steps<'d>(
         &mut self,
-        background_steps: &[cuke::Step<'d>],
-        scenario_outline: &'d ast::ScenarioOutline,
+        scenario: &'d ast::Scenario,
         variable_cells: &'d [ast::TableCell],
         value_cells: &'d [ast::TableCell],
         values: &'d ast::TableRow,
-    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>) {
-        if scenario_outline.steps.is_empty() {
-            (Vec::new(), Vec::new())
+    ) -> Vec<cuke::Step<'d>> {
+        if scenario.steps.is_empty() {
+            Vec::new()
         } else {
-            let mut scenario_outline_steps = Vec::with_capacity(scenario_outline.steps.len());
+            let mut steps = Vec::with_capacity(scenario.steps.len());
 
-            for step in &scenario_outline.steps {
+            for step in &scenario.steps {
                 let keyword = &step.keyword;
                 let text = self.interpolate(&step.text, variable_cells, value_cells);
                 let argument =
                     self.create_cuke_argument(step.argument.as_ref(), variable_cells, value_cells);
                 let locations = vec![
-                    cuke::Location::from(values.location),
+                    cuke::Location::from(values.location.unwrap()),
                     self.cuke_step_location(step),
                 ];
+                let ast_node_ids = vec![step.id.as_str(), values.id.as_str()];
                 let cuke_step = cuke::Step {
+                    id: self.id_generator.new_id(),
                     keyword,
                     text,
                     argument,
                     locations,
+                    ast_node_ids,
                 };
 
-                scenario_outline_steps.push(cuke_step);
+                steps.push(cuke_step);
             }
 
-            (background_steps.to_vec(), scenario_outline_steps)
+            steps
         }
     }
 
     fn compile_scenario_outline_tags<'d>(
         &mut self,
-        feature: &'d ast::Feature,
-        scenario_outline: &'d ast::ScenarioOutline,
+        session: &mut Session<'d>,
+        scenario: &'d ast::Scenario,
         examples: &'d ast::Examples,
     ) -> Vec<cuke::Tag<'d>> {
-        let feature_tags = &feature.tags;
-        let scenario_outline_tags = &scenario_outline.tags;
+        let feature_tags = &session.feature.tags;
+        let scenario_outline_tags = &scenario.tags;
         let examples_tags = &examples.tags;
-        let tags_capacity = feature_tags.len() + scenario_outline_tags.len() + examples_tags.len();
+        let tags_capacity = feature_tags.len()
+            + scenario_outline_tags.len()
+            + examples_tags.len();
 
         let mut tags = Vec::with_capacity(tags_capacity);
 
@@ -251,15 +323,13 @@ impl Compiler {
 
         match argument {
             ast::Argument::DocString(doc_string) => {
-                let location = cuke::Location::from(doc_string.location);
+                let location = cuke::Location::from(doc_string.location.unwrap());
                 let content = self.interpolate(&doc_string.content, variable_cells, value_cells);
-                let content_type = doc_string.content_type.as_ref().map(|content_type| {
-                    self.interpolate(content_type, variable_cells, value_cells)
-                });
+                let media_type = self.interpolate(&doc_string.media_type, variable_cells, value_cells);
                 let cuke_string = cuke::String {
                     location,
                     content,
-                    content_type,
+                    media_type,
                 };
 
                 Some(cuke::Argument::String(cuke_string))
@@ -273,7 +343,7 @@ impl Compiler {
                             .cells
                             .iter()
                             .map(|cell: &ast::TableCell| {
-                                let location = cuke::Location::from(cell.location);
+                                let location = cuke::Location::from(cell.location.unwrap());
                                 let value =
                                     self.interpolate(&cell.value, variable_cells, value_cells);
 
@@ -298,21 +368,30 @@ impl Compiler {
         background
             .steps
             .iter()
-            .map(|step| self.cuke_step(step))
+            .map(|step| self.cuke_step_without_id(step))
             .collect()
     }
 
     fn cuke_step<'d>(&mut self, step: &'d ast::Step) -> cuke::Step<'d> {
+        let mut cuke_step = self.cuke_step_without_id(step);
+        cuke_step.id = self.id_generator.new_id();
+        cuke_step
+    }
+
+    fn cuke_step_without_id<'d>(&mut self, step: &'d ast::Step) -> cuke::Step<'d> {
         let keyword = &step.keyword;
         let text = Cow::Borrowed(step.text.as_str());
         let argument = self.create_cuke_argument(step.argument.as_ref(), &[], &[]);
         let locations = vec![self.cuke_step_location(step)];
+        let ast_node_ids = vec![step.id.as_str()];
 
         cuke::Step {
+            id: String::new(),
             keyword,
             text,
             argument,
             locations,
+            ast_node_ids,
         }
     }
 
@@ -345,9 +424,39 @@ impl Compiler {
         } else {
             step.keyword.chars().count() as u32
         };
-        let step_location = step.location;
+        let step_location = step.location.unwrap();
         let line = step_location.line;
         let column = step_location.column + keyword_column;
         cuke::Location { line, column }
+    }
+
+    fn compile_feature_and_rule_background_steps<'d>(
+        &mut self,
+        session: &mut Session<'d>,
+        should_compile: bool,
+    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>)
+    {
+        if should_compile {
+            (
+                self.recompile_steps(&session.feature_background_steps),
+                self.recompile_steps(&session.rule_background_steps),
+            )
+        } else {
+            (
+                Vec::new(),
+                Vec::new(),
+            )
+        }
+    }
+
+    fn recompile_steps<'d>(&mut self, steps: &[cuke::Step<'d>]) -> Vec<cuke::Step<'d>> {
+        steps
+            .iter()
+            .map(|step| {
+                let mut step = step.clone();
+                step.id = self.id_generator.new_id();
+                step
+            })
+            .collect()
     }
 }

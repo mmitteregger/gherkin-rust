@@ -1,42 +1,37 @@
 use std::any::Any;
-use std::default::Default;
 use std::mem;
 
-use cucumber_messages::id_generator::{self, IdGenerator};
-use cucumber_messages::message::*;
-use cucumber_messages::message::gherkin_document::*;
-use cucumber_messages::message::gherkin_document::feature::*;
-use cucumber_messages::message::gherkin_document::feature::feature_child::{Rule, RuleChild, Value as FeatureChildValue};
-use cucumber_messages::message::gherkin_document::feature::feature_child::rule_child::Value as RuleChildValue;
-use cucumber_messages::message::gherkin_document::feature::scenario::*;
-use cucumber_messages::message::gherkin_document::feature::step::*;
-use cucumber_messages::message::gherkin_document::feature::table_row::*;
+use cucumber_messages::ast::*;
+use cucumber_messages::id_generator::IdGenerator;
 
-//use crate::ast::*;
 use crate::ast_node::AstNode;
 use crate::error::{Error, Result};
 use crate::parser::{self, Builder, RuleType, TokenType};
 use crate::token::Token;
 
-pub struct GherkinDocumentBuilder<IdGen: IdGenerator> {
-    id_generator: IdGen,
+pub struct GherkinDocumentBuilder<'id_gen> {
+    id_generator: &'id_gen mut dyn IdGenerator,
     stack: Vec<AstNode>,
     comments: Vec<Comment>,
 }
 
-impl Default for GherkinDocumentBuilder<id_generator::Incrementing> {
-    fn default() -> GherkinDocumentBuilder<id_generator::Incrementing> {
-        let mut ast_builder = GherkinDocumentBuilder {
-            id_generator: id_generator::Incrementing::new(),
+impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
+    pub fn with_id_generator(id_generator: &'id_gen mut dyn IdGenerator) -> GherkinDocumentBuilder<'id_gen> {
+        let mut builder = GherkinDocumentBuilder {
+            id_generator,
             stack: Vec::new(),
             comments: Vec::new(),
         };
-        ast_builder.reset();
-        ast_builder
+        builder.reset();
+        builder
+    }
+
+    pub fn id_generator_mut(&mut self) -> &mut dyn IdGenerator {
+        self.id_generator
     }
 }
 
-impl<IdGen: IdGenerator> parser::Builder for GherkinDocumentBuilder<IdGen> {
+impl<'id_gen> parser::Builder for GherkinDocumentBuilder<'id_gen> {
     type BuilderResult = GherkinDocument;
 
     fn build(&mut self, token: Token) -> Result<()> {
@@ -50,7 +45,7 @@ impl<IdGen: IdGenerator> parser::Builder for GherkinDocumentBuilder<IdGen> {
         if is_comment {
             let location = self.get_location(&token, 0);
             let text = token.matched_text.as_ref().unwrap().clone();
-            let comment = Comment{location, text};
+            let comment = Comment { location, text };
             self.comments.push(comment);
         } else {
             self.current_node().add(rule_type, Box::new(token));
@@ -86,7 +81,7 @@ impl<IdGen: IdGenerator> parser::Builder for GherkinDocumentBuilder<IdGen> {
     }
 }
 
-impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
+impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
     fn current_node(&mut self) -> &mut AstNode {
         self.stack
             .last_mut()
@@ -136,7 +131,7 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
                 let keyword = step_line.matched_keyword.as_ref().unwrap().to_owned();
                 let text = step_line.matched_text.as_ref().unwrap().to_owned();
 
-                let step = Step {id,location, keyword, text, argument};
+                let step = Step { id, location, keyword, text, argument };
                 Ok(Box::new(step))
             }
             RuleType::DocString => {
@@ -157,14 +152,14 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
                 let location = self.get_location(&separator_token, 0);
                 let delimiter = separator_token.matched_keyword.unwrap_or_default();
 
-                let doc_string = DocString{location, media_type, content,delimiter};
+                let doc_string = DocString { location, media_type, content, delimiter };
                 Ok(Box::new(doc_string))
             }
             RuleType::DataTable => {
                 let rows = self.get_table_rows(node)?;
                 let location = rows[0].location;
 
-                Ok(Box::new(DataTable{location,rows}))
+                Ok(Box::new(DataTable { location, rows }))
             }
             RuleType::Background => {
                 let background_line: Token = node.remove_token(TokenType::BackgroundLine);
@@ -175,7 +170,7 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
                 let keyword = background_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = background_line.matched_text.as_ref().unwrap().to_owned();
 
-                let background = Background{location, keyword, name, description, steps};
+                let background = Background { location, keyword, name, description, steps };
                 Ok(Box::new(background))
             }
             RuleType::ScenarioDefinition => {
@@ -183,7 +178,7 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
                 let mut scenario_node = node.remove::<AstNode>(RuleType::Scenario);
                 let scenario_line = scenario_node.remove_token(TokenType::ScenarioLine);
 
-                let id =  self.id_generator.new_id();
+                let id = self.id_generator.new_id();
                 let location = self.get_location(&scenario_line, 0);
                 let keyword = scenario_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = scenario_line.matched_text.as_ref().unwrap().to_owned();
@@ -225,7 +220,7 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
                 let keyword = examples_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = examples_line.matched_text.as_ref().unwrap().to_owned();
 
-                let examples = Examples{
+                let examples = Examples {
                     location,
                     tags,
                     keyword,
@@ -246,14 +241,14 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
                 let mut end = line_tokens.len();
                 while end > 0
                     && line_tokens[end - 1]
-                        .matched_text
-                        .as_ref()
-                        .unwrap()
-                        .chars()
-                        .all(|c| c.is_whitespace())
-                {
-                    end -= 1;
-                }
+                    .matched_text
+                    .as_ref()
+                    .unwrap()
+                    .chars()
+                    .all(|c| c.is_whitespace())
+                    {
+                        end -= 1;
+                    }
 
                 let line_tokens = &line_tokens[0..end];
 
@@ -265,23 +260,70 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
 
                 Ok(Box::new(description))
             }
+            RuleType::Rule => {
+                let mut header_node = node.remove_or(RuleType::RuleHeader, AstNode::new(RuleType::RuleHeader));
+                let rule_line = header_node.remove_token(TokenType::RuleLine);
+
+                let location = self.get_location(&rule_line, 0);
+                let keyword = rule_line.matched_keyword.as_ref().unwrap().to_owned();
+                let name = rule_line.matched_text.as_ref().unwrap().to_owned();
+                let description = self.get_description(&mut header_node);
+                let background = node.remove_opt::<Background>(RuleType::Background);
+                let scenarios = node.remove_items::<Scenario>(RuleType::ScenarioDefinition);
+
+                let children_capacity = if background.is_some() { 1 } else { 0 }
+                    + scenarios.len();
+                let mut children = Vec::with_capacity(children_capacity);
+
+                if let Some(background) = background {
+                    children.push(RuleChild {
+                        value: Some(RuleChildValue::Background(background))
+                    });
+                }
+                for scenario in scenarios {
+                    children.push(RuleChild {
+                        value: Some(RuleChildValue::Scenario(scenario))
+                    });
+                }
+
+                let rule = Rule {
+                    location,
+                    keyword,
+                    name,
+                    description,
+                    children,
+                };
+                Ok(Box::new(rule))
+            }
             RuleType::Feature => {
                 let mut feature_header = node.remove(RuleType::FeatureHeader);
                 let tags = self.get_tags(&mut feature_header);
                 let feature_line = feature_header.remove_token(TokenType::FeatureLine);
 
-                let mut children = Vec::new();
-                if let Some(background) = node.remove_opt::<Background>(RuleType::Background) {
+                let background = node.remove_opt::<Background>(RuleType::Background);
+                let scenarios = node.remove_items::<Scenario>(RuleType::ScenarioDefinition);
+                let rules = node.remove_items::<Rule>(RuleType::Rule);
+
+                let children_capacity = if background.is_some() { 1 } else { 0 }
+                    + scenarios.len()
+                    + rules.len();
+                let mut children = Vec::with_capacity(children_capacity);
+
+                if let Some(background) = background {
                     children.push(FeatureChild {
                         value: Some(FeatureChildValue::Background(background))
                     });
                 }
-
-//                let mut scenario_definitions: Vec<ScenarioDefinition> = Vec::new();
-//
-//
-//                scenario_definitions
-//                    .extend(node.remove_items::<ScenarioDefinition>(RuleType::ScenarioDefinition));
+                for scenario in scenarios {
+                    children.push(FeatureChild {
+                        value: Some(FeatureChildValue::Scenario(scenario))
+                    });
+                }
+                for rule in rules {
+                    children.push(FeatureChild {
+                        value: Some(FeatureChildValue::Rule(rule))
+                    });
+                }
 
                 let location = self.get_location(&feature_line, 0);
                 let language = feature_line
@@ -310,7 +352,7 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
                 let feature: Option<Feature> = node.remove_opt(RuleType::Feature);
                 let comments = mem::replace(&mut self.comments, Vec::new());
 
-                let gherkin_document = GherkinDocument{uri, feature, comments};
+                let gherkin_document = GherkinDocument { uri, feature, comments };
                 Ok(Box::new(gherkin_document))
             }
             _ => Ok(Box::new(node)),
@@ -322,10 +364,10 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
             .remove_tokens(TokenType::TableRow)
             .into_iter()
             .map(|token| {
-                let id =  self.id_generator.new_id();
+                let id = self.id_generator.new_id();
                 let location = self.get_location(&token, 0);
                 let cells = self.get_cells(&token);
-                TableRow{id, location, cells}
+                TableRow { id, location, cells }
             })
             .collect();
 
@@ -363,7 +405,7 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
             .map(|cell_item| {
                 let location = self.get_location(&token, cell_item.column);
                 let value = cell_item.text.to_owned();
-                TableCell{location, value}
+                TableCell { location, value }
             })
             .collect()
     }
@@ -386,10 +428,10 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
         for token in tokens.iter_mut() {
             let tag_items = mem::replace(&mut token.matched_items, Vec::new());
             for tag_item in tag_items {
-                let id =  self.id_generator.new_id();
+                let id = self.id_generator.new_id();
                 let location = self.get_location(&token, tag_item.column);
                 let name = tag_item.text;
-                tags.push(Tag{id, location, name});
+                tags.push(Tag { id, location, name });
             }
         }
 
@@ -399,13 +441,17 @@ impl<IdGen: IdGenerator> GherkinDocumentBuilder<IdGen> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ParserOptions;
+    use cucumber_messages::id_generator::IncrementingIdGenerator;
+
+    use crate::Parser;
 
     use super::*;
 
     #[test]
     fn is_reusable() {
-        let mut parser = ParserOptions::with_builder(GherkinDocumentBuilder::default()).create();
+        let mut id_generator = IncrementingIdGenerator::new();
+        let builder = GherkinDocumentBuilder::with_id_generator(&mut id_generator);
+        let mut parser = Parser::with_builder(builder);
 
         let document_1 = parser.parse_str("Feature: 1").unwrap();
         let document_2 = parser.parse_str("Feature: 2").unwrap();

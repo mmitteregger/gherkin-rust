@@ -5,7 +5,6 @@ use std::io::{self, Write};
 use gherkin::{Parser, Result, TokenFormatterBuilder};
 
 fn main() -> Result<()> {
-    // TODO: Use clap or structopt?
     let stdout = io::stdout();
     let mut stdout_handle = stdout.lock();
 
