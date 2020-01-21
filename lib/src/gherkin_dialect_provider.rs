@@ -10,7 +10,7 @@ use crate::error::{Error, Result};
 use crate::gherkin_dialect::GherkinDialect;
 use crate::parser::GherkinDialectProvide;
 
-static GHERKIN_LANGUAGES: &[u8] = include_bytes!("../gherkin-languages.json");
+static GHERKIN_LANGUAGES: &[u8] = include_bytes!("../../gherkin-languages.json");
 
 lazy_static! {
     static ref DIALECTS: HashMap<String, Arc<GherkinDialect>> = parse_built_int_gherkin_dialects();

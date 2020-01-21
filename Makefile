@@ -30,7 +30,7 @@ default: .compared
 .compared: $(TOKENS) $(ASTS) $(PICKLES) $(ERRORS) $(SOURCES)
 	touch $@
 
-.built: src/parser.rs gherkin-languages.json $(RUST_FILES) LICENSE Cargo.toml
+.built: lib/src/parser.rs gherkin-languages.json $(RUST_FILES) LICENSE Cargo.toml
 	cargo build
 	cargo test
 	touch $@
@@ -85,7 +85,7 @@ acceptance/testdata/%.feature.errors.ndjson: testdata/%.feature testdata/%.featu
 	$(RUN_GHERKIN) --no-source --format ndjson --predictable-ids $< | jq --sort-keys --compact-output "." > $@
 	diff --unified <(jq "." $<.errors.ndjson) <(jq "." $@)
 
-src/parser.rs: gherkin.berp gherkin-rust.razor berp/berp.exe
+lib/src/parser.rs: gherkin.berp gherkin-rust.razor berp/berp.exe
 	-mono berp/berp.exe -g gherkin.berp -t gherkin-rust.razor -o $@
 	# Remove BOM
 	awk 'NR==1{sub(/^\xef\xbb\xbf/,"")}{print}' < $@ > $@.nobom
@@ -97,5 +97,5 @@ clean:
 .PHONY: clean
 
 clobber: clean
-	rm -rf src/parser.rs
+	rm -rf lib/src/parser.rs
 .PHONY: clobber

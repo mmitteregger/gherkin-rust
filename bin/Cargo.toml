@@ -1,0 +1,28 @@
+[package]
+name = "gherkin-test-binaries"
+version = "0.1.0"
+authors = ["Michael Mitteregger <michael.mitteregger@gmx.at>"]
+description = """
+Gherkin test binaries used for acceptance tests.
+Do not rely on them for anything other than testing the Gherkin library.
+They are not part of the stable API.
+"""
+homepage = "https://github.com/cucumber/cucumber/tree/master/gherkin"
+repository = "https://github.com/cucumber/cucumber/tree/master/gherkin/rust"
+readme = "README.md"
+keywords = ["cucumber", "bdd", "testing"]
+categories = ["parser-implementations", "development-tools::testing"]
+license = "MIT"
+edition = "2018"
+
+[[bin]]
+name = "gherkin_generate_tokens"
+path = "src/generate_tokens.rs"
+
+[[bin]]
+name = "gherkin"
+path = "src/gherkin.rs"
+
+[dependencies]
+gherkin = { path = "../lib" }
+cucumber_messages = { path = "../../../messages/rust", features = ["ndjson"] }
