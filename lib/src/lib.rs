@@ -37,14 +37,21 @@ pub struct IncludeOptions {
     pub pickles: bool,
 }
 
-pub fn parse_paths<'p, I: Iterator<Item=&'p Path>>(paths: I, include_options: IncludeOptions, id_generator: &mut dyn IdGenerator) -> io::Result<Vec<Envelope>> {
+pub fn parse_paths<P>(
+    paths: P,
+    include_options: IncludeOptions,
+    id_generator: &mut dyn IdGenerator,
+) -> io::Result<Vec<Envelope>>
+    where P: IntoIterator,
+          P::Item: AsRef<Path>,
+{
     let mut messages = Vec::new();
 
     let builder = GherkinDocumentBuilder::with_id_generator(id_generator);
     let mut parser = Parser::with_builder(builder);
 
     for path in paths {
-        let envelope = create_envelope_from_path(path)?;
+        let envelope = create_envelope_from_path(path.as_ref())?;
 
         if include_options.source {
             messages.push(envelope);
