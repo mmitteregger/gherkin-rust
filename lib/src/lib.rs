@@ -12,7 +12,7 @@ use cucumber_messages::source::{Source, SourceReference};
 pub use crate::error::{Error, Result};
 pub use crate::gherkin_document_builder::GherkinDocumentBuilder;
 pub use crate::location::Location;
-pub use crate::parser::{GherkinDialectProvide, Parser, ParserOptions};
+pub use crate::parser::{GherkinDialectProvider, Parser, ParserOptions};
 pub use crate::token_formatter_builder::TokenFormatterBuilder;
 
 mod gherkin_document_builder;

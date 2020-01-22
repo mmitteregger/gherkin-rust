@@ -12,7 +12,7 @@ use crate::gherkin_dialect::GherkinDialect;
 use crate::gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 use crate::gherkin_line_span::GherkinLineSpan;
 use crate::parser::{TokenMatch, TokenType};
-use crate::parser::GherkinDialectProvide;
+use crate::parser::GherkinDialectProvider;
 use crate::token::Token;
 
 lazy_static! {
@@ -20,7 +20,7 @@ lazy_static! {
         Regex::new(r"^\s*#\s*language\s*:\s*([a-zA-Z\-_]+)\s*$").unwrap();
 }
 
-pub struct TokenMatcher<DP: GherkinDialectProvide> {
+pub struct TokenMatcher<DP: GherkinDialectProvider> {
     dialect_provider: DP,
     current_dialect: Arc<GherkinDialect>,
     active_doc_string_separator: Option<String>,
@@ -43,7 +43,7 @@ impl TokenMatcher<BuiltInGherkinDialectProvider> {
     }
 }
 
-impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
+impl<DP: GherkinDialectProvider> TokenMatcher<DP> {
     pub fn with_dialect_provider(dialect_provider: DP) -> TokenMatcher<DP> {
         let default_dialect = dialect_provider
             .get_default_dialect()
@@ -155,7 +155,7 @@ impl<DP: GherkinDialectProvide> TokenMatcher<DP> {
     }
 }
 
-impl<DP: GherkinDialectProvide> TokenMatch for TokenMatcher<DP> {
+impl<DP: GherkinDialectProvider> TokenMatch for TokenMatcher<DP> {
     fn match_eof(&mut self, token: &mut Token) -> Result<bool> {
         if token.is_eof() {
             self.set_token_matched(token, TokenType::Eof, None, None, None, Vec::new());

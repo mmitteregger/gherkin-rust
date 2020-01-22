@@ -8,7 +8,7 @@ use serde_json;
 use crate::Location;
 use crate::error::{Error, Result};
 use crate::gherkin_dialect::GherkinDialect;
-use crate::parser::GherkinDialectProvide;
+use crate::parser::GherkinDialectProvider;
 
 static GHERKIN_LANGUAGES: &[u8] = include_bytes!("../../gherkin-languages.json");
 
@@ -50,7 +50,7 @@ impl BuiltInGherkinDialectProvider {
     }
 }
 
-impl GherkinDialectProvide for BuiltInGherkinDialectProvider {
+impl GherkinDialectProvider for BuiltInGherkinDialectProvider {
     fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>> {
         let location = Location::new(0, 0);
         self.get_dialect(&self.default_dialect_name, location)
@@ -66,8 +66,8 @@ impl GherkinDialectProvide for BuiltInGherkinDialectProvider {
         }
     }
 
-    fn get_languages(&self) -> Vec<&String> {
-        let mut languages: Vec<&String> = DIALECTS.keys().collect();
+    fn get_languages(&self) -> Vec<&str> {
+        let mut languages: Vec<&str> = DIALECTS.keys().map(String::as_str).collect();
         languages.sort_unstable();
         languages
     }

@@ -139,7 +139,7 @@ impl<B: Builder> ParserOptions<B> {
 
     pub fn dialect_provider<DP>(self, dialect_provider: DP) -> ParserOptions<B>
     where
-        DP: GherkinDialectProvide + 'static,
+        DP: GherkinDialectProvider + 'static,
     {
         self.token_matcher(TokenMatcher::with_dialect_provider(dialect_provider))
     }
@@ -5867,10 +5867,10 @@ pub trait TokenMatch {
     fn reset(&mut self);
 }
 
-pub trait GherkinDialectProvide {
+pub trait GherkinDialectProvider {
     fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>>;
 
     fn get_dialect(&self, language: &str, location: Location) -> Result<Arc<GherkinDialect>>;
 
-    fn get_languages(&self) -> Vec<&String>;
+    fn get_languages(&self) -> Vec<&str>;
 }
