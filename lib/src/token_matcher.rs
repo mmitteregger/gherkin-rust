@@ -5,14 +5,14 @@ use regex::Regex;
 
 use lazy_static::lazy_static;
 
-use crate::location::Location;
 use crate::constant;
 use crate::error::Result;
 use crate::gherkin_dialect::GherkinDialect;
 use crate::gherkin_dialect_provider::BuiltInGherkinDialectProvider;
 use crate::gherkin_line_span::GherkinLineSpan;
-use crate::parser::{TokenMatch, TokenType};
+use crate::location::Location;
 use crate::parser::GherkinDialectProvider;
+use crate::parser::{TokenMatch, TokenType};
 use crate::token::Token;
 
 lazy_static! {

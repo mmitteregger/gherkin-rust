@@ -1,7 +1,7 @@
 use std::fmt;
 
-use serde::Serialize;
 use cucumber_messages::ast;
+use serde::Serialize;
 
 #[derive(Serialize, Debug, Copy, Clone)]
 #[serde(rename_all = "camelCase")]

@@ -9,9 +9,9 @@ use std::fmt;
 use std::io::Read;
 use std::sync::Arc;
 
-use crate::location::Location;
 use crate::error::{Error, Result};
 use crate::gherkin_dialect::GherkinDialect;
+use crate::location::Location;
 use crate::token::Token;
 use crate::token_matcher::TokenMatcher;
 use crate::token_scanner::TokenScanner;

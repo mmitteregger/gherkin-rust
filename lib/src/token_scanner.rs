@@ -1,9 +1,9 @@
 use std::io::prelude::*;
 use std::io::BufReader;
 
-use crate::location::Location;
 use crate::error::Result;
 use crate::gherkin_line::GherkinLine;
+use crate::location::Location;
 use crate::parser::TokenScan;
 use crate::token::Token;
 

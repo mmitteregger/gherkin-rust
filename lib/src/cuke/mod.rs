@@ -8,8 +8,8 @@ pub use self::string::*;
 pub use self::table::*;
 pub use self::tag::*;
 
-use std::string::String as StdString;
 use std::borrow::Cow;
+use std::string::String as StdString;
 
 use cucumber_messages::ast;
 use cucumber_messages::pickle;

@@ -16,7 +16,9 @@ pub struct GherkinDocumentBuilder<'id_gen> {
 }
 
 impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
-    pub fn with_id_generator(id_generator: &'id_gen mut dyn IdGenerator) -> GherkinDocumentBuilder<'id_gen> {
+    pub fn with_id_generator(
+        id_generator: &'id_gen mut dyn IdGenerator,
+    ) -> GherkinDocumentBuilder<'id_gen> {
         let mut builder = GherkinDocumentBuilder {
             id_generator,
             stack: Vec::new(),
@@ -131,7 +133,13 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let keyword = step_line.matched_keyword.as_ref().unwrap().to_owned();
                 let text = step_line.matched_text.as_ref().unwrap().to_owned();
 
-                let step = Step { id, location, keyword, text, argument };
+                let step = Step {
+                    id,
+                    location,
+                    keyword,
+                    text,
+                    argument,
+                };
                 Ok(Box::new(step))
             }
             RuleType::DocString => {
@@ -152,7 +160,12 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let location = self.get_location(&separator_token, 0);
                 let delimiter = separator_token.matched_keyword.unwrap_or_default();
 
-                let doc_string = DocString { location, media_type, content, delimiter };
+                let doc_string = DocString {
+                    location,
+                    media_type,
+                    content,
+                    delimiter,
+                };
                 Ok(Box::new(doc_string))
             }
             RuleType::DataTable => {
@@ -170,7 +183,13 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let keyword = background_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = background_line.matched_text.as_ref().unwrap().to_owned();
 
-                let background = Background { location, keyword, name, description, steps };
+                let background = Background {
+                    location,
+                    keyword,
+                    name,
+                    description,
+                    steps,
+                };
                 Ok(Box::new(background))
             }
             RuleType::ScenarioDefinition => {
@@ -241,14 +260,14 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let mut end = line_tokens.len();
                 while end > 0
                     && line_tokens[end - 1]
-                    .matched_text
-                    .as_ref()
-                    .unwrap()
-                    .chars()
-                    .all(|c| c.is_whitespace())
-                    {
-                        end -= 1;
-                    }
+                        .matched_text
+                        .as_ref()
+                        .unwrap()
+                        .chars()
+                        .all(|c| c.is_whitespace())
+                {
+                    end -= 1;
+                }
 
                 let line_tokens = &line_tokens[0..end];
 
@@ -261,7 +280,8 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 Ok(Box::new(description))
             }
             RuleType::Rule => {
-                let mut header_node = node.remove_or(RuleType::RuleHeader, AstNode::new(RuleType::RuleHeader));
+                let mut header_node =
+                    node.remove_or(RuleType::RuleHeader, AstNode::new(RuleType::RuleHeader));
                 let rule_line = header_node.remove_token(TokenType::RuleLine);
 
                 let location = self.get_location(&rule_line, 0);
@@ -271,18 +291,17 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let background = node.remove_opt::<Background>(RuleType::Background);
                 let scenarios = node.remove_items::<Scenario>(RuleType::ScenarioDefinition);
 
-                let children_capacity = if background.is_some() { 1 } else { 0 }
-                    + scenarios.len();
+                let children_capacity = if background.is_some() { 1 } else { 0 } + scenarios.len();
                 let mut children = Vec::with_capacity(children_capacity);
 
                 if let Some(background) = background {
                     children.push(RuleChild {
-                        value: Some(RuleChildValue::Background(background))
+                        value: Some(RuleChildValue::Background(background)),
                     });
                 }
                 for scenario in scenarios {
                     children.push(RuleChild {
-                        value: Some(RuleChildValue::Scenario(scenario))
+                        value: Some(RuleChildValue::Scenario(scenario)),
                     });
                 }
 
@@ -304,24 +323,23 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let scenarios = node.remove_items::<Scenario>(RuleType::ScenarioDefinition);
                 let rules = node.remove_items::<Rule>(RuleType::Rule);
 
-                let children_capacity = if background.is_some() { 1 } else { 0 }
-                    + scenarios.len()
-                    + rules.len();
+                let children_capacity =
+                    if background.is_some() { 1 } else { 0 } + scenarios.len() + rules.len();
                 let mut children = Vec::with_capacity(children_capacity);
 
                 if let Some(background) = background {
                     children.push(FeatureChild {
-                        value: Some(FeatureChildValue::Background(background))
+                        value: Some(FeatureChildValue::Background(background)),
                     });
                 }
                 for scenario in scenarios {
                     children.push(FeatureChild {
-                        value: Some(FeatureChildValue::Scenario(scenario))
+                        value: Some(FeatureChildValue::Scenario(scenario)),
                     });
                 }
                 for rule in rules {
                     children.push(FeatureChild {
-                        value: Some(FeatureChildValue::Rule(rule))
+                        value: Some(FeatureChildValue::Rule(rule)),
                     });
                 }
 
@@ -352,7 +370,11 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let feature: Option<Feature> = node.remove_opt(RuleType::Feature);
                 let comments = mem::replace(&mut self.comments, Vec::new());
 
-                let gherkin_document = GherkinDocument { uri, feature, comments };
+                let gherkin_document = GherkinDocument {
+                    uri,
+                    feature,
+                    comments,
+                };
                 Ok(Box::new(gherkin_document))
             }
             _ => Ok(Box::new(node)),
@@ -367,7 +389,11 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
                 let id = self.id_generator.new_id();
                 let location = self.get_location(&token, 0);
                 let cells = self.get_cells(&token);
-                TableRow { id, location, cells }
+                TableRow {
+                    id,
+                    location,
+                    cells,
+                }
             })
             .collect();
 
@@ -387,8 +413,14 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
             if row.cells.len() != cell_count {
                 return Err(Error::GherkinDocumentBuilder {
                     location: crate::Location {
-                        line: row.location.map(|location| location.line).unwrap_or_default(),
-                        column: row.location.map(|location| location.column).unwrap_or_default(),
+                        line: row
+                            .location
+                            .map(|location| location.line)
+                            .unwrap_or_default(),
+                        column: row
+                            .location
+                            .map(|location| location.column)
+                            .unwrap_or_default(),
                     },
                     message: "inconsistent cell count within the table".to_owned(),
                 });

@@ -2,11 +2,11 @@ use std::default::Default;
 use std::mem;
 use std::string::ToString;
 
-use crate::Location;
 use crate::error::Result;
 use crate::gherkin_line_span::GherkinLineSpan;
 use crate::parser::{self, RuleType};
 use crate::token::Token;
+use crate::Location;
 
 pub struct TokenFormatterBuilder {
     tokens_text_builder: String,

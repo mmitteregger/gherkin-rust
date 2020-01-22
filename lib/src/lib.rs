@@ -2,12 +2,12 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-use cucumber_messages::{Envelope, Message};
 use cucumber_messages::ast;
 use cucumber_messages::attachment::{Attachment, AttachmentBody};
 use cucumber_messages::id_generator::IdGenerator;
 use cucumber_messages::pickle::Pickle;
 use cucumber_messages::source::{Source, SourceReference};
+use cucumber_messages::{Envelope, Message};
 
 pub use crate::error::{Error, Result};
 pub use crate::gherkin_document_builder::GherkinDocumentBuilder;
@@ -15,17 +15,17 @@ pub use crate::location::Location;
 pub use crate::parser::{GherkinDialectProvider, Parser, ParserOptions};
 pub use crate::token_formatter_builder::TokenFormatterBuilder;
 
-mod gherkin_document_builder;
 mod ast_node;
 mod constant;
 pub mod cuke;
 mod error;
 mod gherkin_dialect;
 mod gherkin_dialect_provider;
+mod gherkin_document_builder;
 mod gherkin_line;
 mod gherkin_line_span;
-mod parser;
 mod location;
+mod parser;
 mod token;
 mod token_formatter_builder;
 mod token_matcher;
@@ -42,8 +42,9 @@ pub fn parse_paths<P>(
     include_options: IncludeOptions,
     id_generator: &mut dyn IdGenerator,
 ) -> io::Result<Vec<Envelope>>
-    where P: IntoIterator,
-          P::Item: AsRef<Path>,
+where
+    P: IntoIterator,
+    P::Item: AsRef<Path>,
 {
     let mut messages = Vec::new();
 
@@ -55,7 +56,11 @@ pub fn parse_paths<P>(
 
         if include_options.source {
             messages.push(envelope);
-            messages.extend(parse_envelope(&mut parser, &include_options, messages.last().unwrap())?);
+            messages.extend(parse_envelope(
+                &mut parser,
+                &include_options,
+                messages.last().unwrap(),
+            )?);
         } else {
             messages.extend(parse_envelope(&mut parser, &include_options, &envelope)?);
         }
@@ -76,11 +81,15 @@ fn create_source_envelope(data: String, path: &Path) -> Envelope {
             data,
             uri: path.display().to_string(),
             media_type: String::from("text/x.cucumber.gherkin+plain"),
-        }))
+        })),
     }
 }
 
-fn parse_envelope(parser: &mut Parser<GherkinDocumentBuilder>, include_options: &IncludeOptions, envelope: &Envelope) -> io::Result<Vec<Envelope>> {
+fn parse_envelope(
+    parser: &mut Parser<GherkinDocumentBuilder>,
+    include_options: &IncludeOptions,
+    envelope: &Envelope,
+) -> io::Result<Vec<Envelope>> {
     let mut messages = Vec::new();
 
     let source = match &envelope.message {
@@ -91,7 +100,7 @@ fn parse_envelope(parser: &mut Parser<GherkinDocumentBuilder>, include_options: 
                 return Ok(messages);
             }
         }
-        None => return Ok(messages)
+        None => return Ok(messages),
     };
 
     if include_options.gherkin_document || include_options.pickles {
@@ -143,8 +152,7 @@ fn add_error_attachments(messages: &mut Vec<Envelope>, error: Error, uri: &str) 
         Error::GherkinDocumentBuilder { location, .. }
         | Error::NoSuchLanguage { location, .. }
         | Error::UnexpectedToken { location, .. }
-        | Error::UnexpectedEof { location, .. }
-        => {
+        | Error::UnexpectedEof { location, .. } => {
             messages.push(create_attachment_envelope(&error, uri, location));
             Ok(())
         }
@@ -152,8 +160,8 @@ fn add_error_attachments(messages: &mut Vec<Envelope>, error: Error, uri: &str) 
         Error::SerdeJson(serde_json_error) => {
             let io_error = io::Error::new(io::ErrorKind::Other, serde_json_error);
             Err(io_error)
-        },
-        Error::__Nonexhaustive => unreachable!()
+        }
+        Error::__Nonexhaustive => unreachable!(),
     }
 }
 

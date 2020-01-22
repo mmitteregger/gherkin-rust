@@ -25,9 +25,7 @@ struct Session<'d> {
 
 impl<'id_gen> Compiler<'id_gen> {
     pub fn new(id_generator: &'id_gen mut dyn IdGenerator) -> Compiler<'id_gen> {
-        Compiler {
-            id_generator,
-        }
+        Compiler { id_generator }
     }
 
     pub fn compile<'d>(
@@ -65,22 +63,13 @@ impl<'id_gen> Compiler<'id_gen> {
                         session.feature_background_steps = self.background_cuke_steps(background);
                     }
                     ast::FeatureChildValue::Rule(rule) => {
-                        self.compile_rule(
-                            session,
-                            rule,
-                        );
+                        self.compile_rule(session, rule);
                     }
                     ast::FeatureChildValue::Scenario(scenario) => {
                         if scenario.examples.is_empty() {
-                            self.compile_scenario(
-                                session,
-                                scenario,
-                            );
+                            self.compile_scenario(session, scenario);
                         } else {
-                            self.compile_scenario_outline(
-                                session,
-                                scenario,
-                            );
+                            self.compile_scenario_outline(session, scenario);
                         }
                     }
                 }
@@ -101,15 +90,9 @@ impl<'id_gen> Compiler<'id_gen> {
                     }
                     ast::RuleChildValue::Scenario(scenario) => {
                         if scenario.examples.is_empty() {
-                            self.compile_scenario(
-                                session,
-                                scenario,
-                            );
+                            self.compile_scenario(session, scenario);
                         } else {
-                            self.compile_scenario_outline(
-                                session,
-                                scenario,
-                            );
+                            self.compile_scenario_outline(session, scenario);
                         }
                     }
                 }
@@ -121,10 +104,7 @@ impl<'id_gen> Compiler<'id_gen> {
         let name = Cow::Borrowed(scenario.name.as_str());
         let language = &session.feature.language;
         let (feature_background_steps, rule_background_steps) =
-            self.compile_feature_and_rule_background_steps(
-                session,
-                !scenario.steps.is_empty(),
-            );
+            self.compile_feature_and_rule_background_steps(session, !scenario.steps.is_empty());
         let scenario_steps = self.compile_scenario_steps(scenario);
         let tags = self.compile_scenario_tags(session, scenario);
         let locations = vec![cuke::Location::from(scenario.location.unwrap())];
@@ -201,11 +181,8 @@ impl<'id_gen> Compiler<'id_gen> {
 
                 let name = self.interpolate(&scenario.name, variable_cells, value_cells);
                 let language = &session.feature.language;
-                let (feature_background_steps, rule_background_steps) =
-                    self.compile_feature_and_rule_background_steps(
-                        session,
-                        !scenario.steps.is_empty(),
-                    );
+                let (feature_background_steps, rule_background_steps) = self
+                    .compile_feature_and_rule_background_steps(session, !scenario.steps.is_empty());
                 let scenario_steps = self.compile_scenario_outline_steps(
                     scenario,
                     variable_cells,
@@ -288,9 +265,7 @@ impl<'id_gen> Compiler<'id_gen> {
         let feature_tags = &session.feature.tags;
         let scenario_outline_tags = &scenario.tags;
         let examples_tags = &examples.tags;
-        let tags_capacity = feature_tags.len()
-            + scenario_outline_tags.len()
-            + examples_tags.len();
+        let tags_capacity = feature_tags.len() + scenario_outline_tags.len() + examples_tags.len();
 
         let mut tags = Vec::with_capacity(tags_capacity);
 
@@ -325,7 +300,8 @@ impl<'id_gen> Compiler<'id_gen> {
             ast::Argument::DocString(doc_string) => {
                 let location = cuke::Location::from(doc_string.location.unwrap());
                 let content = self.interpolate(&doc_string.content, variable_cells, value_cells);
-                let media_type = self.interpolate(&doc_string.media_type, variable_cells, value_cells);
+                let media_type =
+                    self.interpolate(&doc_string.media_type, variable_cells, value_cells);
                 let cuke_string = cuke::String {
                     location,
                     content,
@@ -434,18 +410,14 @@ impl<'id_gen> Compiler<'id_gen> {
         &mut self,
         session: &mut Session<'d>,
         should_compile: bool,
-    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>)
-    {
+    ) -> (Vec<cuke::Step<'d>>, Vec<cuke::Step<'d>>) {
         if should_compile {
             (
                 self.recompile_steps(&session.feature_background_steps),
                 self.recompile_steps(&session.rule_background_steps),
             )
         } else {
-            (
-                Vec::new(),
-                Vec::new(),
-            )
+            (Vec::new(), Vec::new())
         }
     }
 

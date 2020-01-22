@@ -54,7 +54,8 @@ mod tests {
                     pickles: true,
                 },
                 &mut id_generator,
-            ).unwrap();
+            )
+            .unwrap();
         });
     }
 
@@ -72,7 +73,8 @@ mod tests {
                     pickles: true,
                 },
                 &mut id_generator,
-            ).unwrap();
+            )
+            .unwrap();
         });
     }
 
@@ -83,7 +85,7 @@ mod tests {
             .collect()
     }
 
-    fn feature_paths_iter<P: AsRef<Path>>(path: P) -> impl Iterator<Item=PathBuf> {
+    fn feature_paths_iter<P: AsRef<Path>>(path: P) -> impl Iterator<Item = PathBuf> {
         fs::read_dir(PathBuf::from("../testdata").join(path))
             .unwrap()
             .into_iter()

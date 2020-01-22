@@ -7,7 +7,7 @@ use std::path::Path;
 use cucumber_messages::id_generator::IncrementingIdGenerator;
 use cucumber_messages::io::{MessageWriter, NdjsonWriter};
 
-use gherkin::{Result, IncludeOptions};
+use gherkin::{IncludeOptions, Result};
 
 fn main() -> Result<()> {
     let stdout = io::stdout();

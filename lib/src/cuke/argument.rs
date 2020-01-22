@@ -21,10 +21,14 @@ impl<'d> From<Argument<'d>> for pickle::Argument {
     fn from(argument: Argument<'d>) -> Self {
         match argument {
             Argument::String(string) => pickle::Argument {
-                message: Some(pickle::ArgumentMessage::DocString(pickle::DocString::from(string))),
+                message: Some(pickle::ArgumentMessage::DocString(pickle::DocString::from(
+                    string,
+                ))),
             },
             Argument::Table(table) => pickle::Argument {
-                message: Some(pickle::ArgumentMessage::DataTable(pickle::Table::from(table))),
+                message: Some(pickle::ArgumentMessage::DataTable(pickle::Table::from(
+                    table,
+                ))),
             },
         }
     }
