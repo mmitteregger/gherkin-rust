@@ -2,9 +2,11 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-use cucumber_messages::ast;
+pub use cucumber_messages::ast;
+pub use cucumber_messages::id_generator::{IdGenerator, IncrementingIdGenerator};
+pub use cucumber_messages::pickle;
+
 use cucumber_messages::attachment::{Attachment, AttachmentBody};
-use cucumber_messages::id_generator::IdGenerator;
 use cucumber_messages::pickle::Pickle;
 use cucumber_messages::source::{Source, SourceReference};
 use cucumber_messages::{Envelope, Message};
