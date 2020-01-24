@@ -17,7 +17,7 @@ pub enum Error {
     /// An I/O error that occurred while reading a feature file.
     Io(#[cause] io::Error),
     SerdeJson(#[cause] serde_json::Error),
-    GherkinDocumentBuilder {
+    DocumentBuilder {
         location: Location,
         message: String,
     },
@@ -63,7 +63,7 @@ impl fmt::Display for Error {
         match *self {
             Error::Io(ref err) => err.fmt(f),
             Error::SerdeJson(ref err) => err.fmt(f),
-            Error::GherkinDocumentBuilder {
+            Error::DocumentBuilder {
                 ref location,
                 ref message,
             } => write!(f, "{}: {}", location, message),
@@ -117,7 +117,7 @@ impl Error {
         match *self {
             Error::Io(ref _err) => None,
             Error::SerdeJson(ref _err) => None,
-            Error::GherkinDocumentBuilder { location, .. } => Some(location),
+            Error::DocumentBuilder { location, .. } => Some(location),
             Error::NoSuchLanguage { location, .. } => Some(location),
             Error::UnexpectedToken { location, .. } => Some(location),
             Error::UnexpectedEof { location, .. } => Some(location),

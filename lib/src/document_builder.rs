@@ -9,17 +9,17 @@ use crate::error::{Error, Result};
 use crate::parser::{self, Builder, RuleType, TokenType};
 use crate::token::Token;
 
-pub struct GherkinDocumentBuilder<'id_gen> {
+pub struct DocumentBuilder<'id_gen> {
     id_generator: &'id_gen mut dyn IdGenerator,
     stack: Vec<AstNode>,
     comments: Vec<Comment>,
 }
 
-impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
+impl<'id_gen> DocumentBuilder<'id_gen> {
     pub fn with_id_generator(
         id_generator: &'id_gen mut dyn IdGenerator,
-    ) -> GherkinDocumentBuilder<'id_gen> {
-        let mut builder = GherkinDocumentBuilder {
+    ) -> DocumentBuilder<'id_gen> {
+        let mut builder = DocumentBuilder {
             id_generator,
             stack: Vec::new(),
             comments: Vec::new(),
@@ -33,7 +33,7 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
     }
 }
 
-impl<'id_gen> parser::Builder for GherkinDocumentBuilder<'id_gen> {
+impl<'id_gen> parser::Builder for DocumentBuilder<'id_gen> {
     type BuilderResult = GherkinDocument;
 
     fn build(&mut self, token: Token) -> Result<()> {
@@ -83,7 +83,7 @@ impl<'id_gen> parser::Builder for GherkinDocumentBuilder<'id_gen> {
     }
 }
 
-impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
+impl<'id_gen> DocumentBuilder<'id_gen> {
     fn current_node(&mut self) -> &mut AstNode {
         self.stack
             .last_mut()
@@ -345,7 +345,7 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
 
                 let location = self.get_location(&feature_line, 0);
                 let language = feature_line
-                    .matched_gherkin_dialect
+                    .matched_dialect
                     .as_ref()
                     .unwrap()
                     .get_language()
@@ -411,7 +411,7 @@ impl<'id_gen> GherkinDocumentBuilder<'id_gen> {
 
         for row in rows {
             if row.cells.len() != cell_count {
-                return Err(Error::GherkinDocumentBuilder {
+                return Err(Error::DocumentBuilder {
                     location: crate::Location {
                         line: row
                             .location
@@ -482,7 +482,7 @@ mod tests {
     #[test]
     fn is_reusable() {
         let mut id_generator = IncrementingIdGenerator::new();
-        let builder = GherkinDocumentBuilder::with_id_generator(&mut id_generator);
+        let builder = DocumentBuilder::with_id_generator(&mut id_generator);
         let mut parser = Parser::with_builder(builder);
 
         let document_1 = parser.parse_str("Feature: 1").unwrap();

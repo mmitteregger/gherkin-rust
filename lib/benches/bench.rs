@@ -10,13 +10,13 @@ mod tests {
 
     use cucumber_messages::id_generator::IncrementingIdGenerator;
 
-    use gherkin::{self, GherkinDocumentBuilder, IncludeOptions, Parser};
+    use gherkin::{self, DocumentBuilder, IncludeOptions, Parser};
 
     #[bench]
     fn bench_parser_good_features(bencher: &mut Bencher) {
         let features = read_features("good");
         let mut id_generator = IncrementingIdGenerator::new();
-        let builder = GherkinDocumentBuilder::with_id_generator(&mut id_generator);
+        let builder = DocumentBuilder::with_id_generator(&mut id_generator);
         let mut parser = Parser::with_builder(builder);
 
         bencher.iter(|| {
@@ -30,7 +30,7 @@ mod tests {
     fn bench_parser_bad_features(bencher: &mut Bencher) {
         let features = read_features("bad");
         let mut id_generator = IncrementingIdGenerator::new();
-        let builder = GherkinDocumentBuilder::with_id_generator(&mut id_generator);
+        let builder = DocumentBuilder::with_id_generator(&mut id_generator);
         let mut parser = Parser::with_builder(builder);
 
         bencher.iter(|| {

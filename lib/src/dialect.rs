@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct GherkinDialect {
+pub struct Dialect {
     #[serde(skip)]
     pub(crate) language: String,
     pub(crate) name: String,
@@ -35,7 +35,7 @@ pub struct GherkinDialect {
     pub(crate) step_keywords: Vec<String>,
 }
 
-impl ::std::fmt::Debug for GherkinDialect {
+impl ::std::fmt::Debug for Dialect {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> Result<(), ::std::fmt::Error> {
         write!(
             f,
@@ -49,13 +49,13 @@ fn get_keywords(keywords: &mut HashMap<String, Vec<String>>, key: &str) -> Vec<S
     keywords.remove(key).unwrap_or_default()
 }
 
-impl GherkinDialect {
+impl Dialect {
     pub fn new(
         language: String,
         name: String,
         native_name: String,
         mut keywords: HashMap<String, Vec<String>>,
-    ) -> GherkinDialect {
+    ) -> Dialect {
         let feature_keywords = get_keywords(&mut keywords, "feature");
         let rule_keywords = get_keywords(&mut keywords, "rule");
         let scenario_keywords = get_keywords(&mut keywords, "scenario");
@@ -69,7 +69,7 @@ impl GherkinDialect {
         let but_keywords = get_keywords(&mut keywords, "but");
         let step_keywords = Vec::new();
 
-        let mut dialect = GherkinDialect {
+        let mut dialect = Dialect {
             language,
             name,
             native_name,

@@ -3,7 +3,7 @@ use std::mem;
 use std::string::ToString;
 
 use crate::error::Result;
-use crate::gherkin_line_span::GherkinLineSpan;
+use crate::line::LineSpan;
 use crate::parser::{self, RuleType};
 use crate::token::Token;
 use crate::Location;
@@ -56,7 +56,7 @@ fn format_token(token: Token) -> String {
         format_option_string(&token.matched_type),
         format_option_string(&token.matched_keyword),
         format_option_string(&token.matched_text),
-        format_gherkin_line_spans(&token.matched_items),
+        format_line_spans(&token.matched_items),
     )
 }
 
@@ -74,7 +74,7 @@ fn format_option_string<S: ToString>(string: &Option<S>) -> String {
     }
 }
 
-fn format_gherkin_line_spans(spans: &[GherkinLineSpan]) -> String {
+fn format_line_spans(spans: &[LineSpan]) -> String {
     if spans.is_empty() {
         String::new()
     } else {

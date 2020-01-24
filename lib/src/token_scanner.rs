@@ -2,7 +2,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 
 use crate::error::Result;
-use crate::gherkin_line::GherkinLine;
+use crate::line::Line;
 use crate::location::Location;
 use crate::parser::TokenScan;
 use crate::token::Token;
@@ -12,7 +12,7 @@ use crate::token::Token;
 /// The tokens are passed to the parser, which outputs an AST (Abstract Syntax Tree).
 ///
 /// If the scanner sees a # language header, it will reconfigure itself dynamically to look for
-/// Gherkin keywords for the associated language.
+/// keywords for the associated language.
 /// The keywords are defined in gherkin-languages.json.
 pub struct TokenScanner<R> {
     reader: BufReader<R>,
@@ -60,8 +60,8 @@ impl<R: Read> TokenScan for TokenScanner<R> {
         let token = if is_eof {
             Token::new(None, Some(location))
         } else {
-            let gherkin_line = GherkinLine::new(line);
-            Token::new(Some(gherkin_line), Some(location))
+            let line = Line::new(line);
+            Token::new(Some(line), Some(location))
         };
         Ok(token)
     }

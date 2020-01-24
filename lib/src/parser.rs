@@ -9,8 +9,8 @@ use std::fmt;
 use std::io::Read;
 use std::sync::Arc;
 
+use crate::dialect::Dialect;
 use crate::error::{Error, Result};
-use crate::gherkin_dialect::GherkinDialect;
 use crate::location::Location;
 use crate::token::Token;
 use crate::token_matcher::TokenMatcher;
@@ -139,7 +139,7 @@ impl<B: Builder> ParserOptions<B> {
 
     pub fn dialect_provider<DP>(self, dialect_provider: DP) -> ParserOptions<B>
     where
-        DP: GherkinDialectProvider + 'static,
+        DP: DialectProvider + 'static,
     {
         self.token_matcher(TokenMatcher::with_dialect_provider(dialect_provider))
     }
@@ -5867,10 +5867,10 @@ pub trait TokenMatch {
     fn reset(&mut self);
 }
 
-pub trait GherkinDialectProvider {
-    fn get_default_dialect(&self) -> Result<Arc<GherkinDialect>>;
+pub trait DialectProvider {
+    fn get_default_dialect(&self) -> Result<Arc<Dialect>>;
 
-    fn get_dialect(&self, language: &str, location: Location) -> Result<Arc<GherkinDialect>>;
+    fn get_dialect(&self, language: &str, location: Location) -> Result<Arc<Dialect>>;
 
     fn get_languages(&self) -> Vec<&str>;
 }

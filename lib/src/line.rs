@@ -1,33 +1,35 @@
 use crate::constant;
-use crate::gherkin_line_span::GherkinLineSpan;
 
 #[derive(Debug, Clone)]
-pub struct GherkinLine {
-    line_text: String,
-    trimmed_line_text: String,
+pub struct Line {
+    text: String,
+    trimmed_text: String,
 }
 
-impl GherkinLine {
-    pub fn new(line_text: String) -> GherkinLine {
-        let trimmed_line_text = line_text.trim_start().to_string();
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+pub struct LineSpan {
+    pub column: u32,
+    pub text: String,
+}
 
-        GherkinLine {
-            line_text,
-            trimmed_line_text,
-        }
+impl Line {
+    pub fn new(text: String) -> Line {
+        let trimmed_text = text.trim_start().to_string();
+
+        Line { text, trimmed_text }
     }
 
     pub fn indent(&self) -> u32 {
-        self.line_text.chars().count() as u32 - self.trimmed_line_text.chars().count() as u32
+        self.text.chars().count() as u32 - self.trimmed_text.chars().count() as u32
     }
 
     pub fn detach(&self) {}
 
-    pub fn get_line_text(&self, indent_to_remove: isize) -> &str {
+    pub fn get_text(&self, indent_to_remove: isize) -> &str {
         if indent_to_remove < 0 || indent_to_remove > self.indent() as isize {
-            &self.trimmed_line_text
+            &self.trimmed_text
         } else {
-            let mut chars = self.line_text.chars();
+            let mut chars = self.text.chars();
             for _ in 0..indent_to_remove {
                 chars.next();
             }
@@ -36,29 +38,29 @@ impl GherkinLine {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.trimmed_line_text.is_empty()
+        self.trimmed_text.is_empty()
     }
 
     pub fn starts_with(&self, prefix: &str) -> bool {
-        self.trimmed_line_text.starts_with(prefix)
+        self.trimmed_text.starts_with(prefix)
     }
 
     pub fn get_rest_trimmed(&self, length: usize) -> &str {
-        let mut chars = self.trimmed_line_text.chars();
+        let mut chars = self.trimmed_text.chars();
         for _ in 0..length {
             chars.next();
         }
         chars.as_str().trim()
     }
 
-    pub fn get_tags(&self) -> Vec<GherkinLineSpan> {
-        let mut line_spans: Vec<GherkinLineSpan> = Vec::new();
+    pub fn get_tags(&self) -> Vec<LineSpan> {
+        let mut line_spans: Vec<LineSpan> = Vec::new();
 
         let mut spans: Vec<(u32, String)> = Vec::new();
         let mut preceding_whitespace_count = 0;
         let mut span = String::new();
 
-        for c in self.trimmed_line_text.chars() {
+        for c in self.trimmed_text.chars() {
             if c.is_whitespace() {
                 if !span.is_empty() {
                     spans.push((preceding_whitespace_count, span.clone()));
@@ -80,7 +82,7 @@ impl GherkinLine {
         for (preceding_whitespace_count, text) in spans {
             column += preceding_whitespace_count;
             let text_chars_count = text.chars().count() as u32;
-            let span = GherkinLineSpan { column, text };
+            let span = LineSpan { column, text };
             line_spans.push(span);
             column += text_chars_count;
         }
@@ -91,26 +93,26 @@ impl GherkinLine {
     pub fn starts_with_title_keyword(&self, text: &str) -> bool {
         let text_chars_count = text.chars().count();
 
-        let mut chars = self.trimmed_line_text.chars();
+        let mut chars = self.trimmed_text.chars();
         for _ in 0..text_chars_count {
             chars.next();
         }
         let separator_chars_count = constant::TITLE_KEYWORD_SEPARATOR.chars().count();
         let separator: String = chars.take(separator_chars_count).collect();
 
-        self.trimmed_line_text.chars().count() > text_chars_count
-            && self.trimmed_line_text.starts_with(text)
+        self.trimmed_text.chars().count() > text_chars_count
+            && self.trimmed_text.starts_with(text)
             && separator == constant::TITLE_KEYWORD_SEPARATOR
     }
 
-    pub fn get_table_cells(&self) -> Vec<GherkinLineSpan> {
-        let mut line_spans: Vec<GherkinLineSpan> = Vec::new();
+    pub fn get_table_cells(&self) -> Vec<LineSpan> {
+        let mut line_spans: Vec<LineSpan> = Vec::new();
         let mut cell = String::new();
         let mut before_first = true;
         let mut start_col = 0;
         let mut after_backslash = false;
 
-        for (col, c) in self.trimmed_line_text.chars().enumerate() {
+        for (col, c) in self.trimmed_text.chars().enumerate() {
             if after_backslash {
                 if c == 'n' {
                     cell.push('\n');
@@ -137,7 +139,7 @@ impl GherkinLine {
 
                     let column = self.indent() + start_col + content_start + 2;
                     let text = cell.trim().to_owned();
-                    line_spans.push(GherkinLineSpan { column, text });
+                    line_spans.push(LineSpan { column, text });
 
                     start_col = col as u32;
                 }
@@ -160,21 +162,21 @@ mod tests {
 
     #[test]
     fn get_tags() {
-        let gherkin_line = GherkinLine::new("    @this @is  @atag  ".to_owned());
-        let gherkin_line_spans = gherkin_line.get_tags();
+        let line = Line::new("    @this @is  @atag  ".to_owned());
+        let line_spans = line.get_tags();
 
         assert_eq!(
-            gherkin_line_spans,
+            line_spans,
             vec![
-                GherkinLineSpan {
+                LineSpan {
                     column: 5,
                     text: "@this".to_owned()
                 },
-                GherkinLineSpan {
+                LineSpan {
                     column: 11,
                     text: "@is".to_owned()
                 },
-                GherkinLineSpan {
+                LineSpan {
                     column: 16,
                     text: "@atag".to_owned()
                 },

@@ -6,12 +6,12 @@ use regex::Regex;
 use lazy_static::lazy_static;
 
 use crate::constant;
+use crate::dialect::Dialect;
+use crate::dialect_provider::BuiltInDialectProvider;
 use crate::error::Result;
-use crate::gherkin_dialect::GherkinDialect;
-use crate::gherkin_dialect_provider::BuiltInGherkinDialectProvider;
-use crate::gherkin_line_span::GherkinLineSpan;
+use crate::line::LineSpan;
 use crate::location::Location;
-use crate::parser::GherkinDialectProvider;
+use crate::parser::DialectProvider;
 use crate::parser::{TokenMatch, TokenType};
 use crate::token::Token;
 
@@ -20,30 +20,30 @@ lazy_static! {
         Regex::new(r"^\s*#\s*language\s*:\s*([a-zA-Z\-_]+)\s*$").unwrap();
 }
 
-pub struct TokenMatcher<DP: GherkinDialectProvider> {
+pub struct TokenMatcher<DP: DialectProvider> {
     dialect_provider: DP,
-    current_dialect: Arc<GherkinDialect>,
+    current_dialect: Arc<Dialect>,
     active_doc_string_separator: Option<String>,
     indent_to_remove: u32,
 }
 
-impl Default for TokenMatcher<BuiltInGherkinDialectProvider> {
-    fn default() -> TokenMatcher<BuiltInGherkinDialectProvider> {
-        TokenMatcher::with_dialect_provider(BuiltInGherkinDialectProvider::default())
+impl Default for TokenMatcher<BuiltInDialectProvider> {
+    fn default() -> TokenMatcher<BuiltInDialectProvider> {
+        TokenMatcher::with_dialect_provider(BuiltInDialectProvider::default())
     }
 }
 
-impl TokenMatcher<BuiltInGherkinDialectProvider> {
-    pub fn with_default_dialect_name<S>(default: S) -> TokenMatcher<BuiltInGherkinDialectProvider>
+impl TokenMatcher<BuiltInDialectProvider> {
+    pub fn with_default_dialect_name<S>(default: S) -> TokenMatcher<BuiltInDialectProvider>
     where
         S: Into<String>,
     {
-        let dialect_provider = BuiltInGherkinDialectProvider::with_default_dialect_name(default);
+        let dialect_provider = BuiltInDialectProvider::with_default_dialect_name(default);
         TokenMatcher::with_dialect_provider(dialect_provider)
     }
 }
 
-impl<DP: GherkinDialectProvider> TokenMatcher<DP> {
+impl<DP: DialectProvider> TokenMatcher<DP> {
     pub fn with_dialect_provider(dialect_provider: DP) -> TokenMatcher<DP> {
         let default_dialect = dialect_provider
             .get_default_dialect()
@@ -64,13 +64,13 @@ impl<DP: GherkinDialectProvider> TokenMatcher<DP> {
         text: Option<String>,
         keyword: Option<String>,
         indent: Option<u32>,
-        items: Vec<GherkinLineSpan>,
+        items: Vec<LineSpan>,
     ) {
         token.matched_type = Some(matched_type);
         token.matched_keyword = keyword;
         token.matched_text = text;
         token.matched_items = items;
-        token.matched_gherkin_dialect = Some(self.current_dialect.clone());
+        token.matched_dialect = Some(self.current_dialect.clone());
         token.matched_indent = indent.or_else(|| match token.line {
             Some(ref line) => Some(line.indent()),
             None => Some(0),
@@ -155,7 +155,7 @@ impl<DP: GherkinDialectProvider> TokenMatcher<DP> {
     }
 }
 
-impl<DP: GherkinDialectProvider> TokenMatch for TokenMatcher<DP> {
+impl<DP: DialectProvider> TokenMatch for TokenMatcher<DP> {
     fn match_eof(&mut self, token: &mut Token) -> Result<bool> {
         if token.is_eof() {
             self.set_token_matched(token, TokenType::Eof, None, None, None, Vec::new());
@@ -175,7 +175,7 @@ impl<DP: GherkinDialectProvider> TokenMatch for TokenMatcher<DP> {
     fn match_comment(&mut self, token: &mut Token) -> Result<bool> {
         if token.unwrap_line().starts_with(constant::COMMENT_PREFIX) {
             // take the entire line
-            let text = token.unwrap_line().get_line_text(0).to_owned();
+            let text = token.unwrap_line().get_text(0).to_owned();
             self.set_token_matched(
                 token,
                 TokenType::Comment,
@@ -288,7 +288,7 @@ impl<DP: GherkinDialectProvider> TokenMatch for TokenMatcher<DP> {
 
     fn match_language(&mut self, token: &mut Token) -> Result<bool> {
         let language = {
-            let line_text = token.unwrap_line().get_line_text(0);
+            let line_text = token.unwrap_line().get_text(0);
             let captures = LANGUAGE_PATTERN.captures(line_text);
 
             match captures {
@@ -322,7 +322,7 @@ impl<DP: GherkinDialectProvider> TokenMatch for TokenMatcher<DP> {
         // take the entire line, except removing DocString indents
         let text = {
             let line = token.unwrap_line();
-            let line_text = line.get_line_text(self.indent_to_remove as isize);
+            let line_text = line.get_text(self.indent_to_remove as isize);
             self.unescape_doc_string(line_text)
         };
         self.set_token_matched(

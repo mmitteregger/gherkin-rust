@@ -9,21 +9,20 @@ use cucumber_messages::pickle::Pickle;
 use cucumber_messages::source::{Source, SourceReference};
 use cucumber_messages::{Envelope, Message};
 
+pub use crate::document_builder::DocumentBuilder;
 pub use crate::error::{Error, Result};
-pub use crate::gherkin_document_builder::GherkinDocumentBuilder;
 pub use crate::location::Location;
-pub use crate::parser::{GherkinDialectProvider, Parser, ParserOptions};
+pub use crate::parser::{DialectProvider, Parser, ParserOptions};
 pub use crate::token_formatter_builder::TokenFormatterBuilder;
 
 mod ast_node;
 mod constant;
 pub mod cuke;
+mod dialect;
+mod dialect_provider;
+mod document_builder;
 mod error;
-mod gherkin_dialect;
-mod gherkin_dialect_provider;
-mod gherkin_document_builder;
-mod gherkin_line;
-mod gherkin_line_span;
+mod line;
 mod location;
 mod parser;
 mod token;
@@ -48,7 +47,7 @@ where
 {
     let mut messages = Vec::new();
 
-    let builder = GherkinDocumentBuilder::with_id_generator(id_generator);
+    let builder = DocumentBuilder::with_id_generator(id_generator);
     let mut parser = Parser::with_builder(builder);
 
     for path in paths {
@@ -86,7 +85,7 @@ fn create_source_envelope(data: String, path: &Path) -> Envelope {
 }
 
 fn parse_envelope(
-    parser: &mut Parser<GherkinDocumentBuilder>,
+    parser: &mut Parser<DocumentBuilder>,
     include_options: &IncludeOptions,
     envelope: &Envelope,
 ) -> io::Result<Vec<Envelope>> {
@@ -149,7 +148,7 @@ fn add_error_attachments(messages: &mut Vec<Envelope>, error: Error, uri: &str) 
             }
             Ok(())
         }
-        Error::GherkinDocumentBuilder { location, .. }
+        Error::DocumentBuilder { location, .. }
         | Error::NoSuchLanguage { location, .. }
         | Error::UnexpectedToken { location, .. }
         | Error::UnexpectedEof { location, .. } => {
