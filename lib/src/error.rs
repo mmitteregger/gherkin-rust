@@ -3,7 +3,6 @@ use std::io;
 use std::result;
 
 use failure::Fail;
-use serde_json;
 
 use crate::token::Token;
 use crate::Location;
@@ -16,7 +15,6 @@ pub type Result<T> = result::Result<T, Error>;
 pub enum Error {
     /// An I/O error that occurred while reading a feature file.
     Io(#[cause] io::Error),
-    SerdeJson(#[cause] serde_json::Error),
     DocumentBuilder {
         location: Location,
         message: String,
@@ -52,17 +50,10 @@ impl From<io::Error> for Error {
     }
 }
 
-impl From<serde_json::Error> for Error {
-    fn from(err: serde_json::Error) -> Error {
-        Error::SerdeJson(err)
-    }
-}
-
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Error::Io(ref err) => err.fmt(f),
-            Error::SerdeJson(ref err) => err.fmt(f),
             Error::DocumentBuilder {
                 ref location,
                 ref message,
@@ -116,7 +107,6 @@ impl Error {
     pub fn get_location(&self) -> Option<Location> {
         match *self {
             Error::Io(ref _err) => None,
-            Error::SerdeJson(ref _err) => None,
             Error::DocumentBuilder { location, .. } => Some(location),
             Error::NoSuchLanguage { location, .. } => Some(location),
             Error::UnexpectedToken { location, .. } => Some(location),

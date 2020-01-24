@@ -158,10 +158,6 @@ fn add_error_attachments(messages: &mut Vec<Envelope>, error: Error, uri: &str) 
             Ok(())
         }
         Error::Io(io_error) => Err(io_error),
-        Error::SerdeJson(serde_json_error) => {
-            let io_error = io::Error::new(io::ErrorKind::Other, serde_json_error);
-            Err(io_error)
-        }
         Error::__Nonexhaustive => unreachable!(),
     }
 }
