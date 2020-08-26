@@ -60,7 +60,7 @@ impl<R: Read> TokenScan for TokenScanner<R> {
         let token = if is_eof {
             Token::new(None, Some(location))
         } else {
-            let line = Line::new(line);
+            let line = Line::new(line, self.line_number);
             Token::new(Some(line), Some(location))
         };
         Ok(token)

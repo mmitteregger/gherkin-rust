@@ -85,8 +85,19 @@ impl<DP: DialectProvider> TokenMatcher<DP> {
     }
 
     fn unescape_doc_string(&self, text: &str) -> String {
-        match self.active_doc_string_separator {
-            Some(_) => text.replace("\\\"\\\"\\\"", "\"\"\""),
+        match self.active_doc_string_separator.as_deref() {
+            Some(constant::DOCSTRING_SEPARATOR) => {
+                text.replace(r#"\"\"\""#, constant::DOCSTRING_SEPARATOR)
+            }
+            Some(constant::DOCSTRING_ALTERNATIVE_SEPARATOR) => {
+                text.replace(r#"\`\`\`"#, constant::DOCSTRING_ALTERNATIVE_SEPARATOR)
+            }
+            Some(docstring_separator) => {
+                panic!(
+                    "cannot escape unexpected docstring separator: {}",
+                    docstring_separator
+                );
+            }
             None => text.to_owned(),
         }
     }
@@ -191,7 +202,7 @@ impl<DP: DialectProvider> TokenMatch for TokenMatcher<DP> {
 
     fn match_tag_line(&mut self, token: &mut Token) -> Result<bool> {
         if token.unwrap_line().starts_with(constant::TAG_PREFIX) {
-            let tags = token.unwrap_line().get_tags();
+            let tags = token.unwrap_line().get_tags()?;
             self.set_token_matched(token, TokenType::TagLine, None, None, None, tags);
             return Ok(true);
         }

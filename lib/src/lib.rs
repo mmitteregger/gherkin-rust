@@ -6,10 +6,9 @@ pub use cucumber_messages::ast;
 pub use cucumber_messages::id_generator::{IdGenerator, IncrementingIdGenerator};
 pub use cucumber_messages::pickle;
 
-use cucumber_messages::attachment::{Attachment, AttachmentBody};
 use cucumber_messages::pickle::Pickle;
-use cucumber_messages::source::{Source, SourceReference};
-use cucumber_messages::{Envelope, Message};
+use cucumber_messages::source::{Source, SourceReference, SourceReferenceType};
+use cucumber_messages::{Envelope, Message, ParseError};
 
 pub use crate::document_builder::DocumentBuilder;
 pub use crate::error::{Error, Result};
@@ -154,7 +153,7 @@ fn add_error_attachments(messages: &mut Vec<Envelope>, error: Error, uri: &str) 
         | Error::NoSuchLanguage { location, .. }
         | Error::UnexpectedToken { location, .. }
         | Error::UnexpectedEof { location, .. } => {
-            messages.push(create_attachment_envelope(&error, uri, location));
+            messages.push(create_parse_error_envelope(&error, uri, location));
             Ok(())
         }
         Error::Io(io_error) => Err(io_error),
@@ -162,21 +161,18 @@ fn add_error_attachments(messages: &mut Vec<Envelope>, error: Error, uri: &str) 
     }
 }
 
-fn create_attachment_envelope(error: &Error, uri: &str, location: Location) -> Envelope {
+fn create_parse_error_envelope(error: &Error, uri: &str, location: Location) -> Envelope {
     Envelope {
-        message: Some(Message::Attachment(Attachment {
+        message: Some(Message::ParseError(ParseError {
             source: Some(create_source_reference(uri, location)),
-            body: Some(AttachmentBody::Text(error.to_string())),
-            media_type: String::new(),
-            test_case_started_id: String::new(),
-            test_step_id: String::new(),
+            message: error.to_string(),
         })),
     }
 }
 
 fn create_source_reference(uri: &str, location: Location) -> SourceReference {
     SourceReference {
-        uri: uri.to_string(),
         location: Some(ast::Location::from(location)),
+        reference: Some(SourceReferenceType::Uri(uri.to_string())),
     }
 }

@@ -182,8 +182,10 @@ impl<'id_gen> DocumentBuilder<'id_gen> {
                 let location = self.get_location(&background_line, 0);
                 let keyword = background_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = background_line.matched_text.as_ref().unwrap().to_owned();
+                let id = self.id_generator.new_id();
 
                 let background = Background {
+                    id,
                     location,
                     keyword,
                     name,
@@ -238,8 +240,10 @@ impl<'id_gen> DocumentBuilder<'id_gen> {
                 let location = self.get_location(&examples_line, 0);
                 let keyword = examples_line.matched_keyword.as_ref().unwrap().to_owned();
                 let name = examples_line.matched_text.as_ref().unwrap().to_owned();
+                let id = self.id_generator.new_id();
 
                 let examples = Examples {
+                    id,
                     location,
                     tags,
                     keyword,
@@ -304,8 +308,10 @@ impl<'id_gen> DocumentBuilder<'id_gen> {
                         value: Some(RuleChildValue::Scenario(scenario)),
                     });
                 }
+                let id = self.id_generator.new_id();
 
                 let rule = Rule {
+                    id,
                     location,
                     keyword,
                     name,
