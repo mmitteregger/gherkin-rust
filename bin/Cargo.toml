@@ -25,4 +25,5 @@ path = "src/gherkin.rs"
 
 [dependencies]
 gherkin = { path = "../lib" }
-cucumber_messages = { path = "../../../messages/rust", features = ["ndjson"] }
+cucumber_messages = { git = "https://github.com/mmitteregger/cucumber-messages-rust", features = ["ndjson"] }
+

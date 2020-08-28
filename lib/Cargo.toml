@@ -15,7 +15,7 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-cucumber_messages = { path = "../../../messages/rust" }
+cucumber_messages = { git = "https://github.com/mmitteregger/cucumber-messages-rust" }
 failure = "0.1"
 failure_derive = "0.1"
 regex = "1"
